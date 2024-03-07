@@ -19,30 +19,22 @@ param location string = resourceGroup().location
 ])
 param kind string
 
-@metadata({
-  example: '''
-  {
-    '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID': {}
-    '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID2': {}
-  }
-  '''
-})
-@description('Optional. Specifies the user assigned identities to be assigned to the Deployment Script.')
-param userAssignedIdentities object?
+@description('Optional. The managed identity definition for this resource.')
+param managedIdentities managedIdentitiesType
 
 @description('Optional. Resource tags.')
 param tags object?
 
-@description('Optional. Azure PowerShell module version to be used. See a list of supported Azure PowerShell versions: https://mcr.microsoft.com/v2/azuredeploymentscripts-powershell/tags/list ')
+@description('Optional. Azure PowerShell module version to be used. See a list of supported Azure PowerShell versions: https://mcr.microsoft.com/v2/azuredeploymentscripts-powershell/tags/list.')
 param azPowerShellVersion string?
 
-@description('Optional. Azure CLI module version to be used. See a list of supported Azure CLI versions: https://mcr.microsoft.com/v2/azure-cli/tags/list')
+@description('Optional. Azure CLI module version to be used. See a list of supported Azure CLI versions: https://mcr.microsoft.com/v2/azure-cli/tags/list.')
 param azCliVersion string?
 
 @description('Optional. Script body. Max length: 32000 characters. To run an external script, use primaryScriptURI instead.')
 param scriptContent string?
 
-@description('Optional. Uri for the external script. This is the entry point for the external script. To run an internal script, use the scriptContent instead.')
+@description('Optional. Uri for the external script. This is the entry point for the external script. To run an internal script, use the scriptContent parameter instead.')
 param primaryScriptUri string?
 
 @metadata({
@@ -63,6 +55,9 @@ param environmentVariables object = {}
 @description('Optional. List of supporting files for the external script (defined in primaryScriptUri). Does not work with internal scripts (code defined in scriptContent).')
 param supportingScriptUris array?
 
+@description('Optional. List of subnet IDs to use for the container group. This is required if you want to run the deployment script in a private network. When using a private network, the `Storage File Data Privileged Contributor` role needs to be assigned to the user-assigned managed identity and the deployment principal needs to have permissions to list the storage account keys. Also, Shared-Keys must not be disabled on the used storage account [ref](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-script-vnet).')
+param subnetResourceIds string[]?
+
 @description('Optional. Command-line arguments to pass to the script. Arguments are separated by spaces.')
 param arguments string?
 
@@ -81,7 +76,7 @@ param runOnce bool = false
   'OnSuccess'
   'OnExpiration'
 ])
-param cleanupPreference string?
+param cleanupPreference string = 'Always'
 
 @description('Optional. Container group name, if not specified then the name will get auto-generated. Not specifying a \'containerGroupName\' indicates the system to generate a unique name which might end up flagging an Azure Policy as non-compliant. Use \'containerGroupName\' when you have an Azure Policy that expects a specific naming convention or when you want to fully control the name. \'containerGroupName\' property must be between 1 and 63 characters long, must contain only lowercase letters, numbers, and dashes and it cannot start or end with a dash and consecutive dashes are not allowed.')
 param containerGroupName string?
@@ -95,7 +90,7 @@ param timeout string?
 @description('Optional. The lock settings of the service.')
 param lock lockType
 
-@description('Optional. Array of role assignment objects that contain the \'roleDefinitionIdOrName\' and \'principalId\' to define RBAC role assignments on this resource. In the roleDefinitionIdOrName attribute, you can provide either the display name of the role definition, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'.')
+@description('Optional. Array of role assignments to create.')
 param roleAssignments roleAssignmentType
 
 @description('Optional. Enable/Disable usage telemetry for module.')
@@ -113,21 +108,31 @@ var builtInRoleNames = {
   'User Access Administrator': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '18d7d88d-d35e-4fb5-a5c3-7773c20a72d9')
 }
 
+var subnetIds = [for subnetResourceId in (subnetResourceIds ?? []): {
+  id: subnetResourceId
+}]
+
 var containerSettings = {
   containerGroupName: containerGroupName
+  subnetIds: !empty(subnetIds ?? []) ? subnetIds : null
 }
 
-var identityType = !empty(userAssignedIdentities) ? 'UserAssigned' : 'None'
+var formattedUserAssignedIdentities = reduce(map((managedIdentities.?userAssignedResourcesIds ?? []), (id) => { '${id}': {} }), {}, (cur, next) => union(cur, next)) // Converts the flat array to an object like { '${id1}': {}, '${id2}': {} }
 
-var identity = identityType != 'None' ? {
-  type: identityType
-  userAssignedIdentities: !empty(userAssignedIdentities) ? userAssignedIdentities : null
+var identity = !empty(managedIdentities) ? {
+  type: !empty(managedIdentities.?userAssignedResourcesIds ?? {}) ? 'UserAssigned' : null
+  userAssignedIdentities: !empty(formattedUserAssignedIdentities) ? formattedUserAssignedIdentities : null
 } : null
 
+resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' existing = if (!empty(storageAccountResourceId)) {
+  name: last(split((!empty(storageAccountResourceId) ? storageAccountResourceId : 'dummyAccount'), '/'))!
+  scope: resourceGroup(split((!empty(storageAccountResourceId) ? storageAccountResourceId : '//'), '/')[2], split((!empty(storageAccountResourceId) ? storageAccountResourceId : '////'), '/')[4])
+}
+
 var storageAccountSettings = !empty(storageAccountResourceId) ? {
-  storageAccountKey: listKeys(storageAccountResourceId, '2023-01-01').keys[0].value
+  storageAccountKey: empty(subnetResourceIds) ? listKeys(storageAccount.id, '2023-01-01').keys[0].value : null
   storageAccountName: last(split(storageAccountResourceId, '/'))
-} : {}
+} : null
 
 // ============ //
 // Dependencies //
@@ -145,7 +150,7 @@ resource deploymentScript_lock 'Microsoft.Authorization/locks@2020-05-01' = if (
 resource deploymentScript_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (roleAssignment, index) in (roleAssignments ?? []): {
   name: guid(deploymentScript.id, roleAssignment.principalId, roleAssignment.roleDefinitionIdOrName)
   properties: {
-    roleDefinitionId: contains(builtInRoleNames, roleAssignment.roleDefinitionIdOrName) ? builtInRoleNames[roleAssignment.roleDefinitionIdOrName] : roleAssignment.roleDefinitionIdOrName
+    roleDefinitionId: contains(builtInRoleNames, roleAssignment.roleDefinitionIdOrName) ? builtInRoleNames[roleAssignment.roleDefinitionIdOrName] : contains(roleAssignment.roleDefinitionIdOrName, '/providers/Microsoft.Authorization/roleDefinitions/') ? roleAssignment.roleDefinitionIdOrName : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName)
     principalId: roleAssignment.principalId
     description: roleAssignment.?description
     principalType: roleAssignment.?principalType
@@ -178,7 +183,7 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableT
 // Resources        //
 // ================ //
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: name
   location: location
   tags: tags
@@ -187,7 +192,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   properties: {
     azPowerShellVersion: kind == 'AzurePowerShell' ? azPowerShellVersion : null
     azCliVersion: kind == 'AzureCLI' ? azCliVersion : null
-    containerSettings: !empty(containerGroupName) ? containerSettings : null
+    containerSettings: !empty(containerSettings) ? containerSettings : null
     storageAccountSettings: !empty(storageAccountResourceId) ? storageAccountSettings : null
     arguments: arguments
     environmentVariables: !empty(environmentVariables) ? environmentVariables.secureList : []
@@ -232,20 +237,25 @@ type lockType = {
   kind: ('CanNotDelete' | 'ReadOnly' | 'None')?
 }?
 
+type managedIdentitiesType = {
+  @description('Optional. The resource ID(s) to assign to the resource.')
+  userAssignedResourcesIds: string[]
+}?
+
 type roleAssignmentType = {
-  @description('Required. The name of the role to assign. If it cannot be found you can specify the role definition ID instead.')
+  @description('Required. The role to assign. You can provide either the display name of the role definition, the role definition GUID, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'.')
   roleDefinitionIdOrName: string
 
   @description('Required. The principal ID of the principal (user/group/identity) to assign the role to.')
   principalId: string
 
   @description('Optional. The principal type of the assigned principal ID.')
-  principalType: ('ServicePrincipal' | 'Group' | 'User' | 'ForeignGroup' | 'Device' | null)?
+  principalType: ('ServicePrincipal' | 'Group' | 'User' | 'ForeignGroup' | 'Device')?
 
   @description('Optional. The description of the role assignment.')
   description: string?
 
-  @description('Optional. The conditions on the role assignment. This limits the resources it can be assigned to. e.g.: @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:ContainerName] StringEqualsIgnoreCase "foo_storage_container"')
+  @description('Optional. The conditions on the role assignment. This limits the resources it can be assigned to. e.g.: @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:ContainerName] StringEqualsIgnoreCase "foo_storage_container".')
   condition: string?
 
   @description('Optional. Version of the condition.')

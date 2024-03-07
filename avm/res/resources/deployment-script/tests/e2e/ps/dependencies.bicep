@@ -21,13 +21,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
   kind: 'StorageV2'
   properties: {
     supportsHttpsTrafficOnly: true
-    allowBlobPublicAccess: false
-    minimumTlsVersion: 'TLS1_2'
-  }
-  tags: {
-    'hidden-title': 'This is visible in the resource name'
-    Environment: 'Non-Prod'
-    Role: 'DeploymentValidation'
   }
 }
 

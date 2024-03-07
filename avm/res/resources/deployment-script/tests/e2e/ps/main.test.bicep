@@ -1,7 +1,7 @@
 targetScope = 'subscription'
 
-metadata name = 'WAF-aligned'
-metadata description = 'This instance deploys the module in alignment with the best-practices of the Well-Architected Framework.'
+metadata name = 'Using Azure PowerShell'
+metadata description = 'This instance deploys the module with an Azure PowerShell script.'
 
 // ========== //
 // Parameters //
@@ -15,7 +15,7 @@ param resourceGroupName string = 'avm-${namePrefix}-resources.deploymentscripts-
 param resourceLocation string = deployment().location
 
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
-param serviceShort string = 'rdswaf'
+param serviceShort string = 'rdsps'
 
 @description('Optional. A token to inject into the name of each resource.')
 param namePrefix string = '#_namePrefix_#'
@@ -51,21 +51,11 @@ module testDeployment '../../../main.bicep' = {
   params: {
     name: '${namePrefix}${serviceShort}001'
     location: resourceLocation
-    azCliVersion: '2.9.1'
-    kind: 'AzureCLI'
+    azPowerShellVersion: '9.7'
+    kind: 'AzurePowerShell'
     retentionInterval: 'P1D'
-    cleanupPreference: 'Always'
-    lock: {
-      kind: 'None'
-    }
-    tags: {
-      'hidden-title': 'This is visible in the resource name'
-      Environment: 'Non-Prod'
-      Role: 'DeploymentValidation'
-    }
-    timeout: 'PT1H'
-    runOnce: true
-    scriptContent: 'echo \'AVM Deployment Script test!\''
+    arguments: '-var1 \\"AVM Deployment Script test!\\"'
+    scriptContent: 'param([string] $var1);Write-Host \'Argument var1 value is:\' $var1'
     storageAccountResourceId: nestedDependencies.outputs.storageAccountResourceId
     managedIdentities: {
       userAssignedResourcesIds: [

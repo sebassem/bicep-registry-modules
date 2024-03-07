@@ -9,13 +9,13 @@ metadata description = 'This instance deploys the module with most of its featur
 
 @description('Optional. The name of the resource group to deploy for testing purposes.')
 @maxLength(90)
-param resourceGroupName string = 'dep-${namePrefix}-network.networkinterfaces-${serviceShort}-rg'
+param resourceGroupName string = 'avm-${namePrefix}-resources.deploymentscripts-${serviceShort}-rg'
 
 @description('Optional. The location to deploy resources to.')
-param location string = deployment().location
+param resourceLocation string = deployment().location
 
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
-param serviceShort string = 'nnimax'
+param serviceShort string = 'rdsmax'
 
 @description('Optional. A token to inject into the name of each resource.')
 param namePrefix string = '#_namePrefix_#'
@@ -28,32 +28,16 @@ param namePrefix string = '#_namePrefix_#'
 // =================
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
-  location: location
+  location: resourceLocation
 }
 
 module nestedDependencies 'dependencies.bicep' = {
   scope: resourceGroup
-  name: '${uniqueString(deployment().name, location)}-nestedDependencies'
+  name: '${uniqueString(deployment().name, resourceLocation)}-nestedDependencies'
   params: {
-    location: location
-    virtualNetworkName: 'dep-${namePrefix}-vnet-${serviceShort}'
     managedIdentityName: 'dep-${namePrefix}-msi-${serviceShort}'
-    applicationSecurityGroupName: 'dep-${namePrefix}-asg-${serviceShort}'
-    loadBalancerName: 'dep-${namePrefix}-lb-${serviceShort}'
-  }
-}
-
-// Diagnostics
-// ===========
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, location)}-diagnosticDependencies'
-  params: {
-    storageAccountName: 'dep${namePrefix}diasa${serviceShort}01'
-    logAnalyticsWorkspaceName: 'dep-${namePrefix}-law-${serviceShort}'
-    eventHubNamespaceEventHubName: 'dep-${namePrefix}-evh-${serviceShort}'
-    eventHubNamespaceName: 'dep-${namePrefix}-evhns-${serviceShort}'
-    location: location
+    storageAccountName: 'dep${namePrefix}st${serviceShort}'
+    location: resourceLocation
   }
 }
 
@@ -61,61 +45,63 @@ module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/t
 // Test Execution //
 // ============== //
 
-@batchSize(1)
-module testDeployment '../../../main.bicep' = [for iteration in [ 'init', 'idem' ]: {
+module testDeployment '../../../main.bicep' = {
   scope: resourceGroup
-  name: '${uniqueString(deployment().name, location)}-test-${serviceShort}-${iteration}'
+  name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}'
   params: {
     name: '${namePrefix}${serviceShort}001'
-    location: location
-    ipConfigurations: [
-      {
-        applicationSecurityGroups: [
-          {
-            id: nestedDependencies.outputs.applicationSecurityGroupResourceId
-          }
-        ]
-        loadBalancerBackendAddressPools: [
-          {
-            id: nestedDependencies.outputs.loadBalancerBackendPoolResourceId
-          }
-        ]
-        name: 'ipconfig01'
-        subnetResourceId: nestedDependencies.outputs.subnetResourceId
-      }
-      {
-        subnetResourceId: nestedDependencies.outputs.subnetResourceId
-        applicationSecurityGroups: [
-          {
-            id: nestedDependencies.outputs.applicationSecurityGroupResourceId
-          }
-        ]
-      }
-    ]
-    diagnosticSettings: [
-      {
-        name: 'customSetting'
-        eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
-        eventHubAuthorizationRuleResourceId: diagnosticDependencies.outputs.eventHubAuthorizationRuleId
-        storageAccountResourceId: diagnosticDependencies.outputs.storageAccountResourceId
-        workspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
-      }
-    ]
+    location: resourceLocation
+    azCliVersion: '2.9.1'
+    kind: 'AzureCLI'
+    retentionInterval: 'P1D'
+    cleanupPreference: 'Always'
     lock: {
-      kind: 'CanNotDelete'
-      name: 'myCustomLockName'
+      kind: 'None'
     }
-    roleAssignments: [
-      {
-        roleDefinitionIdOrName: 'Reader'
-        principalId: nestedDependencies.outputs.managedIdentityPrincipalId
-        principalType: 'ServicePrincipal'
-      }
-    ]
     tags: {
       'hidden-title': 'This is visible in the resource name'
       Environment: 'Non-Prod'
       Role: 'DeploymentValidation'
     }
+    containerGroupName: 'dep-${namePrefix}-cg-${serviceShort}'
+    arguments: '-argument1 \\"test\\"'
+    environmentVariables: {
+      secureList: [
+        {
+          name: 'var1'
+          value: 'test'
+        }
+        {
+          name: 'var2'
+          secureValue: guid(deployment().name)
+        }
+      ]
+    }
+    managedIdentities: {
+      userAssignedResourcesIds: [
+        nestedDependencies.outputs.managedIdentityResourceId
+      ]
+    }
+    roleAssignments: [
+      {
+        roleDefinitionIdOrName: 'Owner'
+        principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+        principalType: 'ServicePrincipal'
+      }
+      {
+        roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+        principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+        principalType: 'ServicePrincipal'
+      }
+      {
+        roleDefinitionIdOrName: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
+        principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+        principalType: 'ServicePrincipal'
+      }
+    ]
+    timeout: 'PT1H'
+    runOnce: true
+    scriptContent: 'echo \'AVM Deployment Script test!\''
+    storageAccountResourceId: nestedDependencies.outputs.storageAccountResourceId
   }
-}]
+}

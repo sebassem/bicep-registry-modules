@@ -1,7 +1,7 @@
 targetScope = 'subscription'
 
-metadata name = 'WAF-aligned'
-metadata description = 'This instance deploys the module in alignment with the best-practices of the Well-Architected Framework.'
+metadata name = 'Using Private Networking'
+metadata description = 'This instance deploys the module with access to a private network.'
 
 // ========== //
 // Parameters //
@@ -15,7 +15,7 @@ param resourceGroupName string = 'avm-${namePrefix}-resources.deploymentscripts-
 param resourceLocation string = deployment().location
 
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
-param serviceShort string = 'rdswaf'
+param serviceShort string = 'rdsnet'
 
 @description('Optional. A token to inject into the name of each resource.')
 param namePrefix string = '#_namePrefix_#'
@@ -37,6 +37,7 @@ module nestedDependencies 'dependencies.bicep' = {
   params: {
     managedIdentityName: 'dep-${namePrefix}-msi-${serviceShort}'
     storageAccountName: 'dep${namePrefix}st${serviceShort}'
+    virtualNetworkName: 'dep-${namePrefix}-vnet-${serviceShort}'
     location: resourceLocation
   }
 }
@@ -55,22 +56,17 @@ module testDeployment '../../../main.bicep' = {
     kind: 'AzureCLI'
     retentionInterval: 'P1D'
     cleanupPreference: 'Always'
-    lock: {
-      kind: 'None'
-    }
-    tags: {
-      'hidden-title': 'This is visible in the resource name'
-      Environment: 'Non-Prod'
-      Role: 'DeploymentValidation'
-    }
-    timeout: 'PT1H'
-    runOnce: true
-    scriptContent: 'echo \'AVM Deployment Script test!\''
-    storageAccountResourceId: nestedDependencies.outputs.storageAccountResourceId
+    subnetResourceIds: [
+      nestedDependencies.outputs.subnetResourceId
+    ]
     managedIdentities: {
       userAssignedResourcesIds: [
         nestedDependencies.outputs.managedIdentityResourceId
       ]
     }
+    timeout: 'PT1H'
+    runOnce: true
+    scriptContent: 'echo \'AVM Deployment Script test!\''
+    storageAccountResourceId: nestedDependencies.outputs.storageAccountResourceId
   }
 }

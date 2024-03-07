@@ -1,24 +1,24 @@
 targetScope = 'subscription'
 
+metadata name = 'Using only defaults'
+metadata description = 'This instance deploys the module with the minimum set of required parameters.'
+
 // ========== //
 // Parameters //
 // ========== //
 
 @description('Optional. The name of the resource group to deploy for testing purposes.')
 @maxLength(90)
-param resourceGroupName string = 'dep-${namePrefix}-resources.deploymentscripts-${serviceShort}-rg'
+param resourceGroupName string = 'avm-${namePrefix}-resources.deploymentscripts-${serviceShort}-rg'
 
 @description('Optional. The location to deploy resources to.')
-param location string = deployment().location
+param resourceLocation string = deployment().location
 
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
-param serviceShort string = 'rdsps'
-
-@description('Optional. Enable telemetry via a Globally Unique Identifier (GUID).')
-param enableTelemetry bool = true
+param serviceShort string = 'rdsmin'
 
 @description('Optional. A token to inject into the name of each resource.')
-param namePrefix string = '[[namePrefix]]'
+param namePrefix string = '#_namePrefix_#'
 
 // ============ //
 // Dependencies //
@@ -28,16 +28,15 @@ param namePrefix string = '[[namePrefix]]'
 // =================
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
-  location: location
+  location: resourceLocation
 }
 
 module nestedDependencies 'dependencies.bicep' = {
   scope: resourceGroup
-  name: '${uniqueString(deployment().name, location)}-nestedDependencies'
+  name: '${uniqueString(deployment().name, resourceLocation)}-nestedDependencies'
   params: {
     managedIdentityName: 'dep-${namePrefix}-msi-${serviceShort}'
-    storageAccountName: 'dep${namePrefix}st${serviceShort}'
-    location: location
+    location: resourceLocation
   }
 }
 
@@ -47,30 +46,18 @@ module nestedDependencies 'dependencies.bicep' = {
 
 module testDeployment '../../../main.bicep' = {
   scope: resourceGroup
-  name: '${uniqueString(deployment().name, location)}-test-${serviceShort}'
+  name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}'
   params: {
-    enableTelemetry: enableTelemetry
     name: '${namePrefix}${serviceShort}001'
-    location: location
-    azPowerShellVersion: '8.0'
-    cleanupPreference: 'Always'
+    location: resourceLocation
+    azPowerShellVersion: '9.7'
     kind: 'AzurePowerShell'
-    lock: {
-      kind: 'CanNotDelete'
-      name: 'myCustomLockName'
-    }
     retentionInterval: 'P1D'
-    runOnce: false
     scriptContent: 'Write-Host \'AVM Deployment Script test!\''
-    storageAccountResourceId: nestedDependencies.outputs.storageAccountResourceId
-    timeout: 'PT30M'
-    userAssignedIdentities: {
-      '${nestedDependencies.outputs.managedIdentityResourceId}': {}
-    }
-    tags: {
-      'hidden-title': 'This is visible in the resource name'
-      Environment: 'Non-Prod'
-      Role: 'DeploymentValidation'
+    managedIdentities: {
+      userAssignedResourcesIds: [
+        nestedDependencies.outputs.managedIdentityResourceId
+      ]
     }
   }
 }
