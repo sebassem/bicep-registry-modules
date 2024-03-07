@@ -9,6 +9,7 @@ This module deploys a Subscription wide export of the Activity Log.
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
 - [Cross-referenced modules](#Cross-referenced-modules)
+- [Data Collection](#Data-Collection)
 
 ## Resource Types
 
@@ -39,7 +40,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module diagnosticSetting 'br/public:avm/res/insights/diagnostic-setting:<version>' = {
-  name: '${uniqueString(deployment().name, location)}-test-idsmin'
+  name: '${uniqueString(deployment().name, resourceLocation)}-test-idsmin'
   params: {
     location: '<location>'
     name: 'idsmin001'
@@ -87,7 +88,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module diagnosticSetting 'br/public:avm/res/insights/diagnostic-setting:<version>' = {
-  name: '${uniqueString(deployment().name, location)}-test-idsmax'
+  name: '${uniqueString(deployment().name, resourceLocation)}-test-idsmax'
   params: {
     eventHubAuthorizationRuleResourceId: '<eventHubAuthorizationRuleResourceId>'
     eventHubName: '<eventHubName>'
@@ -159,7 +160,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module diagnosticSetting 'br/public:avm/res/insights/diagnostic-setting:<version>' = {
-  name: '${uniqueString(deployment().name, location)}-test-idswaf'
+  name: '${uniqueString(deployment().name, resourceLocation)}-test-idswaf'
   params: {
     eventHubAuthorizationRuleResourceId: '<eventHubAuthorizationRuleResourceId>'
     eventHubName: '<eventHubName>'
@@ -232,9 +233,9 @@ module diagnosticSetting 'br/public:avm/res/insights/diagnostic-setting:<version
 | [`eventHubName`](#parameter-eventhubname) | string | Name of the diagnostic event hub within the namespace to which logs are streamed. Without this, an event hub is created for each log category. |
 | [`location`](#parameter-location) | string | Location deployment metadata. |
 | [`logAnalyticsDestinationType`](#parameter-loganalyticsdestinationtype) | string | A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type. |
-| [`logCategoriesAndGroups`](#parameter-logcategoriesandgroups) | array | The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to '' to disable log collection. |
+| [`logCategoriesAndGroups`](#parameter-logcategoriesandgroups) | array | The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to `[]` to disable log collection. |
 | [`marketplacePartnerResourceId`](#parameter-marketplacepartnerresourceid) | string | The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic Logs. |
-| [`metricCategories`](#parameter-metriccategories) | array | The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to '' to disable log collection. |
+| [`metricCategories`](#parameter-metriccategories) | array | The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to `[]` to disable log collection. |
 | [`name`](#parameter-name) | string | Name of the Diagnostic settings. |
 | [`storageAccountResourceId`](#parameter-storageaccountresourceid) | string | Resource ID of the diagnostic storage account. |
 | [`workspaceResourceId`](#parameter-workspaceresourceid) | string | Resource ID of the diagnostic log analytics workspace. |
@@ -242,6 +243,7 @@ module diagnosticSetting 'br/public:avm/res/insights/diagnostic-setting:<version
 ### Parameter: `enableTelemetry`
 
 Enable/Disable usage telemetry for module.
+
 - Required: No
 - Type: bool
 - Default: `True`
@@ -249,18 +251,21 @@ Enable/Disable usage telemetry for module.
 ### Parameter: `eventHubAuthorizationRuleResourceId`
 
 Resource ID of the diagnostic event hub authorization rule for the Event Hubs namespace in which the event hub should be created or streamed to.
+
 - Required: No
 - Type: string
 
 ### Parameter: `eventHubName`
 
 Name of the diagnostic event hub within the namespace to which logs are streamed. Without this, an event hub is created for each log category.
+
 - Required: No
 - Type: string
 
 ### Parameter: `location`
 
 Location deployment metadata.
+
 - Required: No
 - Type: string
 - Default: `[deployment().location]`
@@ -268,6 +273,7 @@ Location deployment metadata.
 ### Parameter: `logAnalyticsDestinationType`
 
 A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type.
+
 - Required: No
 - Type: string
 - Default: `''`
@@ -282,57 +288,84 @@ A string indicating whether the export to Log Analytics should use the default d
 
 ### Parameter: `logCategoriesAndGroups`
 
-The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to '' to disable log collection.
+The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to `[]` to disable log collection.
+
 - Required: No
 - Type: array
 
+**Optional parameters**
 
-| Name | Required | Type | Description |
-| :-- | :-- | :--| :-- |
-| [`category`](#parameter-logcategoriesandgroupscategory) | No | string | Optional. Name of a Diagnostic Log category for a resource type this setting is applied to. Set the specific logs to collect here. |
-| [`categoryGroup`](#parameter-logcategoriesandgroupscategorygroup) | No | string | Optional. Name of a Diagnostic Log category group for a resource type this setting is applied to. Set to 'AllLogs' to collect all logs. |
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`category`](#parameter-logcategoriesandgroupscategory) | string | Name of a Diagnostic Log category for a resource type this setting is applied to. Set the specific logs to collect here. |
+| [`categoryGroup`](#parameter-logcategoriesandgroupscategorygroup) | string | Name of a Diagnostic Log category group for a resource type this setting is applied to. Set to `AllLogs` to collect all logs. |
+| [`enabled`](#parameter-logcategoriesandgroupsenabled) | bool | Enable or disable the category explicitly. Default is `true`. |
 
 ### Parameter: `logCategoriesAndGroups.category`
 
-Optional. Name of a Diagnostic Log category for a resource type this setting is applied to. Set the specific logs to collect here.
+Name of a Diagnostic Log category for a resource type this setting is applied to. Set the specific logs to collect here.
 
 - Required: No
 - Type: string
 
 ### Parameter: `logCategoriesAndGroups.categoryGroup`
 
-Optional. Name of a Diagnostic Log category group for a resource type this setting is applied to. Set to 'AllLogs' to collect all logs.
+Name of a Diagnostic Log category group for a resource type this setting is applied to. Set to `AllLogs` to collect all logs.
 
 - Required: No
 - Type: string
 
+### Parameter: `logCategoriesAndGroups.enabled`
+
+Enable or disable the category explicitly. Default is `true`.
+
+- Required: No
+- Type: bool
+
 ### Parameter: `marketplacePartnerResourceId`
 
 The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic Logs.
+
 - Required: No
 - Type: string
 
 ### Parameter: `metricCategories`
 
-The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to '' to disable log collection.
+The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to `[]` to disable log collection.
+
 - Required: No
 - Type: array
 
+**Required parameters**
 
-| Name | Required | Type | Description |
-| :-- | :-- | :--| :-- |
-| [`category`](#parameter-metriccategoriescategory) | Yes | string | Required. Name of a Diagnostic Metric category for a resource type this setting is applied to. Set to 'AllMetrics' to collect all metrics. |
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`category`](#parameter-metriccategoriescategory) | string | Name of a Diagnostic Metric category for a resource type this setting is applied to. Set to `AllMetrics` to collect all metrics. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`enabled`](#parameter-metriccategoriesenabled) | bool | Enable or disable the category explicitly. Default is `true`. |
 
 ### Parameter: `metricCategories.category`
 
-Required. Name of a Diagnostic Metric category for a resource type this setting is applied to. Set to 'AllMetrics' to collect all metrics.
+Name of a Diagnostic Metric category for a resource type this setting is applied to. Set to `AllMetrics` to collect all metrics.
 
 - Required: Yes
 - Type: string
 
+### Parameter: `metricCategories.enabled`
+
+Enable or disable the category explicitly. Default is `true`.
+
+- Required: No
+- Type: bool
+
 ### Parameter: `name`
 
 Name of the Diagnostic settings.
+
 - Required: No
 - Type: string
 - Default: `[format('{0}-diagnosticSettings', uniqueString(subscription().id))]`
@@ -340,12 +373,14 @@ Name of the Diagnostic settings.
 ### Parameter: `storageAccountResourceId`
 
 Resource ID of the diagnostic storage account.
+
 - Required: No
 - Type: string
 
 ### Parameter: `workspaceResourceId`
 
 Resource ID of the diagnostic log analytics workspace.
+
 - Required: No
 - Type: string
 
@@ -361,3 +396,7 @@ Resource ID of the diagnostic log analytics workspace.
 ## Cross-referenced modules
 
 _None_
+
+## Data Collection
+
+The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the [repository](https://aka.ms/avm/telemetry). There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at <https://go.microsoft.com/fwlink/?LinkID=824704>. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
