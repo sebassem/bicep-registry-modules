@@ -52,7 +52,6 @@ module testDeployment '../../../main.bicep' = {
     location: resourceLocation
     azPowerShellVersion: '9.7'
     kind: 'AzurePowerShell'
-    retentionInterval: 'P1D'
     scriptContent: 'Write-Host \'AVM Deployment Script test!\''
     managedIdentities: {
       userAssignedResourcesIds: [
@@ -60,4 +59,7 @@ module testDeployment '../../../main.bicep' = {
       ]
     }
   }
+  dependsOn: [
+    nestedDependencies
+  ]
 }

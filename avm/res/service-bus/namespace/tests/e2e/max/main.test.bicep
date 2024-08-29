@@ -60,196 +60,249 @@ module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/t
 // ============== //
 
 @batchSize(1)
-module testDeployment '../../../main.bicep' = [for iteration in [ 'init', 'idem' ]: {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
-  params: {
-    name: '${namePrefix}${serviceShort}001'
-    lock: {
-      kind: 'CanNotDelete'
-      name: 'myCustomLockName'
-    }
-    location: resourceLocation
-    skuObject: {
-      name: 'Premium'
-      capacity: 16
-    }
-    premiumMessagingPartitions: 1
-    zoneRedundant: true
-    tags: {
-      'hidden-title': 'This is visible in the resource name'
-      Environment: 'Non-Prod'
-      Role: 'DeploymentValidation'
-    }
-    roleAssignments: [
-      {
-        roleDefinitionIdOrName: 'Reader'
-        principalId: nestedDependencies.outputs.managedIdentityPrincipalId
-
-        principalType: 'ServicePrincipal'
+module testDeployment '../../../main.bicep' = [
+  for iteration in ['init', 'idem']: {
+    scope: resourceGroup
+    name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
+    params: {
+      name: '${namePrefix}${serviceShort}001'
+      lock: {
+        kind: 'CanNotDelete'
+        name: 'myCustomLockName'
       }
-    ]
-    networkRuleSets: {
-      defaultAction: 'Deny'
-      trustedServiceAccessEnabled: true
-      virtualNetworkRules: [
+      location: resourceLocation
+      skuObject: {
+        name: 'Premium'
+        capacity: 16
+      }
+      premiumMessagingPartitions: 1
+      zoneRedundant: true
+      tags: {
+        'hidden-title': 'This is visible in the resource name'
+        Environment: 'Non-Prod'
+        Role: 'DeploymentValidation'
+      }
+      roleAssignments: [
         {
-          ignoreMissingVnetServiceEndpoint: true
-          subnetResourceId: nestedDependencies.outputs.subnetResourceId
+          name: '2c42f915-20bf-4094-ba42-fee1f811d374'
+          roleDefinitionIdOrName: 'Owner'
+          principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+          principalType: 'ServicePrincipal'
+        }
+        {
+          name: guid('Custom seed ${namePrefix}${serviceShort}')
+          roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+          principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+          principalType: 'ServicePrincipal'
+        }
+        {
+          roleDefinitionIdOrName: subscriptionResourceId(
+            'Microsoft.Authorization/roleDefinitions',
+            'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+          )
+          principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+          principalType: 'ServicePrincipal'
         }
       ]
-      ipRules: [
+      networkRuleSets: {
+        defaultAction: 'Deny'
+        trustedServiceAccessEnabled: true
+        virtualNetworkRules: [
+          {
+            ignoreMissingVnetServiceEndpoint: true
+            subnetResourceId: nestedDependencies.outputs.subnetResourceId
+          }
+        ]
+        ipRules: [
+          {
+            ipMask: '10.0.1.0/32'
+            action: 'Allow'
+          }
+          {
+            ipMask: '10.0.2.0/32'
+            action: 'Allow'
+          }
+        ]
+      }
+      authorizationRules: [
         {
-          ipMask: '10.0.1.0/32'
-          action: 'Allow'
+          name: 'RootManageSharedAccessKey'
+          rights: [
+            'Listen'
+            'Manage'
+            'Send'
+          ]
         }
         {
-          ipMask: '10.0.2.0/32'
-          action: 'Allow'
+          name: 'AnotherKey'
+          rights: [
+            'Listen'
+            'Send'
+          ]
         }
       ]
-    }
-    authorizationRules: [
-      {
-        name: 'RootManageSharedAccessKey'
-        rights: [
-          'Listen'
-          'Manage'
-          'Send'
-        ]
-      }
-      {
-        name: 'AnotherKey'
-        rights: [
-          'Listen'
-          'Send'
-        ]
-      }
-    ]
-    queues: [
-      {
-        name: '${namePrefix}${serviceShort}q001'
-        roleAssignments: [
-          {
-            roleDefinitionIdOrName: 'Reader'
-            principalId: nestedDependencies.outputs.managedIdentityPrincipalId
-            principalType: 'ServicePrincipal'
-          }
-        ]
-        authorizationRules: [
-          {
-            name: 'RootManageSharedAccessKey'
-            rights: [
-              'Listen'
-              'Manage'
-              'Send'
-            ]
-          }
-          {
-            name: 'AnotherKey'
-            rights: [
-              'Listen'
-              'Send'
-            ]
-          }
-        ]
-        autoDeleteOnIdle: 'PT5M'
-        maxMessageSizeInKilobytes: 2048
-      }
-    ]
-    topics: [
-      {
-        name: '${namePrefix}${serviceShort}t001'
-        roleAssignments: [
-          {
-            roleDefinitionIdOrName: 'Reader'
-            principalId: nestedDependencies.outputs.managedIdentityPrincipalId
-            principalType: 'ServicePrincipal'
-          }
-        ]
-        authorizationRules: [
-          {
-            name: 'RootManageSharedAccessKey'
-            rights: [
-              'Listen'
-              'Manage'
-              'Send'
-            ]
-          }
-          {
-            name: 'AnotherKey'
-            rights: [
-              'Listen'
-              'Send'
-            ]
-          }
-        ]
-        subscriptions: [
-          {
-            name: 'subscription001'
-          }
-        ]
-      }
-    ]
-    diagnosticSettings: [
-      {
-        name: '${namePrefix}-diagnosticsetting'
-        metricCategories: [
-          {
-            category: 'AllMetrics'
-          }
-        ]
-        logCategoriesAndGroups: [
-          {
-            category: 'RuntimeAuditLogs'
-          }
-        ]
-        eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
-        eventHubAuthorizationRuleResourceId: diagnosticDependencies.outputs.eventHubAuthorizationRuleId
-        storageAccountResourceId: diagnosticDependencies.outputs.storageAccountResourceId
-        workspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
-      }
-    ]
-    privateEndpoints: [
-      {
-        service: 'namespace'
-        subnetResourceId: nestedDependencies.outputs.subnetResourceId
-        privateDnsZoneResourceIds: [
-          nestedDependencies.outputs.privateDNSZoneResourceId
-        ]
-        tags: {
-          'hidden-title': 'This is visible in the resource name'
-          Environment: 'Non-Prod'
-          Role: 'DeploymentValidation'
-        }
-        ipConfigurations: [
-          {
-            name: 'myIPconfig'
-            properties: {
-              groupId: 'namespace'
-              memberName: 'namespace'
-              privateIPAddress: '10.0.0.10'
+      queues: [
+        {
+          name: '${namePrefix}${serviceShort}q001'
+          roleAssignments: [
+            {
+              roleDefinitionIdOrName: 'Owner'
+              principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+              principalType: 'ServicePrincipal'
             }
+            {
+              roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+              principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+              principalType: 'ServicePrincipal'
+            }
+            {
+              roleDefinitionIdOrName: subscriptionResourceId(
+                'Microsoft.Authorization/roleDefinitions',
+                'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+              )
+              principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+              principalType: 'ServicePrincipal'
+            }
+          ]
+          authorizationRules: [
+            {
+              name: 'RootManageSharedAccessKey'
+              rights: [
+                'Listen'
+                'Manage'
+                'Send'
+              ]
+            }
+            {
+              name: 'AnotherKey'
+              rights: [
+                'Listen'
+                'Send'
+              ]
+            }
+          ]
+          autoDeleteOnIdle: 'PT5M'
+          maxMessageSizeInKilobytes: 2048
+        }
+      ]
+      topics: [
+        {
+          name: '${namePrefix}${serviceShort}t001'
+          roleAssignments: [
+            {
+              roleDefinitionIdOrName: 'Owner'
+              principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+              principalType: 'ServicePrincipal'
+            }
+            {
+              roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+              principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+              principalType: 'ServicePrincipal'
+            }
+            {
+              roleDefinitionIdOrName: subscriptionResourceId(
+                'Microsoft.Authorization/roleDefinitions',
+                'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+              )
+              principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+              principalType: 'ServicePrincipal'
+            }
+          ]
+          authorizationRules: [
+            {
+              name: 'RootManageSharedAccessKey'
+              rights: [
+                'Listen'
+                'Manage'
+                'Send'
+              ]
+            }
+            {
+              name: 'AnotherKey'
+              rights: [
+                'Listen'
+                'Send'
+              ]
+            }
+          ]
+          subscriptions: [
+            {
+              name: 'subscription001'
+            }
+          ]
+        }
+      ]
+      diagnosticSettings: [
+        {
+          name: '${namePrefix}-diagnosticsetting'
+          metricCategories: [
+            {
+              category: 'AllMetrics'
+            }
+          ]
+          logCategoriesAndGroups: [
+            {
+              category: 'RuntimeAuditLogs'
+            }
+          ]
+          eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
+          eventHubAuthorizationRuleResourceId: diagnosticDependencies.outputs.eventHubAuthorizationRuleId
+          storageAccountResourceId: diagnosticDependencies.outputs.storageAccountResourceId
+          workspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
+        }
+      ]
+      privateEndpoints: [
+        {
+          name: 'myPrivateEndpoint'
+          privateLinkServiceConnectionName: 'customLinkName'
+          subnetResourceId: nestedDependencies.outputs.subnetResourceId
+          privateDnsZoneResourceIds: [
+            nestedDependencies.outputs.privateDNSZoneResourceId
+          ]
+          tags: {
+            'hidden-title': 'This is visible in the resource name'
+            Environment: 'Non-Prod'
+            Role: 'DeploymentValidation'
           }
-        ]
-        customDnsConfigs: [
-          {
-            fqdn: 'abc.namespace.com'
-            ipAddresses: [
-              '10.0.0.10'
-            ]
-          }
+          ipConfigurations: [
+            {
+              name: 'myIPconfig'
+              properties: {
+                groupId: 'namespace'
+                memberName: 'namespace'
+                privateIPAddress: '10.0.0.10'
+              }
+            }
+          ]
+          customDnsConfigs: [
+            {
+              fqdn: 'abc.namespace.com'
+              ipAddresses: [
+                '10.0.0.10'
+              ]
+            }
+          ]
+        }
+        {
+          subnetResourceId: nestedDependencies.outputs.subnetResourceId
+          privateDnsZoneResourceIds: [
+            nestedDependencies.outputs.privateDNSZoneResourceId
+          ]
+        }
+      ]
+      managedIdentities: {
+        systemAssigned: true
+        userAssignedResourcesIds: [
+          nestedDependencies.outputs.managedIdentityResourceId
         ]
       }
-    ]
-    managedIdentities: {
-      systemAssigned: true
-      userAssignedResourcesIds: [
-        nestedDependencies.outputs.managedIdentityResourceId
-      ]
+      disableLocalAuth: true
+      publicNetworkAccess: 'Enabled'
+      minimumTlsVersion: '1.2'
     }
-    disableLocalAuth: true
-    publicNetworkAccess: 'Enabled'
-    minimumTlsVersion: '1.2'
+    dependsOn: [
+      nestedDependencies
+      diagnosticDependencies
+    ]
   }
-}]
+]

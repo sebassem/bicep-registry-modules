@@ -17,8 +17,8 @@ This module deploys an Event Grid System Topic.
 | :-- | :-- |
 | `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.EventGrid/systemTopics` | [2021-12-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.EventGrid/2021-12-01/systemTopics) |
-| `Microsoft.EventGrid/systemTopics/eventSubscriptions` | [2022-06-15](https://learn.microsoft.com/en-us/azure/templates/Microsoft.EventGrid/2022-06-15/systemTopics/eventSubscriptions) |
+| `Microsoft.EventGrid/systemTopics` | [2023-12-15-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.EventGrid/2023-12-15-preview/systemTopics) |
+| `Microsoft.EventGrid/systemTopics/eventSubscriptions` | [2023-12-15-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.EventGrid/2023-12-15-preview/systemTopics/eventSubscriptions) |
 | `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
 
 ## Usage examples
@@ -44,7 +44,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module systemTopic 'br/public:avm/res/event-grid/system-topic:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-egstmin'
+  name: 'systemTopicDeployment'
   params: {
     // Required parameters
     name: 'egstmin001'
@@ -100,7 +100,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module systemTopic 'br/public:avm/res/event-grid/system-topic:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-egstmax'
+  name: 'systemTopicDeployment'
   params: {
     // Required parameters
     name: 'egstmax001'
@@ -154,11 +154,13 @@ module systemTopic 'br/public:avm/res/event-grid/system-topic:<version>' = {
     }
     roleAssignments: [
       {
+        name: 'c9beca28-efcf-4d1d-99aa-8f334484a2c2'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -259,11 +261,13 @@ module systemTopic 'br/public:avm/res/event-grid/system-topic:<version>' = {
     "roleAssignments": {
       "value": [
         {
+          "name": "c9beca28-efcf-4d1d-99aa-8f334484a2c2",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -300,7 +304,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module systemTopic 'br/public:avm/res/event-grid/system-topic:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-egstwaf'
+  name: 'systemTopicDeployment'
   params: {
     // Required parameters
     name: 'egstwaf001'
@@ -746,6 +750,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -792,6 +797,13 @@ The Resource Id of the delegated managed identity resource.
 ### Parameter: `roleAssignments.description`
 
 The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
 
 - Required: No
 - Type: string

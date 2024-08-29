@@ -31,121 +31,41 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   location: resourceLocation
 }
 
-module nestedDependencies 'dependencies.bicep' = {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, resourceLocation)}-nestedDependencies'
-  params: {
-    location: resourceLocation
-    applicationSecurityGroupName: 'dep-${namePrefix}-asg-${serviceShort}'
-  }
-}
-
-// Diagnostics
-// ===========
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, resourceLocation)}-diagnosticDependencies'
-  params: {
-    storageAccountName: 'dep${namePrefix}diasa${serviceShort}01'
-    logAnalyticsWorkspaceName: 'dep-${namePrefix}-law-${serviceShort}'
-    eventHubNamespaceEventHubName: 'dep-${namePrefix}-evh-${serviceShort}'
-    eventHubNamespaceName: 'dep-${namePrefix}-evhns-${serviceShort}'
-    location: resourceLocation
-  }
-}
-
 // ============== //
 // Test Execution //
 // ============== //
 
 @batchSize(1)
-module testDeployment '../../../main.bicep' = [for iteration in [ 'init', 'idem' ]: {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
-  params: {
-    name: '${namePrefix}${serviceShort}001'
-    location: resourceLocation
-    diagnosticSettings: [
-      {
-        name: 'customSetting'
-        eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
-        eventHubAuthorizationRuleResourceId: diagnosticDependencies.outputs.eventHubAuthorizationRuleId
-        storageAccountResourceId: diagnosticDependencies.outputs.storageAccountResourceId
-        workspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
-      }
-    ]
-    lock: {
-      kind: 'CanNotDelete'
-      name: 'myCustomLockName'
-    }
-    securityRules: [
-      {
-        name: 'Specific'
-        properties: {
-          access: 'Allow'
-          description: 'Tests specific IPs and ports'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '8080'
-          direction: 'Inbound'
-          priority: 100
-          protocol: '*'
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
+module testDeployment '../../../main.bicep' = [
+  for iteration in ['init', 'idem']: {
+    scope: resourceGroup
+    name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
+    params: {
+      name: '${namePrefix}${serviceShort}001'
+      location: resourceLocation
+      securityRules: [
+        {
+          name: 'deny-hop-outbound'
+          properties: {
+            priority: 200
+            access: 'Deny'
+            protocol: 'Tcp'
+            direction: 'Outbound'
+            sourceAddressPrefix: 'VirtualNetwork'
+            sourcePortRange: '*'
+            destinationAddressPrefix: '*'
+            destinationPortRanges: [
+              '3389'
+              '22'
+            ]
+          }
         }
+      ]
+      tags: {
+        'hidden-title': 'This is visible in the resource name'
+        Environment: 'Non-Prod'
+        Role: 'DeploymentValidation'
       }
-      {
-        name: 'Ranges'
-        properties: {
-          access: 'Allow'
-          description: 'Tests Ranges'
-          destinationAddressPrefixes: [
-            '10.2.0.0/16'
-            '10.3.0.0/16'
-          ]
-          destinationPortRanges: [
-            '90'
-            '91'
-          ]
-          direction: 'Inbound'
-          priority: 101
-          protocol: '*'
-          sourceAddressPrefixes: [
-            '10.0.0.0/16'
-            '10.1.0.0/16'
-          ]
-          sourcePortRanges: [
-            '80'
-            '81'
-          ]
-        }
-      }
-      {
-        name: 'Port_8082'
-        properties: {
-          access: 'Allow'
-          description: 'Allow inbound access on TCP 8082'
-          destinationApplicationSecurityGroups: [
-            {
-              id: nestedDependencies.outputs.applicationSecurityGroupResourceId
-            }
-          ]
-          destinationPortRange: '8082'
-          direction: 'Inbound'
-          priority: 102
-          protocol: '*'
-          sourceApplicationSecurityGroups: [
-            {
-              id: nestedDependencies.outputs.applicationSecurityGroupResourceId
-            }
-          ]
-          sourcePortRange: '*'
-        }
-      }
-    ]
-    tags: {
-      'hidden-title': 'This is visible in the resource name'
-      Environment: 'Non-Prod'
-      Role: 'DeploymentValidation'
     }
   }
-}]
+]

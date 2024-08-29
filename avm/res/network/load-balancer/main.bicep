@@ -57,97 +57,173 @@ param outboundRules array = []
 // Variables   //
 // =========== //
 
-var frontendIPConfigurationsVar = [for (frontendIPConfiguration, index) in frontendIPConfigurations: {
-  name: frontendIPConfiguration.name
-  properties: {
-    subnet: contains(frontendIPConfiguration, 'subnetId') && !empty(frontendIPConfiguration.subnetId) ? {
-      id: frontendIPConfiguration.subnetId
-    } : null
-    publicIPAddress: contains(frontendIPConfiguration, 'publicIPAddressId') && !empty(frontendIPConfiguration.publicIPAddressId) ? {
-      id: frontendIPConfiguration.publicIPAddressId
-    } : null
-    privateIPAddress: contains(frontendIPConfiguration, 'privateIPAddress') && !empty(frontendIPConfiguration.privateIPAddress) ? frontendIPConfiguration.privateIPAddress : null
-    privateIPAddressVersion: contains(frontendIPConfiguration, 'privateIPAddressVersion') ? frontendIPConfiguration.privateIPAddressVersion : 'IPv4'
-    privateIPAllocationMethod: contains(frontendIPConfiguration, 'subnetId') && !empty(frontendIPConfiguration.subnetId) ? (contains(frontendIPConfiguration, 'privateIPAddress') ? 'Static' : 'Dynamic') : null
-    gatewayLoadBalancer: contains(frontendIPConfiguration, 'gatewayLoadBalancer') && !empty(frontendIPConfiguration.gatewayLoadBalancer) ? {
-      id: frontendIPConfiguration.gatewayLoadBalancer
-    } : null
-    publicIPPrefix: contains(frontendIPConfiguration, 'publicIPPrefix') && !empty(frontendIPConfiguration.publicIPPrefix) ? {
-      id: frontendIPConfiguration.publicIPPrefix
-    } : null
+var frontendIPConfigurationsVar = [
+  for (frontendIPConfiguration, index) in frontendIPConfigurations: {
+    name: frontendIPConfiguration.name
+    properties: {
+      subnet: contains(frontendIPConfiguration, 'subnetId') && !empty(frontendIPConfiguration.subnetId)
+        ? {
+            id: frontendIPConfiguration.subnetId
+          }
+        : null
+      publicIPAddress: contains(frontendIPConfiguration, 'publicIPAddressId') && !empty(frontendIPConfiguration.publicIPAddressId)
+        ? {
+            id: frontendIPConfiguration.publicIPAddressId
+          }
+        : null
+      privateIPAddress: contains(frontendIPConfiguration, 'privateIPAddress') && !empty(frontendIPConfiguration.privateIPAddress)
+        ? frontendIPConfiguration.privateIPAddress
+        : null
+      privateIPAddressVersion: contains(frontendIPConfiguration, 'privateIPAddressVersion')
+        ? frontendIPConfiguration.privateIPAddressVersion
+        : 'IPv4'
+      privateIPAllocationMethod: contains(frontendIPConfiguration, 'subnetId') && !empty(frontendIPConfiguration.subnetId)
+        ? (contains(frontendIPConfiguration, 'privateIPAddress') ? 'Static' : 'Dynamic')
+        : null
+      gatewayLoadBalancer: contains(frontendIPConfiguration, 'gatewayLoadBalancer') && !empty(frontendIPConfiguration.gatewayLoadBalancer)
+        ? {
+            id: frontendIPConfiguration.gatewayLoadBalancer
+          }
+        : null
+      publicIPPrefix: contains(frontendIPConfiguration, 'publicIPPrefix') && !empty(frontendIPConfiguration.publicIPPrefix)
+        ? {
+            id: frontendIPConfiguration.publicIPPrefix
+          }
+        : null
+    }
+    zones: contains(frontendIPConfiguration, 'zones')
+      ? map(frontendIPConfiguration.zones, zone => string(zone))
+      : !empty(frontendIPConfiguration.?subnetResourceId)
+          ? [
+              '1'
+              '2'
+              '3'
+            ]
+          : null
   }
-}]
+]
 
-var loadBalancingRulesVar = [for loadBalancingRule in (loadBalancingRules ?? []): {
-  name: loadBalancingRule.name
-  properties: {
-    backendAddressPool: {
-      id: az.resourceId('Microsoft.Network/loadBalancers/backendAddressPools', name, loadBalancingRule.backendAddressPoolName)
-    }
-    backendPort: loadBalancingRule.backendPort
-    disableOutboundSnat: contains(loadBalancingRule, 'disableOutboundSnat') ? loadBalancingRule.disableOutboundSnat : true
-    enableFloatingIP: contains(loadBalancingRule, 'enableFloatingIP') ? loadBalancingRule.enableFloatingIP : false
-    enableTcpReset: contains(loadBalancingRule, 'enableTcpReset') ? loadBalancingRule.enableTcpReset : false
-    frontendIPConfiguration: {
-      id: az.resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', name, loadBalancingRule.frontendIPConfigurationName)
-    }
-    frontendPort: loadBalancingRule.frontendPort
-    idleTimeoutInMinutes: contains(loadBalancingRule, 'idleTimeoutInMinutes') ? loadBalancingRule.idleTimeoutInMinutes : 4
-    loadDistribution: contains(loadBalancingRule, 'loadDistribution') ? loadBalancingRule.loadDistribution : 'Default'
-    probe: {
-      id: '${az.resourceId('Microsoft.Network/loadBalancers', name)}/probes/${loadBalancingRule.probeName}'
-    }
-    protocol: contains(loadBalancingRule, 'protocol') ? loadBalancingRule.protocol : 'Tcp'
-  }
-}]
-
-var outboundRulesVar = [for outboundRule in outboundRules: {
-  name: outboundRule.name
-  properties: {
-    frontendIPConfigurations: [
-      {
-        id: az.resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', name, outboundRule.frontendIPConfigurationName)
+var loadBalancingRulesVar = [
+  for loadBalancingRule in (loadBalancingRules ?? []): {
+    name: loadBalancingRule.name
+    properties: {
+      backendAddressPool: {
+        id: az.resourceId(
+          'Microsoft.Network/loadBalancers/backendAddressPools',
+          name,
+          loadBalancingRule.backendAddressPoolName
+        )
       }
-    ]
-    backendAddressPool: {
-      id: az.resourceId('Microsoft.Network/loadBalancers/backendAddressPools', name, outboundRule.backendAddressPoolName)
+      backendPort: loadBalancingRule.backendPort
+      disableOutboundSnat: contains(loadBalancingRule, 'disableOutboundSnat')
+        ? loadBalancingRule.disableOutboundSnat
+        : true
+      enableFloatingIP: contains(loadBalancingRule, 'enableFloatingIP') ? loadBalancingRule.enableFloatingIP : false
+      enableTcpReset: contains(loadBalancingRule, 'enableTcpReset') ? loadBalancingRule.enableTcpReset : false
+      frontendIPConfiguration: {
+        id: az.resourceId(
+          'Microsoft.Network/loadBalancers/frontendIPConfigurations',
+          name,
+          loadBalancingRule.frontendIPConfigurationName
+        )
+      }
+      frontendPort: loadBalancingRule.frontendPort
+      idleTimeoutInMinutes: contains(loadBalancingRule, 'idleTimeoutInMinutes')
+        ? loadBalancingRule.idleTimeoutInMinutes
+        : 4
+      loadDistribution: contains(loadBalancingRule, 'loadDistribution') ? loadBalancingRule.loadDistribution : 'Default'
+      probe: {
+        id: '${az.resourceId('Microsoft.Network/loadBalancers', name)}/probes/${loadBalancingRule.probeName}'
+      }
+      protocol: contains(loadBalancingRule, 'protocol') ? loadBalancingRule.protocol : 'Tcp'
     }
-    protocol: contains(outboundRule, 'protocol') ? outboundRule.protocol : 'All'
-    allocatedOutboundPorts: contains(outboundRule, 'allocatedOutboundPorts') ? outboundRule.allocatedOutboundPorts : 63984
-    enableTcpReset: contains(outboundRule, 'enableTcpReset') ? outboundRule.enableTcpReset : true
-    idleTimeoutInMinutes: contains(outboundRule, 'idleTimeoutInMinutes') ? outboundRule.idleTimeoutInMinutes : 4
   }
-}]
+]
 
-var probesVar = [for probe in (probes ?? []): {
-  name: probe.name
-  properties: {
-    protocol: contains(probe, 'protocol') ? probe.protocol : 'Tcp'
-    requestPath: toLower(probe.protocol) != 'tcp' ? probe.requestPath : null
-    port: contains(probe, 'port') ? probe.port : 80
-    intervalInSeconds: contains(probe, 'intervalInSeconds') ? probe.intervalInSeconds : 5
-    numberOfProbes: contains(probe, 'numberOfProbes') ? probe.numberOfProbes : 2
+var outboundRulesVar = [
+  for outboundRule in outboundRules: {
+    name: outboundRule.name
+    properties: {
+      frontendIPConfigurations: [
+        {
+          id: az.resourceId(
+            'Microsoft.Network/loadBalancers/frontendIPConfigurations',
+            name,
+            outboundRule.frontendIPConfigurationName
+          )
+        }
+      ]
+      backendAddressPool: {
+        id: az.resourceId(
+          'Microsoft.Network/loadBalancers/backendAddressPools',
+          name,
+          outboundRule.backendAddressPoolName
+        )
+      }
+      protocol: contains(outboundRule, 'protocol') ? outboundRule.protocol : 'All'
+      allocatedOutboundPorts: contains(outboundRule, 'allocatedOutboundPorts')
+        ? outboundRule.allocatedOutboundPorts
+        : 63984
+      enableTcpReset: contains(outboundRule, 'enableTcpReset') ? outboundRule.enableTcpReset : true
+      idleTimeoutInMinutes: contains(outboundRule, 'idleTimeoutInMinutes') ? outboundRule.idleTimeoutInMinutes : 4
+    }
   }
-}]
+]
 
-var backendAddressPoolNames = [for backendAddressPool in (backendAddressPools ?? []): {
-  name: backendAddressPool.name
-}]
+var probesVar = [
+  for probe in (probes ?? []): {
+    name: probe.name
+    properties: {
+      protocol: contains(probe, 'protocol') ? probe.protocol : 'Tcp'
+      requestPath: toLower(probe.protocol) != 'tcp' ? probe.requestPath : null
+      port: contains(probe, 'port') ? probe.port : 80
+      intervalInSeconds: contains(probe, 'intervalInSeconds') ? probe.intervalInSeconds : 5
+      numberOfProbes: contains(probe, 'numberOfProbes') ? probe.numberOfProbes : 2
+    }
+  }
+]
+
+var backendAddressPoolNames = [
+  for backendAddressPool in (backendAddressPools ?? []): {
+    name: backendAddressPool.name
+  }
+]
 
 var builtInRoleNames = {
   Contributor: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
-  'Network Contributor': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')
+  'Network Contributor': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    '4d97b98b-1d4f-4787-a291-c67834d212e7'
+  )
   Owner: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')
   Reader: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
-  'Role Based Access Control Administrator (Preview)': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'f58310d9-a9f6-439a-9e8d-f62e7b41a168')
-  'User Access Administrator': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '18d7d88d-d35e-4fb5-a5c3-7773c20a72d9')
+  'Role Based Access Control Administrator (Preview)': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    'f58310d9-a9f6-439a-9e8d-f62e7b41a168'
+  )
+  'User Access Administrator': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    '18d7d88d-d35e-4fb5-a5c3-7773c20a72d9'
+  )
 }
+
+var formattedRoleAssignments = [
+  for (roleAssignment, index) in (roleAssignments ?? []): union(roleAssignment, {
+    roleDefinitionId: builtInRoleNames[?roleAssignment.roleDefinitionIdOrName] ?? (contains(
+        roleAssignment.roleDefinitionIdOrName,
+        '/providers/Microsoft.Authorization/roleDefinitions/'
+      )
+      ? roleAssignment.roleDefinitionIdOrName
+      : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName))
+  })
+]
 
 // ============ //
 // Dependencies //
 // ============ //
 
-resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
+#disable-next-line no-deployments-resources
+resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableTelemetry) {
   name: '46d3xbcp.res.network-loadbalancer.${replace('-..--..-', '.', '-')}.${substring(uniqueString(deployment().name, location), 0, 4)}'
   properties: {
     mode: 'Incremental'
@@ -165,7 +241,7 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableT
   }
 }
 
-resource loadBalancer 'Microsoft.Network/loadBalancers@2023-04-01' = {
+resource loadBalancer 'Microsoft.Network/loadBalancers@2023-11-01' = {
   name: name
   location: location
   tags: tags
@@ -181,78 +257,103 @@ resource loadBalancer 'Microsoft.Network/loadBalancers@2023-04-01' = {
   }
 }
 
-module loadBalancer_backendAddressPools 'backend-address-pool/main.bicep' = [for (backendAddressPool, index) in backendAddressPools ?? []: {
-  name: '${uniqueString(deployment().name, location)}-loadBalancer-backendAddressPools-${index}'
-  params: {
-    loadBalancerName: loadBalancer.name
-    name: backendAddressPool.name
-    tunnelInterfaces: contains(backendAddressPool, 'tunnelInterfaces') && !empty(backendAddressPool.tunnelInterfaces) ? backendAddressPool.tunnelInterfaces : []
-    loadBalancerBackendAddresses: contains(backendAddressPool, 'loadBalancerBackendAddresses') && !empty(backendAddressPool.loadBalancerBackendAddresses) ? backendAddressPool.loadBalancerBackendAddresses : []
-    drainPeriodInSeconds: contains(backendAddressPool, 'drainPeriodInSeconds') ? backendAddressPool.drainPeriodInSeconds : 0
+module loadBalancer_backendAddressPools 'backend-address-pool/main.bicep' = [
+  for (backendAddressPool, index) in backendAddressPools ?? []: {
+    name: '${uniqueString(deployment().name, location)}-loadBalancer-backendAddressPools-${index}'
+    params: {
+      loadBalancerName: loadBalancer.name
+      name: backendAddressPool.name
+      tunnelInterfaces: contains(backendAddressPool, 'tunnelInterfaces') && !empty(backendAddressPool.tunnelInterfaces)
+        ? backendAddressPool.tunnelInterfaces
+        : []
+      loadBalancerBackendAddresses: contains(backendAddressPool, 'loadBalancerBackendAddresses') && !empty(backendAddressPool.loadBalancerBackendAddresses)
+        ? backendAddressPool.loadBalancerBackendAddresses
+        : []
+      drainPeriodInSeconds: contains(backendAddressPool, 'drainPeriodInSeconds')
+        ? backendAddressPool.drainPeriodInSeconds
+        : 0
+    }
   }
-}]
+]
 
-module loadBalancer_inboundNATRules 'inbound-nat-rule/main.bicep' = [for (inboundNATRule, index) in inboundNatRules: {
-  name: '${uniqueString(deployment().name, location)}-LoadBalancer-inboundNatRules-${index}'
-  params: {
-    loadBalancerName: loadBalancer.name
-    name: inboundNATRule.name
-    frontendIPConfigurationName: inboundNATRule.frontendIPConfigurationName
-    frontendPort: inboundNATRule.frontendPort
-    backendPort: contains(inboundNATRule, 'backendPort') ? inboundNATRule.backendPort : inboundNATRule.frontendPort
-    backendAddressPoolName: contains(inboundNATRule, 'backendAddressPoolName') ? inboundNATRule.backendAddressPoolName : ''
-    enableFloatingIP: contains(inboundNATRule, 'enableFloatingIP') ? inboundNATRule.enableFloatingIP : false
-    enableTcpReset: contains(inboundNATRule, 'enableTcpReset') ? inboundNATRule.enableTcpReset : false
-    frontendPortRangeEnd: contains(inboundNATRule, 'frontendPortRangeEnd') ? inboundNATRule.frontendPortRangeEnd : -1
-    frontendPortRangeStart: contains(inboundNATRule, 'frontendPortRangeStart') ? inboundNATRule.frontendPortRangeStart : -1
-    idleTimeoutInMinutes: contains(inboundNATRule, 'idleTimeoutInMinutes') ? inboundNATRule.idleTimeoutInMinutes : 4
-    protocol: contains(inboundNATRule, 'protocol') ? inboundNATRule.protocol : 'Tcp'
+module loadBalancer_inboundNATRules 'inbound-nat-rule/main.bicep' = [
+  for (inboundNATRule, index) in inboundNatRules: {
+    name: '${uniqueString(deployment().name, location)}-LoadBalancer-inboundNatRules-${index}'
+    params: {
+      loadBalancerName: loadBalancer.name
+      name: inboundNATRule.name
+      frontendIPConfigurationName: inboundNATRule.frontendIPConfigurationName
+      frontendPort: inboundNATRule.?frontendPort
+      backendPort: inboundNATRule.backendPort
+      backendAddressPoolName: inboundNATRule.?backendAddressPoolName
+      enableFloatingIP: inboundNATRule.?enableFloatingIP
+      enableTcpReset: inboundNATRule.?enableTcpReset
+      frontendPortRangeEnd: inboundNATRule.?frontendPortRangeEnd
+      frontendPortRangeStart: inboundNATRule.?frontendPortRangeStart
+      idleTimeoutInMinutes: inboundNATRule.?idleTimeoutInMinutes
+      protocol: inboundNATRule.?protocol
+    }
+    dependsOn: [
+      loadBalancer_backendAddressPools
+    ]
   }
-  dependsOn: [
-    loadBalancer_backendAddressPools
-  ]
-}]
+]
 
 resource loadBalancer_lock 'Microsoft.Authorization/locks@2020-05-01' = if (!empty(lock ?? {}) && lock.?kind != 'None') {
   name: lock.?name ?? 'lock-${name}'
   properties: {
     level: lock.?kind ?? ''
-    notes: lock.?kind == 'CanNotDelete' ? 'Cannot delete resource or child resources.' : 'Cannot delete or modify the resource or child resources.'
+    notes: lock.?kind == 'CanNotDelete'
+      ? 'Cannot delete resource or child resources.'
+      : 'Cannot delete or modify the resource or child resources.'
   }
   scope: loadBalancer
 }
 
-resource loadBalancer_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = [for (diagnosticSetting, index) in (diagnosticSettings ?? []): {
-  name: diagnosticSetting.?name ?? '${name}-diagnosticSettings'
-  properties: {
-    storageAccountId: diagnosticSetting.?storageAccountResourceId
-    workspaceId: diagnosticSetting.?workspaceResourceId
-    eventHubAuthorizationRuleId: diagnosticSetting.?eventHubAuthorizationRuleResourceId
-    eventHubName: diagnosticSetting.?eventHubName
-    metrics: [for group in (diagnosticSetting.?metricCategories ?? [ { category: 'AllMetrics' } ]): {
-      category: group.category
-      enabled: group.?enabled ?? true
-      timeGrain: null
-    }]
-    marketplacePartnerId: diagnosticSetting.?marketplacePartnerResourceId
-    logAnalyticsDestinationType: diagnosticSetting.?logAnalyticsDestinationType
+resource loadBalancer_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = [
+  for (diagnosticSetting, index) in (diagnosticSettings ?? []): {
+    name: diagnosticSetting.?name ?? '${name}-diagnosticSettings'
+    properties: {
+      storageAccountId: diagnosticSetting.?storageAccountResourceId
+      workspaceId: diagnosticSetting.?workspaceResourceId
+      eventHubAuthorizationRuleId: diagnosticSetting.?eventHubAuthorizationRuleResourceId
+      eventHubName: diagnosticSetting.?eventHubName
+      metrics: [
+        for group in (diagnosticSetting.?metricCategories ?? [{ category: 'AllMetrics' }]): {
+          category: group.category
+          enabled: group.?enabled ?? true
+          timeGrain: null
+        }
+      ]
+      logs: [
+        for group in (diagnosticSetting.?logCategoriesAndGroups ?? [{ categoryGroup: 'allLogs' }]): {
+          categoryGroup: group.?categoryGroup
+          category: group.?category
+          enabled: group.?enabled ?? true
+        }
+      ]
+      marketplacePartnerId: diagnosticSetting.?marketplacePartnerResourceId
+      logAnalyticsDestinationType: diagnosticSetting.?logAnalyticsDestinationType
+    }
+    scope: loadBalancer
   }
-  scope: loadBalancer
-}]
+]
 
-resource loadBalancer_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (roleAssignment, index) in (roleAssignments ?? []): {
-  name: guid(loadBalancer.id, roleAssignment.principalId, roleAssignment.roleDefinitionIdOrName)
-  properties: {
-    roleDefinitionId: contains(builtInRoleNames, roleAssignment.roleDefinitionIdOrName) ? builtInRoleNames[roleAssignment.roleDefinitionIdOrName] : contains(roleAssignment.roleDefinitionIdOrName, '/providers/Microsoft.Authorization/roleDefinitions/') ? roleAssignment.roleDefinitionIdOrName : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName)
-    principalId: roleAssignment.principalId
-    description: roleAssignment.?description
-    principalType: roleAssignment.?principalType
-    condition: roleAssignment.?condition
-    conditionVersion: !empty(roleAssignment.?condition) ? (roleAssignment.?conditionVersion ?? '2.0') : null // Must only be set if condtion is set
-    delegatedManagedIdentityResourceId: roleAssignment.?delegatedManagedIdentityResourceId
+resource loadBalancer_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
+  for (roleAssignment, index) in (formattedRoleAssignments ?? []): {
+    name: roleAssignment.?name ?? guid(loadBalancer.id, roleAssignment.principalId, roleAssignment.roleDefinitionId)
+    properties: {
+      roleDefinitionId: roleAssignment.roleDefinitionId
+      principalId: roleAssignment.principalId
+      description: roleAssignment.?description
+      principalType: roleAssignment.?principalType
+      condition: roleAssignment.?condition
+      conditionVersion: !empty(roleAssignment.?condition) ? (roleAssignment.?conditionVersion ?? '2.0') : null // Must only be set if condtion is set
+      delegatedManagedIdentityResourceId: roleAssignment.?delegatedManagedIdentityResourceId
+    }
+    scope: loadBalancer
   }
-  scope: loadBalancer
-}]
+]
 
 // =========== //
 // Outputs     //
@@ -280,6 +381,18 @@ output location string = loadBalancer.location
 type diagnosticSettingType = {
   @description('Optional. The name of diagnostic setting.')
   name: string?
+
+  @description('Optional. The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to `[]` to disable log collection.')
+  logCategoriesAndGroups: {
+    @description('Optional. Name of a Diagnostic Log category for a resource type this setting is applied to. Set the specific logs to collect here.')
+    category: string?
+
+    @description('Optional. Name of a Diagnostic Log category group for a resource type this setting is applied to. Set to `allLogs` to collect all logs.')
+    categoryGroup: string?
+
+    @description('Optional. Enable or disable the category explicitly. Default is `true`.')
+    enabled: bool?
+  }[]?
 
   @description('Optional. The name of metrics that will be streamed. "allMetrics" includes all possible metrics for the resource. Set to `[]` to disable metric collection.')
   metricCategories: {
@@ -318,6 +431,9 @@ type lockType = {
 }?
 
 type roleAssignmentType = {
+  @description('Optional. The name (as GUID) of the role assignment. If not provided, a GUID will be generated.')
+  name: string?
+
   @description('Required. The role to assign. You can provide either the display name of the role definition, the role definition GUID, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'.')
   roleDefinitionIdOrName: string
 

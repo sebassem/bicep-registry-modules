@@ -18,10 +18,10 @@ This module deploys a Search Service.
 | `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
 | `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
-| `Microsoft.Network/privateEndpoints` | [2023-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-04-01/privateEndpoints) |
-| `Microsoft.Network/privateEndpoints/privateDnsZoneGroups` | [2023-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-04-01/privateEndpoints/privateDnsZoneGroups) |
-| `Microsoft.Search/searchServices` | [2022-09-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Search/2022-09-01/searchServices) |
-| `Microsoft.Search/searchServices/sharedPrivateLinkResources` | [2022-09-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Search/2022-09-01/searchServices/sharedPrivateLinkResources) |
+| `Microsoft.Network/privateEndpoints` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints) |
+| `Microsoft.Network/privateEndpoints/privateDnsZoneGroups` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints/privateDnsZoneGroups) |
+| `Microsoft.Search/searchServices` | [2024-03-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Search/2024-03-01-preview/searchServices) |
+| `Microsoft.Search/searchServices/sharedPrivateLinkResources` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Search/2023-11-01/searchServices/sharedPrivateLinkResources) |
 
 ## Usage examples
 
@@ -47,10 +47,10 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module searchService 'br/public:avm/res/search/search-service:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-sssmin'
+  name: 'searchServiceDeployment'
   params: {
     // Required parameters
-    name: 'sssmin001'
+    name: 'sssmin002'
     // Non-required parameters
     location: '<location>'
   }
@@ -71,7 +71,7 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
   "parameters": {
     // Required parameters
     "name": {
-      "value": "sssmin001"
+      "value": "sssmin002"
     },
     // Non-required parameters
     "location": {
@@ -95,7 +95,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module searchService 'br/public:avm/res/search/search-service:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-sssmax'
+  name: 'searchServiceDeployment'
   params: {
     // Required parameters
     name: 'sssmax001'
@@ -129,6 +129,9 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
     }
     managedIdentities: {
       systemAssigned: true
+      userAssignedResourceIds: [
+        '<managedIdentityResourceId>'
+      ]
     }
     networkRuleSet: {
       ipRules: [
@@ -144,11 +147,13 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
     replicaCount: 3
     roleAssignments: [
       {
+        name: '73ec30e0-2e25-475f-beec-d90cab332eb7'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -159,6 +164,7 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
         roleDefinitionIdOrName: '<roleDefinitionIdOrName>'
       }
     ]
+    semanticSearch: 'standard'
     sku: 'standard3'
     tags: {
       Environment: 'Non-Prod'
@@ -229,7 +235,10 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
     },
     "managedIdentities": {
       "value": {
-        "systemAssigned": true
+        "systemAssigned": true,
+        "userAssignedResourceIds": [
+          "<managedIdentityResourceId>"
+        ]
       }
     },
     "networkRuleSet": {
@@ -253,11 +262,13 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
     "roleAssignments": {
       "value": [
         {
+          "name": "73ec30e0-2e25-475f-beec-d90cab332eb7",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -268,6 +279,9 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
           "roleDefinitionIdOrName": "<roleDefinitionIdOrName>"
         }
       ]
+    },
+    "semanticSearch": {
+      "value": "standard"
     },
     "sku": {
       "value": "standard3"
@@ -297,7 +311,7 @@ This instance deploys the module with private endpoints.
 
 ```bicep
 module searchService 'br/public:avm/res/search/search-service:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ssspe'
+  name: 'searchServiceDeployment'
   params: {
     // Required parameters
     name: 'ssspe001'
@@ -308,17 +322,31 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
         applicationSecurityGroupResourceIds: [
           '<applicationSecurityGroupResourceId>'
         ]
-        privateDnsZoneResourceIds: [
-          '<privateDNSZoneResourceId>'
-        ]
+        privateDnsZoneGroup: {
+          privateDnsZoneGroupConfigs: [
+            {
+              privateDnsZoneResourceId: '<privateDnsZoneResourceId>'
+            }
+          ]
+        }
         subnetResourceId: '<subnetResourceId>'
         tags: {
           Environment: 'Non-Prod'
           Role: 'DeploymentValidation'
         }
       }
+      {
+        privateDnsZoneGroup: {
+          privateDnsZoneGroupConfigs: [
+            {
+              privateDnsZoneResourceId: '<privateDnsZoneResourceId>'
+            }
+          ]
+        }
+        subnetResourceId: '<subnetResourceId>'
+      }
     ]
-    publicNetworkAccess: 'disabled'
+    publicNetworkAccess: 'Disabled'
     sharedPrivateLinkResources: [
       {
         groupId: 'blob'
@@ -367,19 +395,33 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
           "applicationSecurityGroupResourceIds": [
             "<applicationSecurityGroupResourceId>"
           ],
-          "privateDnsZoneResourceIds": [
-            "<privateDNSZoneResourceId>"
-          ],
+          "privateDnsZoneGroup": {
+            "privateDnsZoneGroupConfigs": [
+              {
+                "privateDnsZoneResourceId": "<privateDnsZoneResourceId>"
+              }
+            ]
+          },
           "subnetResourceId": "<subnetResourceId>",
           "tags": {
             "Environment": "Non-Prod",
             "Role": "DeploymentValidation"
           }
+        },
+        {
+          "privateDnsZoneGroup": {
+            "privateDnsZoneGroupConfigs": [
+              {
+                "privateDnsZoneResourceId": "<privateDnsZoneResourceId>"
+              }
+            ]
+          },
+          "subnetResourceId": "<subnetResourceId>"
         }
       ]
     },
     "publicNetworkAccess": {
-      "value": "disabled"
+      "value": "Disabled"
     },
     "sharedPrivateLinkResources": {
       "value": [
@@ -421,7 +463,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module searchService 'br/public:avm/res/search/search-service:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ssswaf'
+  name: 'searchServiceDeployment'
   params: {
     // Required parameters
     name: 'ssswaf001'
@@ -601,9 +643,10 @@ module searchService 'br/public:avm/res/search/search-service:<version>' = {
 | [`networkRuleSet`](#parameter-networkruleset) | object | Network specific rules that determine how the Azure Cognitive Search service may be reached. |
 | [`partitionCount`](#parameter-partitioncount) | int | The number of partitions in the search service; if specified, it can be 1, 2, 3, 4, 6, or 12. Values greater than 1 are only valid for standard SKUs. For 'standard3' services with hostingMode set to 'highDensity', the allowed values are between 1 and 3. |
 | [`privateEndpoints`](#parameter-privateendpoints) | array | Configuration details for private endpoints. For security reasons, it is recommended to use private endpoints whenever possible. |
-| [`publicNetworkAccess`](#parameter-publicnetworkaccess) | string | This value can be set to 'enabled' to avoid breaking changes on existing customer resources and templates. If set to 'disabled', traffic over public interface is not allowed, and private endpoint connections would be the exclusive access method. |
+| [`publicNetworkAccess`](#parameter-publicnetworkaccess) | string | This value can be set to 'Enabled' to avoid breaking changes on existing customer resources and templates. If set to 'Disabled', traffic over public interface is not allowed, and private endpoint connections would be the exclusive access method. |
 | [`replicaCount`](#parameter-replicacount) | int | The number of replicas in the search service. If specified, it must be a value between 1 and 12 inclusive for standard SKUs or between 1 and 3 inclusive for basic SKU. |
 | [`roleAssignments`](#parameter-roleassignments) | array | Array of role assignments to create. |
+| [`semanticSearch`](#parameter-semanticsearch) | string | Sets options that control the availability of semantic search. This configuration is only possible for certain search SKUs in certain locations. |
 | [`sharedPrivateLinkResources`](#parameter-sharedprivatelinkresources) | array | The sharedPrivateLinkResources to create as part of the search Service. |
 | [`sku`](#parameter-sku) | string | Defines the SKU of an Azure Cognitive Search Service, which determines price tier and capacity limits. |
 | [`tags`](#parameter-tags) | object | Tags to help categorize the resource in the Azure portal. |
@@ -872,6 +915,7 @@ The managed identity definition for this resource.
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`systemAssigned`](#parameter-managedidentitiessystemassigned) | bool | Enables system assigned managed identity on the resource. |
+| [`userAssignedResourceIds`](#parameter-managedidentitiesuserassignedresourceids) | array | The resource ID(s) to assign to the resource. Required if a user assigned identity is used for encryption. |
 
 ### Parameter: `managedIdentities.systemAssigned`
 
@@ -879,6 +923,13 @@ Enables system assigned managed identity on the resource.
 
 - Required: No
 - Type: bool
+
+### Parameter: `managedIdentities.userAssignedResourceIds`
+
+The resource ID(s) to assign to the resource. Required if a user assigned identity is used for encryption.
+
+- Required: No
+- Type: array
 
 ### Parameter: `networkRuleSet`
 
@@ -918,14 +969,16 @@ Configuration details for private endpoints. For security reasons, it is recomme
 | [`customNetworkInterfaceName`](#parameter-privateendpointscustomnetworkinterfacename) | string | The custom name of the network interface attached to the private endpoint. |
 | [`enableTelemetry`](#parameter-privateendpointsenabletelemetry) | bool | Enable/Disable usage telemetry for module. |
 | [`ipConfigurations`](#parameter-privateendpointsipconfigurations) | array | A list of IP configurations of the private endpoint. This will be used to map to the First Party Service endpoints. |
+| [`isManualConnection`](#parameter-privateendpointsismanualconnection) | bool | If Manual Private Link Connection is required. |
 | [`location`](#parameter-privateendpointslocation) | string | The location to deploy the private endpoint to. |
 | [`lock`](#parameter-privateendpointslock) | object | Specify the type of lock. |
-| [`manualPrivateLinkServiceConnections`](#parameter-privateendpointsmanualprivatelinkserviceconnections) | array | Manual PrivateLink Service Connections. |
+| [`manualConnectionRequestMessage`](#parameter-privateendpointsmanualconnectionrequestmessage) | string | A message passed to the owner of the remote resource with the manual connection request. |
 | [`name`](#parameter-privateendpointsname) | string | The name of the private endpoint. |
-| [`privateDnsZoneGroupName`](#parameter-privateendpointsprivatednszonegroupname) | string | The name of the private DNS zone group to create if privateDnsZoneResourceIds were provided. |
-| [`privateDnsZoneResourceIds`](#parameter-privateendpointsprivatednszoneresourceids) | array | The private DNS zone groups to associate the private endpoint with. A DNS zone group can support up to 5 DNS zones. |
+| [`privateDnsZoneGroup`](#parameter-privateendpointsprivatednszonegroup) | object | The private DNS zone group to configure for the private endpoint. |
+| [`privateLinkServiceConnectionName`](#parameter-privateendpointsprivatelinkserviceconnectionname) | string | The name of the private link connection to create. |
+| [`resourceGroupName`](#parameter-privateendpointsresourcegroupname) | string | Specify if you want to deploy the Private Endpoint into a different resource group than the main resource. |
 | [`roleAssignments`](#parameter-privateendpointsroleassignments) | array | Array of role assignments to create. |
-| [`service`](#parameter-privateendpointsservice) | string | The service (sub-) type to deploy the private endpoint for. For example "vault" or "blob". |
+| [`service`](#parameter-privateendpointsservice) | string | The subresource to deploy the private endpoint for. For example "vault", "mysqlServer" or "dataFactory". |
 | [`tags`](#parameter-privateendpointstags) | object | Tags to be applied on all resources/resource groups in this deployment. |
 
 ### Parameter: `privateEndpoints.subnetResourceId`
@@ -953,19 +1006,19 @@ Custom DNS configurations.
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`fqdn`](#parameter-privateendpointscustomdnsconfigsfqdn) | string | Fqdn that resolves to private endpoint ip address. |
-| [`ipAddresses`](#parameter-privateendpointscustomdnsconfigsipaddresses) | array | A list of private ip addresses of the private endpoint. |
+| [`fqdn`](#parameter-privateendpointscustomdnsconfigsfqdn) | string | Fqdn that resolves to private endpoint IP address. |
+| [`ipAddresses`](#parameter-privateendpointscustomdnsconfigsipaddresses) | array | A list of private IP addresses of the private endpoint. |
 
 ### Parameter: `privateEndpoints.customDnsConfigs.fqdn`
 
-Fqdn that resolves to private endpoint ip address.
+Fqdn that resolves to private endpoint IP address.
 
 - Required: No
 - Type: string
 
 ### Parameter: `privateEndpoints.customDnsConfigs.ipAddresses`
 
-A list of private ip addresses of the private endpoint.
+A list of private IP addresses of the private endpoint.
 
 - Required: Yes
 - Type: array
@@ -1018,7 +1071,7 @@ Properties of private endpoint IP configurations.
 | :-- | :-- | :-- |
 | [`groupId`](#parameter-privateendpointsipconfigurationspropertiesgroupid) | string | The ID of a group obtained from the remote resource that this private endpoint should connect to. |
 | [`memberName`](#parameter-privateendpointsipconfigurationspropertiesmembername) | string | The member name of a group obtained from the remote resource that this private endpoint should connect to. |
-| [`privateIPAddress`](#parameter-privateendpointsipconfigurationspropertiesprivateipaddress) | string | A private ip address obtained from the private endpoint's subnet. |
+| [`privateIPAddress`](#parameter-privateendpointsipconfigurationspropertiesprivateipaddress) | string | A private IP address obtained from the private endpoint's subnet. |
 
 ### Parameter: `privateEndpoints.ipConfigurations.properties.groupId`
 
@@ -1036,10 +1089,17 @@ The member name of a group obtained from the remote resource that this private e
 
 ### Parameter: `privateEndpoints.ipConfigurations.properties.privateIPAddress`
 
-A private ip address obtained from the private endpoint's subnet.
+A private IP address obtained from the private endpoint's subnet.
 
 - Required: Yes
 - Type: string
+
+### Parameter: `privateEndpoints.isManualConnection`
+
+If Manual Private Link Connection is required.
+
+- Required: No
+- Type: bool
 
 ### Parameter: `privateEndpoints.location`
 
@@ -1084,12 +1144,12 @@ Specify the name of lock.
 - Required: No
 - Type: string
 
-### Parameter: `privateEndpoints.manualPrivateLinkServiceConnections`
+### Parameter: `privateEndpoints.manualConnectionRequestMessage`
 
-Manual PrivateLink Service Connections.
+A message passed to the owner of the remote resource with the manual connection request.
 
 - Required: No
-- Type: array
+- Type: string
 
 ### Parameter: `privateEndpoints.name`
 
@@ -1098,19 +1158,78 @@ The name of the private endpoint.
 - Required: No
 - Type: string
 
-### Parameter: `privateEndpoints.privateDnsZoneGroupName`
+### Parameter: `privateEndpoints.privateDnsZoneGroup`
 
-The name of the private DNS zone group to create if privateDnsZoneResourceIds were provided.
+The private DNS zone group to configure for the private endpoint.
+
+- Required: No
+- Type: object
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`privateDnsZoneGroupConfigs`](#parameter-privateendpointsprivatednszonegroupprivatednszonegroupconfigs) | array | The private DNS zone groups to associate the private endpoint. A DNS zone group can support up to 5 DNS zones. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`name`](#parameter-privateendpointsprivatednszonegroupname) | string | The name of the Private DNS Zone Group. |
+
+### Parameter: `privateEndpoints.privateDnsZoneGroup.privateDnsZoneGroupConfigs`
+
+The private DNS zone groups to associate the private endpoint. A DNS zone group can support up to 5 DNS zones.
+
+- Required: Yes
+- Type: array
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`privateDnsZoneResourceId`](#parameter-privateendpointsprivatednszonegroupprivatednszonegroupconfigsprivatednszoneresourceid) | string | The resource id of the private DNS zone. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`name`](#parameter-privateendpointsprivatednszonegroupprivatednszonegroupconfigsname) | string | The name of the private DNS zone group config. |
+
+### Parameter: `privateEndpoints.privateDnsZoneGroup.privateDnsZoneGroupConfigs.privateDnsZoneResourceId`
+
+The resource id of the private DNS zone.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `privateEndpoints.privateDnsZoneGroup.privateDnsZoneGroupConfigs.name`
+
+The name of the private DNS zone group config.
 
 - Required: No
 - Type: string
 
-### Parameter: `privateEndpoints.privateDnsZoneResourceIds`
+### Parameter: `privateEndpoints.privateDnsZoneGroup.name`
 
-The private DNS zone groups to associate the private endpoint with. A DNS zone group can support up to 5 DNS zones.
+The name of the Private DNS Zone Group.
 
 - Required: No
-- Type: array
+- Type: string
+
+### Parameter: `privateEndpoints.privateLinkServiceConnectionName`
+
+The name of the private link connection to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `privateEndpoints.resourceGroupName`
+
+Specify if you want to deploy the Private Endpoint into a different resource group than the main resource.
+
+- Required: No
+- Type: string
 
 ### Parameter: `privateEndpoints.roleAssignments`
 
@@ -1134,6 +1253,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-privateendpointsroleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-privateendpointsroleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-privateendpointsroleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-privateendpointsroleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-privateendpointsroleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `privateEndpoints.roleAssignments.principalId`
@@ -1184,6 +1304,13 @@ The description of the role assignment.
 - Required: No
 - Type: string
 
+### Parameter: `privateEndpoints.roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
 ### Parameter: `privateEndpoints.roleAssignments.principalType`
 
 The principal type of the assigned principal ID.
@@ -1203,7 +1330,7 @@ The principal type of the assigned principal ID.
 
 ### Parameter: `privateEndpoints.service`
 
-The service (sub-) type to deploy the private endpoint for. For example "vault" or "blob".
+The subresource to deploy the private endpoint for. For example "vault", "mysqlServer" or "dataFactory".
 
 - Required: No
 - Type: string
@@ -1217,16 +1344,16 @@ Tags to be applied on all resources/resource groups in this deployment.
 
 ### Parameter: `publicNetworkAccess`
 
-This value can be set to 'enabled' to avoid breaking changes on existing customer resources and templates. If set to 'disabled', traffic over public interface is not allowed, and private endpoint connections would be the exclusive access method.
+This value can be set to 'Enabled' to avoid breaking changes on existing customer resources and templates. If set to 'Disabled', traffic over public interface is not allowed, and private endpoint connections would be the exclusive access method.
 
 - Required: No
 - Type: string
-- Default: `'enabled'`
+- Default: `'Enabled'`
 - Allowed:
   ```Bicep
   [
-    'disabled'
-    'enabled'
+    'Disabled'
+    'Enabled'
   ]
   ```
 
@@ -1236,7 +1363,7 @@ The number of replicas in the search service. If specified, it must be a value b
 
 - Required: No
 - Type: int
-- Default: `1`
+- Default: `3`
 
 ### Parameter: `roleAssignments`
 
@@ -1260,6 +1387,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -1310,6 +1438,13 @@ The description of the role assignment.
 - Required: No
 - Type: string
 
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
 ### Parameter: `roleAssignments.principalType`
 
 The principal type of the assigned principal ID.
@@ -1324,6 +1459,21 @@ The principal type of the assigned principal ID.
     'Group'
     'ServicePrincipal'
     'User'
+  ]
+  ```
+
+### Parameter: `semanticSearch`
+
+Sets options that control the availability of semantic search. This configuration is only possible for certain search SKUs in certain locations.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'disabled'
+    'free'
+    'standard'
   ]
   ```
 
@@ -1369,17 +1519,18 @@ Tags to help categorize the resource in the Azure portal.
 | :-- | :-- | :-- |
 | `location` | string | The location the resource was deployed into. |
 | `name` | string | The name of the search service. |
+| `privateEndpoints` | array | The private endpoints of the search service. |
 | `resourceGroupName` | string | The name of the resource group the search service was created in. |
 | `resourceId` | string | The resource ID of the search service. |
 | `systemAssignedMIPrincipalId` | string | The principal ID of the system assigned identity. |
 
 ## Cross-referenced modules
 
-This section gives you an overview of all local-referenced module files (i.e., other CARML modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
+This section gives you an overview of all local-referenced module files (i.e., other modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
 
 | Reference | Type |
 | :-- | :-- |
-| `br/public:avm/res/network/private-endpoint:0.3.1` | Remote reference |
+| `br/public:avm/res/network/private-endpoint:0.7.1` | Remote reference |
 
 ## Data Collection
 

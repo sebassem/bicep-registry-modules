@@ -32,11 +32,11 @@ param subscriptionsLimit int = 1
 @sys.description('Optional. Product terms of use. Developers trying to subscribe to the product will be presented and required to accept these terms before they can complete the subscription process.')
 param terms string = ''
 
-resource service 'Microsoft.ApiManagement/service@2021-08-01' existing = {
+resource service 'Microsoft.ApiManagement/service@2023-05-01-preview' existing = {
   name: apiManagementServiceName
 }
 
-resource product 'Microsoft.ApiManagement/service/products@2021-08-01' = {
+resource product 'Microsoft.ApiManagement/service/products@2022-08-01' = {
   name: name
   parent: service
   properties: {
@@ -50,23 +50,27 @@ resource product 'Microsoft.ApiManagement/service/products@2021-08-01' = {
   }
 }
 
-module product_apis 'api/main.bicep' = [for (api, index) in apis: {
-  name: '${deployment().name}-Api-${index}'
-  params: {
-    apiManagementServiceName: apiManagementServiceName
-    name: api.name
-    productName: name
+module product_apis 'api/main.bicep' = [
+  for (api, index) in apis: {
+    name: '${deployment().name}-Api-${index}'
+    params: {
+      apiManagementServiceName: apiManagementServiceName
+      name: api.name
+      productName: name
+    }
   }
-}]
+]
 
-module product_groups 'group/main.bicep' = [for (group, index) in groups: {
-  name: '${deployment().name}-Group-${index}'
-  params: {
-    apiManagementServiceName: apiManagementServiceName
-    name: group.name
-    productName: name
+module product_groups 'group/main.bicep' = [
+  for (group, index) in groups: {
+    name: '${deployment().name}-Group-${index}'
+    params: {
+      apiManagementServiceName: apiManagementServiceName
+      name: group.name
+      productName: name
+    }
   }
-}]
+]
 
 @sys.description('The resource ID of the API management service product.')
 output resourceId string = product.id

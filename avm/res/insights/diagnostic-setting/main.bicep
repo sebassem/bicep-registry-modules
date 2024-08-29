@@ -44,7 +44,8 @@ param enableTelemetry bool = true
 @description('Optional. Location deployment metadata.')
 param location string = deployment().location
 
-resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
+#disable-next-line no-deployments-resources
+resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableTelemetry) {
   name: '46d3xbcp.res.insights-diagnosticsetting.${replace('-..--..-', '.', '-')}.${substring(uniqueString(deployment().name, location), 0, 4)}'
   location: location
   properties: {
@@ -72,16 +73,20 @@ resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
     eventHubName: eventHubName
     logAnalyticsDestinationType: !empty(logAnalyticsDestinationType) ? logAnalyticsDestinationType : null
     marketplacePartnerId: marketplacePartnerResourceId
-    logs: [for group in (logCategoriesAndGroups ?? [ { categoryGroup: 'allLogs' } ]): {
-      categoryGroup: group.?categoryGroup
-      category: group.?category
-      enabled: group.?enabled ?? true
-    }]
-    metrics: [for group in (metricCategories ?? [ { category: 'AllMetrics' } ]): {
-      category: group.category
-      enabled: group.?enabled ?? true
-      timeGrain: null
-    }]
+    logs: [
+      for group in (logCategoriesAndGroups ?? [{ categoryGroup: 'allLogs' }]): {
+        categoryGroup: group.?categoryGroup
+        category: group.?category
+        enabled: group.?enabled ?? true
+      }
+    ]
+    metrics: [
+      for group in (metricCategories ?? [{ category: 'AllMetrics' }]): {
+        category: group.category
+        enabled: group.?enabled ?? true
+        timeGrain: null
+      }
+    ]
   }
 }
 

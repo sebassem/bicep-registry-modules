@@ -24,9 +24,12 @@ This module deploys a DocumentDB Database Account.
 | `Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections` | [2023-04-15](https://learn.microsoft.com/en-us/azure/templates/Microsoft.DocumentDB/2023-04-15/databaseAccounts/mongodbDatabases/collections) |
 | `Microsoft.DocumentDB/databaseAccounts/sqlDatabases` | [2023-04-15](https://learn.microsoft.com/en-us/azure/templates/Microsoft.DocumentDB/2023-04-15/databaseAccounts/sqlDatabases) |
 | `Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers` | [2023-04-15](https://learn.microsoft.com/en-us/azure/templates/Microsoft.DocumentDB/2023-04-15/databaseAccounts/sqlDatabases/containers) |
+| `Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments` | [2023-04-15](https://learn.microsoft.com/en-us/azure/templates/Microsoft.DocumentDB/2023-04-15/databaseAccounts/sqlRoleAssignments) |
+| `Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions` | [2023-04-15](https://learn.microsoft.com/en-us/azure/templates/Microsoft.DocumentDB/2023-04-15/databaseAccounts/sqlRoleDefinitions) |
 | `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
-| `Microsoft.Network/privateEndpoints` | [2023-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-04-01/privateEndpoints) |
-| `Microsoft.Network/privateEndpoints/privateDnsZoneGroups` | [2023-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-04-01/privateEndpoints/privateDnsZoneGroups) |
+| `Microsoft.KeyVault/vaults/secrets` | [2023-07-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.KeyVault/2023-07-01/vaults/secrets) |
+| `Microsoft.Network/privateEndpoints` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints) |
+| `Microsoft.Network/privateEndpoints/privateDnsZoneGroups` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints/privateDnsZoneGroups) |
 
 ## Usage examples
 
@@ -36,14 +39,157 @@ The following section provides usage examples for the module, which were used to
 
 >**Note**: To reference the module, please use the following syntax `br/public:avm/res/document-db/database-account:<version>`.
 
-- [Using only defaults](#example-1-using-only-defaults)
-- [Germlin Database](#example-2-germlin-database)
-- [Mongo Database](#example-3-mongo-database)
-- [Plain](#example-4-plain)
-- [SQL Database](#example-5-sql-database)
-- [WAF-aligned](#example-6-waf-aligned)
+- [Using analytical storage](#example-1-using-analytical-storage)
+- [Using bounded consistency](#example-2-using-bounded-consistency)
+- [Using only defaults](#example-3-using-only-defaults)
+- [Gremlin Database](#example-4-gremlin-database)
+- [Deploying with a key vault reference to save secrets](#example-5-deploying-with-a-key-vault-reference-to-save-secrets)
+- [Deploying with Managed identities](#example-6-deploying-with-managed-identities)
+- [Mongo Database](#example-7-mongo-database)
+- [Deploying multiple regions](#example-8-deploying-multiple-regions)
+- [Plain](#example-9-plain)
+- [Public network restricted access with ACL](#example-10-public-network-restricted-access-with-acl)
+- [Deploying with a sql role definision and assignment](#example-11-deploying-with-a-sql-role-definision-and-assignment)
+- [SQL Database](#example-12-sql-database)
+- [WAF-aligned](#example-13-waf-aligned)
 
-### Example 1: _Using only defaults_
+### Example 1: _Using analytical storage_
+
+This instance deploys the module with analytical storage enabled.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
+  name: 'databaseAccountDeployment'
+  params: {
+    // Required parameters
+    name: 'analytical'
+    // Non-required parameters
+    enableAnalyticalStorage: true
+    location: '<location>'
+    sqlDatabases: [
+      {
+        name: 'no-containers-specified'
+      }
+    ]
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "analytical"
+    },
+    // Non-required parameters
+    "enableAnalyticalStorage": {
+      "value": true
+    },
+    "location": {
+      "value": "<location>"
+    },
+    "sqlDatabases": {
+      "value": [
+        {
+          "name": "no-containers-specified"
+        }
+      ]
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 2: _Using bounded consistency_
+
+This instance deploys the module specifying a default consistency level.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
+  name: 'databaseAccountDeployment'
+  params: {
+    // Required parameters
+    name: 'bounded'
+    // Non-required parameters
+    defaultConsistencyLevel: 'BoundedStaleness'
+    location: '<location>'
+    maxIntervalInSeconds: 600
+    maxStalenessPrefix: 200000
+    sqlDatabases: [
+      {
+        name: 'no-containers-specified'
+      }
+    ]
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "bounded"
+    },
+    // Non-required parameters
+    "defaultConsistencyLevel": {
+      "value": "BoundedStaleness"
+    },
+    "location": {
+      "value": "<location>"
+    },
+    "maxIntervalInSeconds": {
+      "value": 600
+    },
+    "maxStalenessPrefix": {
+      "value": 200000
+    },
+    "sqlDatabases": {
+      "value": [
+        {
+          "name": "no-containers-specified"
+        }
+      ]
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 3: _Using only defaults_
 
 This instance deploys the module with the minimum set of required parameters.
 
@@ -54,16 +200,9 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dddamin'
+  name: 'databaseAccountDeployment'
   params: {
     // Required parameters
-    locations: [
-      {
-        failoverPriority: 0
-        isZoneRedundant: false
-        locationName: '<locationName>'
-      }
-    ]
     name: 'dddamin001'
     // Non-required parameters
     location: '<location>'
@@ -84,15 +223,6 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "locations": {
-      "value": [
-        {
-          "failoverPriority": 0,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        }
-      ]
-    },
     "name": {
       "value": "dddamin001"
     },
@@ -107,7 +237,7 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
 </details>
 <p>
 
-### Example 2: _Germlin Database_
+### Example 4: _Gremlin Database_
 
 This instance deploys the module with a Gremlin Database.
 
@@ -118,21 +248,9 @@ This instance deploys the module with a Gremlin Database.
 
 ```bicep
 module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dddagrm'
+  name: 'databaseAccountDeployment'
   params: {
     // Required parameters
-    locations: [
-      {
-        failoverPriority: 0
-        isZoneRedundant: false
-        locationName: '<locationName>'
-      }
-      {
-        failoverPriority: 1
-        isZoneRedundant: false
-        locationName: '<locationName>'
-      }
-    ]
     name: 'dddagrm002'
     // Non-required parameters
     capabilitiesToAdd: [
@@ -202,6 +320,18 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
       }
     ]
     location: '<location>'
+    locations: [
+      {
+        failoverPriority: 0
+        isZoneRedundant: false
+        locationName: '<locationName>'
+      }
+      {
+        failoverPriority: 1
+        isZoneRedundant: false
+        locationName: '<locationName>'
+      }
+    ]
     managedIdentities: {
       systemAssigned: true
     }
@@ -212,6 +342,7 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -244,20 +375,6 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "locations": {
-      "value": [
-        {
-          "failoverPriority": 0,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        },
-        {
-          "failoverPriority": 1,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        }
-      ]
-    },
     "name": {
       "value": "dddagrm002"
     },
@@ -337,6 +454,20 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
     "location": {
       "value": "<location>"
     },
+    "locations": {
+      "value": [
+        {
+          "failoverPriority": 0,
+          "isZoneRedundant": false,
+          "locationName": "<locationName>"
+        },
+        {
+          "failoverPriority": 1,
+          "isZoneRedundant": false,
+          "locationName": "<locationName>"
+        }
+      ]
+    },
     "managedIdentities": {
       "value": {
         "systemAssigned": true
@@ -350,6 +481,7 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -375,7 +507,179 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
 </details>
 <p>
 
-### Example 3: _Mongo Database_
+### Example 5: _Deploying with a key vault reference to save secrets_
+
+This instance deploys the module saving all its secrets in a key vault.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
+  name: 'databaseAccountDeployment'
+  params: {
+    // Required parameters
+    name: 'kv-ref'
+    // Non-required parameters
+    location: '<location>'
+    secretsExportConfiguration: {
+      keyVaultResourceId: '<keyVaultResourceId>'
+      primaryReadonlyConnectionStringSecretName: 'primaryReadonlyConnectionString'
+      primaryReadOnlyKeySecretName: 'primaryReadOnlyKey'
+      primaryWriteConnectionStringSecretName: 'primaryWriteConnectionString'
+      primaryWriteKeySecretName: 'primaryWriteKey'
+      secondaryReadonlyConnectionStringSecretName: 'secondaryReadonlyConnectionString'
+      secondaryReadonlyKeySecretName: 'secondaryReadonlyKey'
+      secondaryWriteConnectionStringSecretName: 'secondaryWriteConnectionString'
+      secondaryWriteKeySecretName: 'secondaryWriteKey'
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "kv-ref"
+    },
+    // Non-required parameters
+    "location": {
+      "value": "<location>"
+    },
+    "secretsExportConfiguration": {
+      "value": {
+        "keyVaultResourceId": "<keyVaultResourceId>",
+        "primaryReadonlyConnectionStringSecretName": "primaryReadonlyConnectionString",
+        "primaryReadOnlyKeySecretName": "primaryReadOnlyKey",
+        "primaryWriteConnectionStringSecretName": "primaryWriteConnectionString",
+        "primaryWriteKeySecretName": "primaryWriteKey",
+        "secondaryReadonlyConnectionStringSecretName": "secondaryReadonlyConnectionString",
+        "secondaryReadonlyKeySecretName": "secondaryReadonlyKey",
+        "secondaryWriteConnectionStringSecretName": "secondaryWriteConnectionString",
+        "secondaryWriteKeySecretName": "secondaryWriteKey"
+      }
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 6: _Deploying with Managed identities_
+
+This instance deploys the module with an system and user assigned managed identity.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
+  name: 'databaseAccountDeployment'
+  params: {
+    // Required parameters
+    name: 'user-mi'
+    // Non-required parameters
+    location: '<location>'
+    managedIdentities: {
+      systemAssigned: true
+      userAssignedResourceIds: [
+        '<managedIdentityResourceId>'
+      ]
+    }
+    roleAssignments: [
+      {
+        principalId: '<principalId>'
+        principalType: 'ServicePrincipal'
+        roleDefinitionIdOrName: 'Owner'
+      }
+      {
+        name: '<name>'
+        principalId: '<principalId>'
+        principalType: 'ServicePrincipal'
+        roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+      }
+      {
+        principalId: '<principalId>'
+        principalType: 'ServicePrincipal'
+        roleDefinitionIdOrName: '<roleDefinitionIdOrName>'
+      }
+    ]
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "user-mi"
+    },
+    // Non-required parameters
+    "location": {
+      "value": "<location>"
+    },
+    "managedIdentities": {
+      "value": {
+        "systemAssigned": true,
+        "userAssignedResourceIds": [
+          "<managedIdentityResourceId>"
+        ]
+      }
+    },
+    "roleAssignments": {
+      "value": [
+        {
+          "principalId": "<principalId>",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionIdOrName": "Owner"
+        },
+        {
+          "name": "<name>",
+          "principalId": "<principalId>",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
+        },
+        {
+          "principalId": "<principalId>",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionIdOrName": "<roleDefinitionIdOrName>"
+        }
+      ]
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 7: _Mongo Database_
 
 This instance deploys the module with a Mongo Database.
 
@@ -386,21 +690,9 @@ This instance deploys the module with a Mongo Database.
 
 ```bicep
 module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dddamng'
+  name: 'databaseAccountDeployment'
   params: {
     // Required parameters
-    locations: [
-      {
-        failoverPriority: 0
-        isZoneRedundant: false
-        locationName: '<locationName>'
-      }
-      {
-        failoverPriority: 1
-        isZoneRedundant: false
-        locationName: '<locationName>'
-      }
-    ]
     name: 'dddamng001'
     // Non-required parameters
     diagnosticSettings: [
@@ -418,6 +710,18 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
       }
     ]
     location: '<location>'
+    locations: [
+      {
+        failoverPriority: 0
+        isZoneRedundant: false
+        locationName: '<locationName>'
+      }
+      {
+        failoverPriority: 1
+        isZoneRedundant: false
+        locationName: '<locationName>'
+      }
+    ]
     managedIdentities: {
       systemAssigned: true
     }
@@ -614,6 +918,7 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -646,20 +951,6 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "locations": {
-      "value": [
-        {
-          "failoverPriority": 0,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        },
-        {
-          "failoverPriority": 1,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        }
-      ]
-    },
     "name": {
       "value": "dddamng001"
     },
@@ -682,6 +973,20 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
     },
     "location": {
       "value": "<location>"
+    },
+    "locations": {
+      "value": [
+        {
+          "failoverPriority": 0,
+          "isZoneRedundant": false,
+          "locationName": "<locationName>"
+        },
+        {
+          "failoverPriority": 1,
+          "isZoneRedundant": false,
+          "locationName": "<locationName>"
+        }
+      ]
     },
     "managedIdentities": {
       "value": {
@@ -884,6 +1189,7 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -909,9 +1215,9 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
 </details>
 <p>
 
-### Example 4: _Plain_
+### Example 8: _Deploying multiple regions_
 
-This instance deploys the module without a Database.
+This instance deploys the module in multiple regions with configs specific of multi region scenarios.
 
 
 <details>
@@ -920,64 +1226,35 @@ This instance deploys the module without a Database.
 
 ```bicep
 module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dddapln'
+  name: 'databaseAccountDeployment'
   params: {
     // Required parameters
+    name: 'multi-region'
+    // Non-required parameters
+    automaticFailover: false
+    backupIntervalInMinutes: 300
+    backupPolicyType: 'Periodic'
+    backupRetentionIntervalInHours: 16
+    backupStorageRedundancy: 'Zone'
+    enableMultipleWriteLocations: true
+    location: '<location>'
     locations: [
       {
         failoverPriority: 0
-        isZoneRedundant: false
+        isZoneRedundant: true
         locationName: '<locationName>'
       }
       {
         failoverPriority: 1
-        isZoneRedundant: false
+        isZoneRedundant: true
         locationName: '<locationName>'
       }
     ]
-    name: 'dddapln001'
-    // Non-required parameters
-    diagnosticSettings: [
+    sqlDatabases: [
       {
-        eventHubAuthorizationRuleResourceId: '<eventHubAuthorizationRuleResourceId>'
-        eventHubName: '<eventHubName>'
-        metricCategories: [
-          {
-            category: 'AllMetrics'
-          }
-        ]
-        name: 'customSetting'
-        storageAccountResourceId: '<storageAccountResourceId>'
-        workspaceResourceId: '<workspaceResourceId>'
+        name: 'no-containers-specified'
       }
     ]
-    location: '<location>'
-    lock: {
-      kind: 'CanNotDelete'
-      name: 'myCustomLockName'
-    }
-    roleAssignments: [
-      {
-        principalId: '<principalId>'
-        principalType: 'ServicePrincipal'
-        roleDefinitionIdOrName: 'Owner'
-      }
-      {
-        principalId: '<principalId>'
-        principalType: 'ServicePrincipal'
-        roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
-      }
-      {
-        principalId: '<principalId>'
-        principalType: 'ServicePrincipal'
-        roleDefinitionIdOrName: '<roleDefinitionIdOrName>'
-      }
-    ]
-    tags: {
-      Environment: 'Non-Prod'
-      'hidden-title': 'This is visible in the resource name'
-      Role: 'DeploymentValidation'
-    }
   }
 }
 ```
@@ -995,74 +1272,51 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "locations": {
-      "value": [
-        {
-          "failoverPriority": 0,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        },
-        {
-          "failoverPriority": 1,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        }
-      ]
-    },
     "name": {
-      "value": "dddapln001"
+      "value": "multi-region"
     },
     // Non-required parameters
-    "diagnosticSettings": {
-      "value": [
-        {
-          "eventHubAuthorizationRuleResourceId": "<eventHubAuthorizationRuleResourceId>",
-          "eventHubName": "<eventHubName>",
-          "metricCategories": [
-            {
-              "category": "AllMetrics"
-            }
-          ],
-          "name": "customSetting",
-          "storageAccountResourceId": "<storageAccountResourceId>",
-          "workspaceResourceId": "<workspaceResourceId>"
-        }
-      ]
+    "automaticFailover": {
+      "value": false
+    },
+    "backupIntervalInMinutes": {
+      "value": 300
+    },
+    "backupPolicyType": {
+      "value": "Periodic"
+    },
+    "backupRetentionIntervalInHours": {
+      "value": 16
+    },
+    "backupStorageRedundancy": {
+      "value": "Zone"
+    },
+    "enableMultipleWriteLocations": {
+      "value": true
     },
     "location": {
       "value": "<location>"
     },
-    "lock": {
-      "value": {
-        "kind": "CanNotDelete",
-        "name": "myCustomLockName"
-      }
-    },
-    "roleAssignments": {
+    "locations": {
       "value": [
         {
-          "principalId": "<principalId>",
-          "principalType": "ServicePrincipal",
-          "roleDefinitionIdOrName": "Owner"
+          "failoverPriority": 0,
+          "isZoneRedundant": true,
+          "locationName": "<locationName>"
         },
         {
-          "principalId": "<principalId>",
-          "principalType": "ServicePrincipal",
-          "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
-        },
-        {
-          "principalId": "<principalId>",
-          "principalType": "ServicePrincipal",
-          "roleDefinitionIdOrName": "<roleDefinitionIdOrName>"
+          "failoverPriority": 1,
+          "isZoneRedundant": true,
+          "locationName": "<locationName>"
         }
       ]
     },
-    "tags": {
-      "value": {
-        "Environment": "Non-Prod",
-        "hidden-title": "This is visible in the resource name",
-        "Role": "DeploymentValidation"
-      }
+    "sqlDatabases": {
+      "value": [
+        {
+          "name": "no-containers-specified"
+        }
+      ]
     }
   }
 }
@@ -1071,7 +1325,259 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
 </details>
 <p>
 
-### Example 5: _SQL Database_
+### Example 9: _Plain_
+
+This instance deploys the module without a Database.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
+  name: 'databaseAccountDeployment'
+  params: {
+    // Required parameters
+    name: 'dddapln001'
+    // Non-required parameters
+    backupPolicyContinuousTier: 'Continuous7Days'
+    backupPolicyType: 'Continuous'
+    defaultConsistencyLevel: 'ConsistentPrefix'
+    disableKeyBasedMetadataWriteAccess: true
+    disableLocalAuth: true
+    location: '<location>'
+    locations: [
+      {
+        failoverPriority: 0
+        isZoneRedundant: false
+        locationName: '<locationName>'
+      }
+    ]
+    sqlDatabases: [
+      {
+        name: 'no-containers-specified'
+      }
+    ]
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "dddapln001"
+    },
+    // Non-required parameters
+    "backupPolicyContinuousTier": {
+      "value": "Continuous7Days"
+    },
+    "backupPolicyType": {
+      "value": "Continuous"
+    },
+    "defaultConsistencyLevel": {
+      "value": "ConsistentPrefix"
+    },
+    "disableKeyBasedMetadataWriteAccess": {
+      "value": true
+    },
+    "disableLocalAuth": {
+      "value": true
+    },
+    "location": {
+      "value": "<location>"
+    },
+    "locations": {
+      "value": [
+        {
+          "failoverPriority": 0,
+          "isZoneRedundant": false,
+          "locationName": "<locationName>"
+        }
+      ]
+    },
+    "sqlDatabases": {
+      "value": [
+        {
+          "name": "no-containers-specified"
+        }
+      ]
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 10: _Public network restricted access with ACL_
+
+This instance deploys the module with public network access enabled but restricted to IPs, CIDRS or subnets.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
+  name: 'databaseAccountDeployment'
+  params: {
+    // Required parameters
+    name: 'dddapres001'
+    // Non-required parameters
+    location: '<location>'
+    networkRestrictions: {
+      ipRules: [
+        '79.0.0.0'
+        '80.0.0.0'
+      ]
+      networkAclBypass: 'AzureServices'
+      publicNetworkAccess: 'Enabled'
+      virtualNetworkRules: [
+        {
+          subnetResourceId: '<subnetResourceId>'
+        }
+      ]
+    }
+    sqlDatabases: [
+      {
+        name: 'no-containers-specified'
+      }
+    ]
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "dddapres001"
+    },
+    // Non-required parameters
+    "location": {
+      "value": "<location>"
+    },
+    "networkRestrictions": {
+      "value": {
+        "ipRules": [
+          "79.0.0.0",
+          "80.0.0.0"
+        ],
+        "networkAclBypass": "AzureServices",
+        "publicNetworkAccess": "Enabled",
+        "virtualNetworkRules": [
+          {
+            "subnetResourceId": "<subnetResourceId>"
+          }
+        ]
+      }
+    },
+    "sqlDatabases": {
+      "value": [
+        {
+          "name": "no-containers-specified"
+        }
+      ]
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 11: _Deploying with a sql role definision and assignment_
+
+This instance deploys the module with sql role definision and assignment
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
+  name: 'databaseAccountDeployment'
+  params: {
+    // Required parameters
+    name: 'role-ref'
+    // Non-required parameters
+    location: '<location>'
+    sqlRoleAssignmentsPrincipalIds: [
+      '<identityPrincipalId>'
+    ]
+    sqlRoleDefinitions: [
+      {
+        name: 'cosmos-sql-role-test'
+      }
+    ]
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "role-ref"
+    },
+    // Non-required parameters
+    "location": {
+      "value": "<location>"
+    },
+    "sqlRoleAssignmentsPrincipalIds": {
+      "value": [
+        "<identityPrincipalId>"
+      ]
+    },
+    "sqlRoleDefinitions": {
+      "value": [
+        {
+          "name": "cosmos-sql-role-test"
+        }
+      ]
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 12: _SQL Database_
 
 This instance deploys the module with a SQL Database.
 
@@ -1082,79 +1588,18 @@ This instance deploys the module with a SQL Database.
 
 ```bicep
 module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dddasql'
+  name: 'databaseAccountDeployment'
   params: {
     // Required parameters
+    name: 'dddasql001'
+    // Non-required parameters
+    enableAnalyticalStorage: true
+    location: '<location>'
     locations: [
       {
         failoverPriority: 0
         isZoneRedundant: false
         locationName: '<locationName>'
-      }
-      {
-        failoverPriority: 1
-        isZoneRedundant: false
-        locationName: '<locationName>'
-      }
-    ]
-    name: 'dddasql001'
-    // Non-required parameters
-    diagnosticSettings: [
-      {
-        eventHubAuthorizationRuleResourceId: '<eventHubAuthorizationRuleResourceId>'
-        eventHubName: '<eventHubName>'
-        metricCategories: [
-          {
-            category: 'AllMetrics'
-          }
-        ]
-        name: 'customSetting'
-        storageAccountResourceId: '<storageAccountResourceId>'
-        workspaceResourceId: '<workspaceResourceId>'
-      }
-    ]
-    location: '<location>'
-    managedIdentities: {
-      userAssignedResourceIds: [
-        '<managedIdentityResourceId>'
-      ]
-    }
-    privateEndpoints: [
-      {
-        privateDnsZoneResourceIds: [
-          '<privateDNSZoneResourceId>'
-        ]
-        service: 'Sql'
-        subnetResourceId: '<subnetResourceId>'
-        tags: {
-          Environment: 'Non-Prod'
-          'hidden-title': 'This is visible in the resource name'
-          Role: 'DeploymentValidation'
-        }
-      }
-      {
-        privateDnsZoneResourceIds: [
-          '<privateDNSZoneResourceId>'
-        ]
-        service: 'Sql'
-        subnetResourceId: '<subnetResourceId>'
-      }
-    ]
-    roleAssignments: [
-      {
-        principalId: '<principalId>'
-        principalType: 'ServicePrincipal'
-        roleDefinitionIdOrName: 'Owner'
-      }
-      {
-        principalId: '<principalId>'
-        principalType: 'ServicePrincipal'
-        roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
-      }
-      {
-        principalId: '<principalId>'
-        principalType: 'ServicePrincipal'
-        roleDefinitionIdOrName: '<roleDefinitionIdOrName>'
       }
     ]
     sqlDatabases: [
@@ -1190,27 +1635,77 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
             ]
           }
         ]
-        name: 'sql-dddasql-001'
+        name: 'all-configs-specified'
       }
       {
-        containers: []
-        name: 'sql-dddasql-002'
-      }
-      {
-        autoscaleSettingsMaxThroughput: 1000
         containers: [
           {
-            analyticalStorageTtl: 0
-            autoscaleSettingsMaxThroughput: 1000
+            indexingPolicy: {
+              automatic: true
+            }
+            name: 'container-001'
+            paths: [
+              '/myPartitionKey'
+            ]
+          }
+        ]
+        name: 'automatic-indexing-policy'
+      }
+      {
+        containers: [
+          {
             conflictResolutionPolicy: {
               conflictResolutionPath: '/myCustomId'
               mode: 'LastWriterWins'
             }
-            indexingPolicy: {
-              automatic: true
-            }
-            kind: 'Hash'
-            name: 'container-003'
+            name: 'container-001'
+            paths: [
+              '/myPartitionKey'
+            ]
+          }
+        ]
+        name: 'last-writer-conflict-resolution-policy'
+      }
+      {
+        containers: [
+          {
+            analyticalStorageTtl: 1000
+            name: 'container-001'
+            paths: [
+              '/myPartitionKey'
+            ]
+          }
+        ]
+        name: 'fixed-analytical-ttl'
+      }
+      {
+        containers: [
+          {
+            analyticalStorageTtl: -1
+            name: 'container-001'
+            paths: [
+              '/myPartitionKey'
+            ]
+          }
+        ]
+        name: 'infinite-analytical-ttl'
+      }
+      {
+        containers: [
+          {
+            defaultTtl: 1000
+            name: 'container-001'
+            paths: [
+              '/myPartitionKey'
+            ]
+          }
+        ]
+        name: 'document-ttl'
+      }
+      {
+        containers: [
+          {
+            name: 'container-001'
             paths: [
               '/myPartitionKey'
             ]
@@ -1228,14 +1723,135 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
             ]
           }
         ]
-        name: 'sql-dddasql-003'
+        name: 'unique-key-policy'
+      }
+      {
+        containers: [
+          {
+            name: 'container-003'
+            paths: [
+              '/myPartitionKey'
+            ]
+            throughput: 500
+          }
+        ]
+        name: 'db-and-container-fixed-throughput-level'
+        throughput: 500
+      }
+      {
+        containers: [
+          {
+            name: 'container-003'
+            paths: [
+              '/myPartitionKey'
+            ]
+            throughput: 500
+          }
+        ]
+        name: 'container-fixed-throughput-level'
+      }
+      {
+        containers: [
+          {
+            name: 'container-003'
+            paths: [
+              '/myPartitionKey'
+            ]
+          }
+        ]
+        name: 'database-fixed-throughput-level'
+        throughput: 500
+      }
+      {
+        autoscaleSettingsMaxThroughput: 1000
+        containers: [
+          {
+            autoscaleSettingsMaxThroughput: 1000
+            name: 'container-003'
+            paths: [
+              '/myPartitionKey'
+            ]
+          }
+        ]
+        name: 'db-and-container-autoscale-level'
+      }
+      {
+        containers: [
+          {
+            autoscaleSettingsMaxThroughput: 1000
+            name: 'container-003'
+            paths: [
+              '/myPartitionKey'
+            ]
+          }
+        ]
+        name: 'container-autoscale-level'
+      }
+      {
+        autoscaleSettingsMaxThroughput: 1000
+        containers: [
+          {
+            name: 'container-003'
+            paths: [
+              '/myPartitionKey'
+            ]
+          }
+        ]
+        name: 'database-autoscale-level'
+      }
+      {
+        containers: [
+          {
+            kind: 'MultiHash'
+            name: 'container-001'
+            paths: [
+              '/myPartitionKey1'
+              '/myPartitionKey2'
+              '/myPartitionKey3'
+            ]
+          }
+          {
+            kind: 'MultiHash'
+            name: 'container-002'
+            paths: [
+              'myPartitionKey1'
+              'myPartitionKey2'
+              'myPartitionKey3'
+            ]
+          }
+          {
+            kind: 'Hash'
+            name: 'container-003'
+            paths: [
+              '/myPartitionKey1'
+            ]
+          }
+          {
+            kind: 'Hash'
+            name: 'container-004'
+            paths: [
+              'myPartitionKey1'
+            ]
+          }
+          {
+            kind: 'Hash'
+            name: 'container-005'
+            paths: [
+              'myPartitionKey1'
+            ]
+            version: 2
+          }
+        ]
+        name: 'all-partition-key-types'
+      }
+      {
+        containers: []
+        name: 'empty-containers-array'
+      }
+      {
+        name: 'no-containers-specified'
       }
     ]
-    tags: {
-      Environment: 'Non-Prod'
-      'hidden-title': 'This is visible in the resource name'
-      Role: 'DeploymentValidation'
-    }
   }
 }
 ```
@@ -1253,89 +1869,22 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
+    "name": {
+      "value": "dddasql001"
+    },
+    // Non-required parameters
+    "enableAnalyticalStorage": {
+      "value": true
+    },
+    "location": {
+      "value": "<location>"
+    },
     "locations": {
       "value": [
         {
           "failoverPriority": 0,
           "isZoneRedundant": false,
           "locationName": "<locationName>"
-        },
-        {
-          "failoverPriority": 1,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        }
-      ]
-    },
-    "name": {
-      "value": "dddasql001"
-    },
-    // Non-required parameters
-    "diagnosticSettings": {
-      "value": [
-        {
-          "eventHubAuthorizationRuleResourceId": "<eventHubAuthorizationRuleResourceId>",
-          "eventHubName": "<eventHubName>",
-          "metricCategories": [
-            {
-              "category": "AllMetrics"
-            }
-          ],
-          "name": "customSetting",
-          "storageAccountResourceId": "<storageAccountResourceId>",
-          "workspaceResourceId": "<workspaceResourceId>"
-        }
-      ]
-    },
-    "location": {
-      "value": "<location>"
-    },
-    "managedIdentities": {
-      "value": {
-        "userAssignedResourceIds": [
-          "<managedIdentityResourceId>"
-        ]
-      }
-    },
-    "privateEndpoints": {
-      "value": [
-        {
-          "privateDnsZoneResourceIds": [
-            "<privateDNSZoneResourceId>"
-          ],
-          "service": "Sql",
-          "subnetResourceId": "<subnetResourceId>",
-          "tags": {
-            "Environment": "Non-Prod",
-            "hidden-title": "This is visible in the resource name",
-            "Role": "DeploymentValidation"
-          }
-        },
-        {
-          "privateDnsZoneResourceIds": [
-            "<privateDNSZoneResourceId>"
-          ],
-          "service": "Sql",
-          "subnetResourceId": "<subnetResourceId>"
-        }
-      ]
-    },
-    "roleAssignments": {
-      "value": [
-        {
-          "principalId": "<principalId>",
-          "principalType": "ServicePrincipal",
-          "roleDefinitionIdOrName": "Owner"
-        },
-        {
-          "principalId": "<principalId>",
-          "principalType": "ServicePrincipal",
-          "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
-        },
-        {
-          "principalId": "<principalId>",
-          "principalType": "ServicePrincipal",
-          "roleDefinitionIdOrName": "<roleDefinitionIdOrName>"
         }
       ]
     },
@@ -1373,27 +1922,77 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
               ]
             }
           ],
-          "name": "sql-dddasql-001"
+          "name": "all-configs-specified"
         },
         {
-          "containers": [],
-          "name": "sql-dddasql-002"
-        },
-        {
-          "autoscaleSettingsMaxThroughput": 1000,
           "containers": [
             {
-              "analyticalStorageTtl": 0,
-              "autoscaleSettingsMaxThroughput": 1000,
+              "indexingPolicy": {
+                "automatic": true
+              },
+              "name": "container-001",
+              "paths": [
+                "/myPartitionKey"
+              ]
+            }
+          ],
+          "name": "automatic-indexing-policy"
+        },
+        {
+          "containers": [
+            {
               "conflictResolutionPolicy": {
                 "conflictResolutionPath": "/myCustomId",
                 "mode": "LastWriterWins"
               },
-              "indexingPolicy": {
-                "automatic": true
-              },
-              "kind": "Hash",
-              "name": "container-003",
+              "name": "container-001",
+              "paths": [
+                "/myPartitionKey"
+              ]
+            }
+          ],
+          "name": "last-writer-conflict-resolution-policy"
+        },
+        {
+          "containers": [
+            {
+              "analyticalStorageTtl": 1000,
+              "name": "container-001",
+              "paths": [
+                "/myPartitionKey"
+              ]
+            }
+          ],
+          "name": "fixed-analytical-ttl"
+        },
+        {
+          "containers": [
+            {
+              "analyticalStorageTtl": -1,
+              "name": "container-001",
+              "paths": [
+                "/myPartitionKey"
+              ]
+            }
+          ],
+          "name": "infinite-analytical-ttl"
+        },
+        {
+          "containers": [
+            {
+              "defaultTtl": 1000,
+              "name": "container-001",
+              "paths": [
+                "/myPartitionKey"
+              ]
+            }
+          ],
+          "name": "document-ttl"
+        },
+        {
+          "containers": [
+            {
+              "name": "container-001",
               "paths": [
                 "/myPartitionKey"
               ],
@@ -1411,16 +2010,135 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
               ]
             }
           ],
-          "name": "sql-dddasql-003"
+          "name": "unique-key-policy"
+        },
+        {
+          "containers": [
+            {
+              "name": "container-003",
+              "paths": [
+                "/myPartitionKey"
+              ],
+              "throughput": 500
+            }
+          ],
+          "name": "db-and-container-fixed-throughput-level",
+          "throughput": 500
+        },
+        {
+          "containers": [
+            {
+              "name": "container-003",
+              "paths": [
+                "/myPartitionKey"
+              ],
+              "throughput": 500
+            }
+          ],
+          "name": "container-fixed-throughput-level"
+        },
+        {
+          "containers": [
+            {
+              "name": "container-003",
+              "paths": [
+                "/myPartitionKey"
+              ]
+            }
+          ],
+          "name": "database-fixed-throughput-level",
+          "throughput": 500
+        },
+        {
+          "autoscaleSettingsMaxThroughput": 1000,
+          "containers": [
+            {
+              "autoscaleSettingsMaxThroughput": 1000,
+              "name": "container-003",
+              "paths": [
+                "/myPartitionKey"
+              ]
+            }
+          ],
+          "name": "db-and-container-autoscale-level"
+        },
+        {
+          "containers": [
+            {
+              "autoscaleSettingsMaxThroughput": 1000,
+              "name": "container-003",
+              "paths": [
+                "/myPartitionKey"
+              ]
+            }
+          ],
+          "name": "container-autoscale-level"
+        },
+        {
+          "autoscaleSettingsMaxThroughput": 1000,
+          "containers": [
+            {
+              "name": "container-003",
+              "paths": [
+                "/myPartitionKey"
+              ]
+            }
+          ],
+          "name": "database-autoscale-level"
+        },
+        {
+          "containers": [
+            {
+              "kind": "MultiHash",
+              "name": "container-001",
+              "paths": [
+                "/myPartitionKey1",
+                "/myPartitionKey2",
+                "/myPartitionKey3"
+              ]
+            },
+            {
+              "kind": "MultiHash",
+              "name": "container-002",
+              "paths": [
+                "myPartitionKey1",
+                "myPartitionKey2",
+                "myPartitionKey3"
+              ]
+            },
+            {
+              "kind": "Hash",
+              "name": "container-003",
+              "paths": [
+                "/myPartitionKey1"
+              ]
+            },
+            {
+              "kind": "Hash",
+              "name": "container-004",
+              "paths": [
+                "myPartitionKey1"
+              ]
+            },
+            {
+              "kind": "Hash",
+              "name": "container-005",
+              "paths": [
+                "myPartitionKey1"
+              ],
+              "version": 2
+            }
+          ],
+          "name": "all-partition-key-types"
+        },
+        {
+          "containers": [],
+          "name": "empty-containers-array"
+        },
+        {
+          "name": "no-containers-specified"
         }
       ]
-    },
-    "tags": {
-      "value": {
-        "Environment": "Non-Prod",
-        "hidden-title": "This is visible in the resource name",
-        "Role": "DeploymentValidation"
-      }
     }
   }
 }
@@ -1429,7 +2147,7 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
 </details>
 <p>
 
-### Example 6: _WAF-aligned_
+### Example 13: _WAF-aligned_
 
 This instance deploys the module in alignment with the best-practices of the Azure Well-Architected Framework.
 
@@ -1440,21 +2158,9 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module databaseAccount 'br/public:avm/res/document-db/database-account:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dddawaf'
+  name: 'databaseAccountDeployment'
   params: {
     // Required parameters
-    locations: [
-      {
-        failoverPriority: 0
-        isZoneRedundant: false
-        locationName: '<locationName>'
-      }
-      {
-        failoverPriority: 1
-        isZoneRedundant: false
-        locationName: '<locationName>'
-      }
-    ]
     name: 'dddawaf001'
     // Non-required parameters
     diagnosticSettings: [
@@ -1465,12 +2171,21 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
         workspaceResourceId: '<workspaceResourceId>'
       }
     ]
+    disableKeyBasedMetadataWriteAccess: true
     location: '<location>'
+    lock: {
+      kind: 'CanNotDelete'
+      name: 'myCustomLockName'
+    }
     privateEndpoints: [
       {
-        privateDnsZoneResourceIds: [
-          '<privateDNSZoneResourceId>'
-        ]
+        privateDnsZoneGroup: {
+          privateDnsZoneGroupConfigs: [
+            {
+              privateDnsZoneResourceId: '<privateDnsZoneResourceId>'
+            }
+          ]
+        }
         service: 'Sql'
         subnetResourceId: '<subnetResourceId>'
         tags: {
@@ -1484,37 +2199,14 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
       {
         containers: [
           {
-            analyticalStorageTtl: 0
-            conflictResolutionPolicy: {
-              conflictResolutionPath: '/myCustomId'
-              mode: 'LastWriterWins'
-            }
-            defaultTtl: 1000
-            indexingPolicy: {
-              automatic: true
-            }
             kind: 'Hash'
             name: 'container-001'
             paths: [
-              '/myPartitionKey'
-            ]
-            throughput: 600
-            uniqueKeyPolicyKeys: [
-              {
-                paths: [
-                  '/firstName'
-                ]
-              }
-              {
-                paths: [
-                  '/lastName'
-                ]
-              }
+              '/myPartitionKey1'
             ]
           }
         ]
         name: 'sql-dddawaf-001'
-        throughput: 1000
       }
     ]
     tags: {
@@ -1539,20 +2231,6 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "locations": {
-      "value": [
-        {
-          "failoverPriority": 0,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        },
-        {
-          "failoverPriority": 1,
-          "isZoneRedundant": false,
-          "locationName": "<locationName>"
-        }
-      ]
-    },
     "name": {
       "value": "dddawaf001"
     },
@@ -1567,15 +2245,28 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
         }
       ]
     },
+    "disableKeyBasedMetadataWriteAccess": {
+      "value": true
+    },
     "location": {
       "value": "<location>"
+    },
+    "lock": {
+      "value": {
+        "kind": "CanNotDelete",
+        "name": "myCustomLockName"
+      }
     },
     "privateEndpoints": {
       "value": [
         {
-          "privateDnsZoneResourceIds": [
-            "<privateDNSZoneResourceId>"
-          ],
+          "privateDnsZoneGroup": {
+            "privateDnsZoneGroupConfigs": [
+              {
+                "privateDnsZoneResourceId": "<privateDnsZoneResourceId>"
+              }
+            ]
+          },
           "service": "Sql",
           "subnetResourceId": "<subnetResourceId>",
           "tags": {
@@ -1591,37 +2282,14 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
         {
           "containers": [
             {
-              "analyticalStorageTtl": 0,
-              "conflictResolutionPolicy": {
-                "conflictResolutionPath": "/myCustomId",
-                "mode": "LastWriterWins"
-              },
-              "defaultTtl": 1000,
-              "indexingPolicy": {
-                "automatic": true
-              },
               "kind": "Hash",
               "name": "container-001",
               "paths": [
-                "/myPartitionKey"
-              ],
-              "throughput": 600,
-              "uniqueKeyPolicyKeys": [
-                {
-                  "paths": [
-                    "/firstName"
-                  ]
-                },
-                {
-                  "paths": [
-                    "/lastName"
-                  ]
-                }
+                "/myPartitionKey1"
               ]
             }
           ],
-          "name": "sql-dddawaf-001",
-          "throughput": 1000
+          "name": "sql-dddawaf-001"
         }
       ]
     },
@@ -1646,7 +2314,6 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`locations`](#parameter-locations) | array | Locations enabled for the Cosmos DB account. |
 | [`name`](#parameter-name) | string | Name of the Database Account. |
 
 **Optional parameters**
@@ -1654,36 +2321,38 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:<version>
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`automaticFailover`](#parameter-automaticfailover) | bool | Enable automatic failover for regions. |
-| [`backupIntervalInMinutes`](#parameter-backupintervalinminutes) | int | An integer representing the interval in minutes between two backups. Only applies to periodic backup type. |
-| [`backupPolicyContinuousTier`](#parameter-backuppolicycontinuoustier) | string | Configuration values for continuous mode backup. |
-| [`backupPolicyType`](#parameter-backuppolicytype) | string | Describes the mode of backups. |
-| [`backupRetentionIntervalInHours`](#parameter-backupretentionintervalinhours) | int | An integer representing the time (in hours) that each backup is retained. Only applies to periodic backup type. |
-| [`backupStorageRedundancy`](#parameter-backupstorageredundancy) | string | Enum to indicate type of backup residency. Only applies to periodic backup type. |
+| [`backupIntervalInMinutes`](#parameter-backupintervalinminutes) | int | Default to 240. An integer representing the interval in minutes between two backups. Only applies to periodic backup type. |
+| [`backupPolicyContinuousTier`](#parameter-backuppolicycontinuoustier) | string | Default to Continuous30Days. Configuration values for continuous mode backup. |
+| [`backupPolicyType`](#parameter-backuppolicytype) | string | Default to Continuous. Describes the mode of backups. Periodic backup must be used if multiple write locations are used. |
+| [`backupRetentionIntervalInHours`](#parameter-backupretentionintervalinhours) | int | Default to 8. An integer representing the time (in hours) that each backup is retained. Only applies to periodic backup type. |
+| [`backupStorageRedundancy`](#parameter-backupstorageredundancy) | string | Default to Local. Enum to indicate type of backup residency. Only applies to periodic backup type. |
 | [`capabilitiesToAdd`](#parameter-capabilitiestoadd) | array | List of Cosmos DB capabilities for the account. |
-| [`databaseAccountOfferType`](#parameter-databaseaccountoffertype) | string | The offer type for the Cosmos DB database account. |
-| [`defaultConsistencyLevel`](#parameter-defaultconsistencylevel) | string | The default consistency level of the Cosmos DB account. |
+| [`databaseAccountOfferType`](#parameter-databaseaccountoffertype) | string | Default to Standard. The offer type for the Cosmos DB database account. |
+| [`defaultConsistencyLevel`](#parameter-defaultconsistencylevel) | string | Default to Session. The default consistency level of the Cosmos DB account. |
 | [`diagnosticSettings`](#parameter-diagnosticsettings) | array | The diagnostic settings of the service. |
+| [`disableKeyBasedMetadataWriteAccess`](#parameter-disablekeybasedmetadatawriteaccess) | bool | Disable write operations on metadata resources (databases, containers, throughput) via account keys. |
+| [`disableLocalAuth`](#parameter-disablelocalauth) | bool | Opt-out of local authentication and ensure only MSI and AAD can be used exclusively for authentication. |
+| [`enableAnalyticalStorage`](#parameter-enableanalyticalstorage) | bool | Flag to indicate whether to enable storage analytics. |
 | [`enableFreeTier`](#parameter-enablefreetier) | bool | Flag to indicate whether Free Tier is enabled. |
+| [`enableMultipleWriteLocations`](#parameter-enablemultiplewritelocations) | bool | Enables the account to write in multiple locations. Periodic backup must be used if enabled. |
 | [`enableTelemetry`](#parameter-enabletelemetry) | bool | Enable/Disable usage telemetry for module. |
 | [`gremlinDatabases`](#parameter-gremlindatabases) | array | Gremlin Databases configurations. |
-| [`location`](#parameter-location) | string | Location for all resources. |
+| [`location`](#parameter-location) | string | Default to current resource group scope location. Location for all resources. |
+| [`locations`](#parameter-locations) | array | Default to the location where the account is deployed. Locations enabled for the Cosmos DB account. |
 | [`lock`](#parameter-lock) | object | The lock settings of the service. |
 | [`managedIdentities`](#parameter-managedidentities) | object | The managed identity definition for this resource. |
-| [`maxIntervalInSeconds`](#parameter-maxintervalinseconds) | int | Max lag time (minutes). Required for BoundedStaleness. Valid ranges, Single Region: 5 to 84600. Multi Region: 300 to 86400. |
-| [`maxStalenessPrefix`](#parameter-maxstalenessprefix) | int | Max stale requests. Required for BoundedStaleness. Valid ranges, Single Region: 10 to 1000000. Multi Region: 100000 to 1000000. |
+| [`maxIntervalInSeconds`](#parameter-maxintervalinseconds) | int | Default to 300. Max lag time (minutes). Required for BoundedStaleness. Valid ranges, Single Region: 5 to 84600. Multi Region: 300 to 86400. |
+| [`maxStalenessPrefix`](#parameter-maxstalenessprefix) | int | Default to 100000. Max stale requests. Required for BoundedStaleness. Valid ranges, Single Region: 10 to 1000000. Multi Region: 100000 to 1000000. |
 | [`mongodbDatabases`](#parameter-mongodbdatabases) | array | MongoDB Databases configurations. |
+| [`networkRestrictions`](#parameter-networkrestrictions) | object | The network configuration of this module. |
 | [`privateEndpoints`](#parameter-privateendpoints) | array | Configuration details for private endpoints. For security reasons, it is recommended to use private endpoints whenever possible. |
 | [`roleAssignments`](#parameter-roleassignments) | array | Array of role assignment objects that contain the 'roleDefinitionIdOrName' and 'principalIds' to define RBAC role assignments on this resource. In the roleDefinitionIdOrName attribute, you can provide either the display name of the role definition, or its fully qualified ID in the following format: '/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11'. |
-| [`serverVersion`](#parameter-serverversion) | string | Specifies the MongoDB server version to use. |
+| [`secretsExportConfiguration`](#parameter-secretsexportconfiguration) | object | Key vault reference and secret settings for the module's secrets export. |
+| [`serverVersion`](#parameter-serverversion) | string | Default to 4.2. Specifies the MongoDB server version to use. |
 | [`sqlDatabases`](#parameter-sqldatabases) | array | SQL Databases configurations. |
+| [`sqlRoleAssignmentsPrincipalIds`](#parameter-sqlroleassignmentsprincipalids) | array | SQL Role Definitions configurations. |
+| [`sqlRoleDefinitions`](#parameter-sqlroledefinitions) | array | SQL Role Definitions configurations. |
 | [`tags`](#parameter-tags) | object | Tags of the Database Account resource. |
-
-### Parameter: `locations`
-
-Locations enabled for the Cosmos DB account.
-
-- Required: Yes
-- Type: array
 
 ### Parameter: `name`
 
@@ -1702,7 +2371,7 @@ Enable automatic failover for regions.
 
 ### Parameter: `backupIntervalInMinutes`
 
-An integer representing the interval in minutes between two backups. Only applies to periodic backup type.
+Default to 240. An integer representing the interval in minutes between two backups. Only applies to periodic backup type.
 
 - Required: No
 - Type: int
@@ -1710,7 +2379,7 @@ An integer representing the interval in minutes between two backups. Only applie
 
 ### Parameter: `backupPolicyContinuousTier`
 
-Configuration values for continuous mode backup.
+Default to Continuous30Days. Configuration values for continuous mode backup.
 
 - Required: No
 - Type: string
@@ -1725,7 +2394,7 @@ Configuration values for continuous mode backup.
 
 ### Parameter: `backupPolicyType`
 
-Describes the mode of backups.
+Default to Continuous. Describes the mode of backups. Periodic backup must be used if multiple write locations are used.
 
 - Required: No
 - Type: string
@@ -1740,7 +2409,7 @@ Describes the mode of backups.
 
 ### Parameter: `backupRetentionIntervalInHours`
 
-An integer representing the time (in hours) that each backup is retained. Only applies to periodic backup type.
+Default to 8. An integer representing the time (in hours) that each backup is retained. Only applies to periodic backup type.
 
 - Required: No
 - Type: int
@@ -1748,7 +2417,7 @@ An integer representing the time (in hours) that each backup is retained. Only a
 
 ### Parameter: `backupStorageRedundancy`
 
-Enum to indicate type of backup residency. Only applies to periodic backup type.
+Default to Local. Enum to indicate type of backup residency. Only applies to periodic backup type.
 
 - Required: No
 - Type: string
@@ -1783,7 +2452,7 @@ List of Cosmos DB capabilities for the account.
 
 ### Parameter: `databaseAccountOfferType`
 
-The offer type for the Cosmos DB database account.
+Default to Standard. The offer type for the Cosmos DB database account.
 
 - Required: No
 - Type: string
@@ -1797,7 +2466,7 @@ The offer type for the Cosmos DB database account.
 
 ### Parameter: `defaultConsistencyLevel`
 
-The default consistency level of the Cosmos DB account.
+Default to Session. The default consistency level of the Cosmos DB account.
 
 - Required: No
 - Type: string
@@ -1959,9 +2628,41 @@ Resource ID of the diagnostic log analytics workspace. For security reasons, it 
 - Required: No
 - Type: string
 
+### Parameter: `disableKeyBasedMetadataWriteAccess`
+
+Disable write operations on metadata resources (databases, containers, throughput) via account keys.
+
+- Required: No
+- Type: bool
+- Default: `False`
+
+### Parameter: `disableLocalAuth`
+
+Opt-out of local authentication and ensure only MSI and AAD can be used exclusively for authentication.
+
+- Required: No
+- Type: bool
+- Default: `True`
+
+### Parameter: `enableAnalyticalStorage`
+
+Flag to indicate whether to enable storage analytics.
+
+- Required: No
+- Type: bool
+- Default: `False`
+
 ### Parameter: `enableFreeTier`
 
 Flag to indicate whether Free Tier is enabled.
+
+- Required: No
+- Type: bool
+- Default: `False`
+
+### Parameter: `enableMultipleWriteLocations`
+
+Enables the account to write in multiple locations. Periodic backup must be used if enabled.
 
 - Required: No
 - Type: bool
@@ -1985,11 +2686,53 @@ Gremlin Databases configurations.
 
 ### Parameter: `location`
 
-Location for all resources.
+Default to current resource group scope location. Location for all resources.
 
 - Required: No
 - Type: string
 - Default: `[resourceGroup().location]`
+
+### Parameter: `locations`
+
+Default to the location where the account is deployed. Locations enabled for the Cosmos DB account.
+
+- Required: No
+- Type: array
+- Default: `[]`
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`failoverPriority`](#parameter-locationsfailoverpriority) | int | The failover priority of the region. A failover priority of 0 indicates a write region. The maximum value for a failover priority = (total number of regions - 1). Failover priority values must be unique for each of the regions in which the database account exists. |
+| [`locationName`](#parameter-locationslocationname) | string | The name of the region. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`isZoneRedundant`](#parameter-locationsiszoneredundant) | bool | Default to true. Flag to indicate whether or not this region is an AvailabilityZone region. |
+
+### Parameter: `locations.failoverPriority`
+
+The failover priority of the region. A failover priority of 0 indicates a write region. The maximum value for a failover priority = (total number of regions - 1). Failover priority values must be unique for each of the regions in which the database account exists.
+
+- Required: Yes
+- Type: int
+
+### Parameter: `locations.locationName`
+
+The name of the region.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `locations.isZoneRedundant`
+
+Default to true. Flag to indicate whether or not this region is an AvailabilityZone region.
+
+- Required: No
+- Type: bool
 
 ### Parameter: `lock`
 
@@ -2057,7 +2800,7 @@ The resource ID(s) to assign to the resource.
 
 ### Parameter: `maxIntervalInSeconds`
 
-Max lag time (minutes). Required for BoundedStaleness. Valid ranges, Single Region: 5 to 84600. Multi Region: 300 to 86400.
+Default to 300. Max lag time (minutes). Required for BoundedStaleness. Valid ranges, Single Region: 5 to 84600. Multi Region: 300 to 86400.
 
 - Required: No
 - Type: int
@@ -2065,7 +2808,7 @@ Max lag time (minutes). Required for BoundedStaleness. Valid ranges, Single Regi
 
 ### Parameter: `maxStalenessPrefix`
 
-Max stale requests. Required for BoundedStaleness. Valid ranges, Single Region: 10 to 1000000. Multi Region: 100000 to 1000000.
+Default to 100000. Max stale requests. Required for BoundedStaleness. Valid ranges, Single Region: 10 to 1000000. Multi Region: 100000 to 1000000.
 
 - Required: No
 - Type: int
@@ -2078,6 +2821,77 @@ MongoDB Databases configurations.
 - Required: No
 - Type: array
 - Default: `[]`
+
+### Parameter: `networkRestrictions`
+
+The network configuration of this module.
+
+- Required: No
+- Type: object
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`ipRules`](#parameter-networkrestrictionsiprules) | array | Default to []. A single IPv4 address or a single IPv4 address range in CIDR format. Provided IPs must be well-formatted and cannot be contained in one of the following ranges: 10.0.0.0/8, 100.64.0.0/10, 172.16.0.0/12, 192.168.0.0/16, since these are not enforceable by the IP address filter. Example of valid inputs: "23.40.210.245" or "23.40.210.0/8". |
+| [`networkAclBypass`](#parameter-networkrestrictionsnetworkaclbypass) | string | Default to AzureServices. Specifies the network ACL bypass for Azure services. |
+| [`publicNetworkAccess`](#parameter-networkrestrictionspublicnetworkaccess) | string | Default to Enabled. Whether requests from Public Network are allowed. |
+| [`virtualNetworkRules`](#parameter-networkrestrictionsvirtualnetworkrules) | array | Default to []. List of Virtual Network ACL rules configured for the Cosmos DB account.. |
+
+### Parameter: `networkRestrictions.ipRules`
+
+Default to []. A single IPv4 address or a single IPv4 address range in CIDR format. Provided IPs must be well-formatted and cannot be contained in one of the following ranges: 10.0.0.0/8, 100.64.0.0/10, 172.16.0.0/12, 192.168.0.0/16, since these are not enforceable by the IP address filter. Example of valid inputs: "23.40.210.245" or "23.40.210.0/8".
+
+- Required: Yes
+- Type: array
+
+### Parameter: `networkRestrictions.networkAclBypass`
+
+Default to AzureServices. Specifies the network ACL bypass for Azure services.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'AzureServices'
+    'None'
+  ]
+  ```
+
+### Parameter: `networkRestrictions.publicNetworkAccess`
+
+Default to Enabled. Whether requests from Public Network are allowed.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'Disabled'
+    'Enabled'
+  ]
+  ```
+
+### Parameter: `networkRestrictions.virtualNetworkRules`
+
+Default to []. List of Virtual Network ACL rules configured for the Cosmos DB account..
+
+- Required: Yes
+- Type: array
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`subnetResourceId`](#parameter-networkrestrictionsvirtualnetworkrulessubnetresourceid) | string | Resource ID of a subnet. |
+
+### Parameter: `networkRestrictions.virtualNetworkRules.subnetResourceId`
+
+Resource ID of a subnet.
+
+- Required: Yes
+- Type: string
 
 ### Parameter: `privateEndpoints`
 
@@ -2107,8 +2921,9 @@ Configuration details for private endpoints. For security reasons, it is recomme
 | [`lock`](#parameter-privateendpointslock) | object | Specify the type of lock. |
 | [`manualConnectionRequestMessage`](#parameter-privateendpointsmanualconnectionrequestmessage) | string | A message passed to the owner of the remote resource with the manual connection request. |
 | [`name`](#parameter-privateendpointsname) | string | The name of the private endpoint. |
-| [`privateDnsZoneGroupName`](#parameter-privateendpointsprivatednszonegroupname) | string | The name of the private DNS zone group to create if privateDnsZoneResourceIds were provided. |
-| [`privateDnsZoneResourceIds`](#parameter-privateendpointsprivatednszoneresourceids) | array | The private DNS zone groups to associate the private endpoint with. A DNS zone group can support up to 5 DNS zones. |
+| [`privateDnsZoneGroup`](#parameter-privateendpointsprivatednszonegroup) | object | The private DNS zone group to configure for the private endpoint. |
+| [`privateLinkServiceConnectionName`](#parameter-privateendpointsprivatelinkserviceconnectionname) | string | The name of the private link connection to create. |
+| [`resourceGroupName`](#parameter-privateendpointsresourcegroupname) | string | Specify if you want to deploy the Private Endpoint into a different resource group than the main resource. |
 | [`roleAssignments`](#parameter-privateendpointsroleassignments) | array | Array of role assignments to create. |
 | [`tags`](#parameter-privateendpointstags) | object | Tags to be applied on all resources/resource groups in this deployment. |
 
@@ -2296,19 +3111,78 @@ The name of the private endpoint.
 - Required: No
 - Type: string
 
-### Parameter: `privateEndpoints.privateDnsZoneGroupName`
+### Parameter: `privateEndpoints.privateDnsZoneGroup`
 
-The name of the private DNS zone group to create if privateDnsZoneResourceIds were provided.
+The private DNS zone group to configure for the private endpoint.
+
+- Required: No
+- Type: object
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`privateDnsZoneGroupConfigs`](#parameter-privateendpointsprivatednszonegroupprivatednszonegroupconfigs) | array | The private DNS zone groups to associate the private endpoint. A DNS zone group can support up to 5 DNS zones. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`name`](#parameter-privateendpointsprivatednszonegroupname) | string | The name of the Private DNS Zone Group. |
+
+### Parameter: `privateEndpoints.privateDnsZoneGroup.privateDnsZoneGroupConfigs`
+
+The private DNS zone groups to associate the private endpoint. A DNS zone group can support up to 5 DNS zones.
+
+- Required: Yes
+- Type: array
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`privateDnsZoneResourceId`](#parameter-privateendpointsprivatednszonegroupprivatednszonegroupconfigsprivatednszoneresourceid) | string | The resource id of the private DNS zone. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`name`](#parameter-privateendpointsprivatednszonegroupprivatednszonegroupconfigsname) | string | The name of the private DNS zone group config. |
+
+### Parameter: `privateEndpoints.privateDnsZoneGroup.privateDnsZoneGroupConfigs.privateDnsZoneResourceId`
+
+The resource id of the private DNS zone.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `privateEndpoints.privateDnsZoneGroup.privateDnsZoneGroupConfigs.name`
+
+The name of the private DNS zone group config.
 
 - Required: No
 - Type: string
 
-### Parameter: `privateEndpoints.privateDnsZoneResourceIds`
+### Parameter: `privateEndpoints.privateDnsZoneGroup.name`
 
-The private DNS zone groups to associate the private endpoint with. A DNS zone group can support up to 5 DNS zones.
+The name of the Private DNS Zone Group.
 
 - Required: No
-- Type: array
+- Type: string
+
+### Parameter: `privateEndpoints.privateLinkServiceConnectionName`
+
+The name of the private link connection to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `privateEndpoints.resourceGroupName`
+
+Specify if you want to deploy the Private Endpoint into a different resource group than the main resource.
+
+- Required: No
+- Type: string
 
 ### Parameter: `privateEndpoints.roleAssignments`
 
@@ -2332,6 +3206,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-privateendpointsroleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-privateendpointsroleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-privateendpointsroleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-privateendpointsroleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-privateendpointsroleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `privateEndpoints.roleAssignments.principalId`
@@ -2382,6 +3257,13 @@ The description of the role assignment.
 - Required: No
 - Type: string
 
+### Parameter: `privateEndpoints.roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
 ### Parameter: `privateEndpoints.roleAssignments.principalType`
 
 The principal type of the assigned principal ID.
@@ -2428,6 +3310,7 @@ Array of role assignment objects that contain the 'roleDefinitionIdOrName' and '
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -2478,6 +3361,13 @@ The description of the role assignment.
 - Required: No
 - Type: string
 
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
 ### Parameter: `roleAssignments.principalType`
 
 The principal type of the assigned principal ID.
@@ -2495,9 +3385,98 @@ The principal type of the assigned principal ID.
   ]
   ```
 
+### Parameter: `secretsExportConfiguration`
+
+Key vault reference and secret settings for the module's secrets export.
+
+- Required: No
+- Type: object
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`keyVaultResourceId`](#parameter-secretsexportconfigurationkeyvaultresourceid) | string | The resource ID of the key vault where to store the secrets of this module. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`primaryReadonlyConnectionStringSecretName`](#parameter-secretsexportconfigurationprimaryreadonlyconnectionstringsecretname) | string | The primary readonly connection string secret name to create. |
+| [`primaryReadOnlyKeySecretName`](#parameter-secretsexportconfigurationprimaryreadonlykeysecretname) | string | The primary readonly key secret name to create. |
+| [`primaryWriteConnectionStringSecretName`](#parameter-secretsexportconfigurationprimarywriteconnectionstringsecretname) | string | The primary write connection string secret name to create. |
+| [`primaryWriteKeySecretName`](#parameter-secretsexportconfigurationprimarywritekeysecretname) | string | The primary write key secret name to create. |
+| [`secondaryReadonlyConnectionStringSecretName`](#parameter-secretsexportconfigurationsecondaryreadonlyconnectionstringsecretname) | string | The primary readonly connection string secret name to create. |
+| [`secondaryReadonlyKeySecretName`](#parameter-secretsexportconfigurationsecondaryreadonlykeysecretname) | string | The primary readonly key secret name to create. |
+| [`secondaryWriteConnectionStringSecretName`](#parameter-secretsexportconfigurationsecondarywriteconnectionstringsecretname) | string | The primary write connection string secret name to create. |
+| [`secondaryWriteKeySecretName`](#parameter-secretsexportconfigurationsecondarywritekeysecretname) | string | The primary write key secret name to create. |
+
+### Parameter: `secretsExportConfiguration.keyVaultResourceId`
+
+The resource ID of the key vault where to store the secrets of this module.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `secretsExportConfiguration.primaryReadonlyConnectionStringSecretName`
+
+The primary readonly connection string secret name to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `secretsExportConfiguration.primaryReadOnlyKeySecretName`
+
+The primary readonly key secret name to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `secretsExportConfiguration.primaryWriteConnectionStringSecretName`
+
+The primary write connection string secret name to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `secretsExportConfiguration.primaryWriteKeySecretName`
+
+The primary write key secret name to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `secretsExportConfiguration.secondaryReadonlyConnectionStringSecretName`
+
+The primary readonly connection string secret name to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `secretsExportConfiguration.secondaryReadonlyKeySecretName`
+
+The primary readonly key secret name to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `secretsExportConfiguration.secondaryWriteConnectionStringSecretName`
+
+The primary write connection string secret name to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `secretsExportConfiguration.secondaryWriteKeySecretName`
+
+The primary write key secret name to create.
+
+- Required: No
+- Type: string
+
 ### Parameter: `serverVersion`
 
-Specifies the MongoDB server version to use.
+Default to 4.2. Specifies the MongoDB server version to use.
 
 - Required: No
 - Type: string
@@ -2520,6 +3499,278 @@ SQL Databases configurations.
 - Type: array
 - Default: `[]`
 
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`name`](#parameter-sqldatabasesname) | string | Name of the SQL database . |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`autoscaleSettingsMaxThroughput`](#parameter-sqldatabasesautoscalesettingsmaxthroughput) | int | Specifies the Autoscale settings and represents maximum throughput, the resource can scale up to.  The autoscale throughput should have valid throughput values between 1000 and 1000000 inclusive in increments of 1000. If value is set to null, then autoscale will be disabled. |
+| [`containers`](#parameter-sqldatabasescontainers) | array | Array of containers to deploy in the SQL database. |
+| [`throughput`](#parameter-sqldatabasesthroughput) | int | Default to 400. Request units per second. Will be ignored if autoscaleSettingsMaxThroughput is used. |
+
+### Parameter: `sqlDatabases.name`
+
+Name of the SQL database .
+
+- Required: Yes
+- Type: string
+
+### Parameter: `sqlDatabases.autoscaleSettingsMaxThroughput`
+
+Specifies the Autoscale settings and represents maximum throughput, the resource can scale up to.  The autoscale throughput should have valid throughput values between 1000 and 1000000 inclusive in increments of 1000. If value is set to null, then autoscale will be disabled.
+
+- Required: No
+- Type: int
+
+### Parameter: `sqlDatabases.containers`
+
+Array of containers to deploy in the SQL database.
+
+- Required: No
+- Type: array
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`name`](#parameter-sqldatabasescontainersname) | string | Name of the container. |
+| [`paths`](#parameter-sqldatabasescontainerspaths) | array | List of paths using which data within the container can be partitioned. For kind=MultiHash it can be up to 3. For anything else it needs to be exactly 1. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`analyticalStorageTtl`](#parameter-sqldatabasescontainersanalyticalstoragettl) | int | Default to 0. Indicates how long data should be retained in the analytical store, for a container. Analytical store is enabled when ATTL is set with a value other than 0. If the value is set to -1, the analytical store retains all historical data, irrespective of the retention of the data in the transactional store. |
+| [`autoscaleSettingsMaxThroughput`](#parameter-sqldatabasescontainersautoscalesettingsmaxthroughput) | int | Specifies the Autoscale settings and represents maximum throughput, the resource can scale up to. The autoscale throughput should have valid throughput values between 1000 and 1000000 inclusive in increments of 1000. If value is set to null, then autoscale will be disabled. |
+| [`conflictResolutionPolicy`](#parameter-sqldatabasescontainersconflictresolutionpolicy) | object | The conflict resolution policy for the container. Conflicts and conflict resolution policies are applicable if the Azure Cosmos DB account is configured with multiple write regions. |
+| [`defaultTtl`](#parameter-sqldatabasescontainersdefaultttl) | int | Default to -1. Default time to live (in seconds). With Time to Live or TTL, Azure Cosmos DB provides the ability to delete items automatically from a container after a certain time period. If the value is set to "-1", it is equal to infinity, and items don't expire by default. |
+| [`indexingPolicy`](#parameter-sqldatabasescontainersindexingpolicy) | object | Indexing policy of the container. |
+| [`kind`](#parameter-sqldatabasescontainerskind) | string | Default to Hash. Indicates the kind of algorithm used for partitioning. |
+| [`throughput`](#parameter-sqldatabasescontainersthroughput) | int | Default to 400. Request Units per second. Will be ignored if autoscaleSettingsMaxThroughput is used. |
+| [`uniqueKeyPolicyKeys`](#parameter-sqldatabasescontainersuniquekeypolicykeys) | array | The unique key policy configuration containing a list of unique keys that enforces uniqueness constraint on documents in the collection in the Azure Cosmos DB service. |
+| [`version`](#parameter-sqldatabasescontainersversion) | int | Default to 1 for Hash and 2 for MultiHash - 1 is not allowed for MultiHash. Version of the partition key definition. |
+
+### Parameter: `sqlDatabases.containers.name`
+
+Name of the container.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `sqlDatabases.containers.paths`
+
+List of paths using which data within the container can be partitioned. For kind=MultiHash it can be up to 3. For anything else it needs to be exactly 1.
+
+- Required: Yes
+- Type: array
+
+### Parameter: `sqlDatabases.containers.analyticalStorageTtl`
+
+Default to 0. Indicates how long data should be retained in the analytical store, for a container. Analytical store is enabled when ATTL is set with a value other than 0. If the value is set to -1, the analytical store retains all historical data, irrespective of the retention of the data in the transactional store.
+
+- Required: No
+- Type: int
+
+### Parameter: `sqlDatabases.containers.autoscaleSettingsMaxThroughput`
+
+Specifies the Autoscale settings and represents maximum throughput, the resource can scale up to. The autoscale throughput should have valid throughput values between 1000 and 1000000 inclusive in increments of 1000. If value is set to null, then autoscale will be disabled.
+
+- Required: No
+- Type: int
+
+### Parameter: `sqlDatabases.containers.conflictResolutionPolicy`
+
+The conflict resolution policy for the container. Conflicts and conflict resolution policies are applicable if the Azure Cosmos DB account is configured with multiple write regions.
+
+- Required: No
+- Type: object
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`mode`](#parameter-sqldatabasescontainersconflictresolutionpolicymode) | string | Indicates the conflict resolution mode. |
+
+**Conditional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`conflictResolutionPath`](#parameter-sqldatabasescontainersconflictresolutionpolicyconflictresolutionpath) | string | The conflict resolution path in the case of LastWriterWins mode. Required if `mode` is set to 'LastWriterWins'. |
+| [`conflictResolutionProcedure`](#parameter-sqldatabasescontainersconflictresolutionpolicyconflictresolutionprocedure) | string | The procedure to resolve conflicts in the case of custom mode. Required if `mode` is set to 'Custom'. |
+
+### Parameter: `sqlDatabases.containers.conflictResolutionPolicy.mode`
+
+Indicates the conflict resolution mode.
+
+- Required: Yes
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'Custom'
+    'LastWriterWins'
+  ]
+  ```
+
+### Parameter: `sqlDatabases.containers.conflictResolutionPolicy.conflictResolutionPath`
+
+The conflict resolution path in the case of LastWriterWins mode. Required if `mode` is set to 'LastWriterWins'.
+
+- Required: No
+- Type: string
+
+### Parameter: `sqlDatabases.containers.conflictResolutionPolicy.conflictResolutionProcedure`
+
+The procedure to resolve conflicts in the case of custom mode. Required if `mode` is set to 'Custom'.
+
+- Required: No
+- Type: string
+
+### Parameter: `sqlDatabases.containers.defaultTtl`
+
+Default to -1. Default time to live (in seconds). With Time to Live or TTL, Azure Cosmos DB provides the ability to delete items automatically from a container after a certain time period. If the value is set to "-1", it is equal to infinity, and items don't expire by default.
+
+- Required: No
+- Type: int
+
+### Parameter: `sqlDatabases.containers.indexingPolicy`
+
+Indexing policy of the container.
+
+- Required: No
+- Type: object
+
+### Parameter: `sqlDatabases.containers.kind`
+
+Default to Hash. Indicates the kind of algorithm used for partitioning.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'Hash'
+    'MultiHash'
+  ]
+  ```
+
+### Parameter: `sqlDatabases.containers.throughput`
+
+Default to 400. Request Units per second. Will be ignored if autoscaleSettingsMaxThroughput is used.
+
+- Required: No
+- Type: int
+
+### Parameter: `sqlDatabases.containers.uniqueKeyPolicyKeys`
+
+The unique key policy configuration containing a list of unique keys that enforces uniqueness constraint on documents in the collection in the Azure Cosmos DB service.
+
+- Required: No
+- Type: array
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`paths`](#parameter-sqldatabasescontainersuniquekeypolicykeyspaths) | array | List of paths must be unique for each document in the Azure Cosmos DB service. |
+
+### Parameter: `sqlDatabases.containers.uniqueKeyPolicyKeys.paths`
+
+List of paths must be unique for each document in the Azure Cosmos DB service.
+
+- Required: Yes
+- Type: array
+
+### Parameter: `sqlDatabases.containers.version`
+
+Default to 1 for Hash and 2 for MultiHash - 1 is not allowed for MultiHash. Version of the partition key definition.
+
+- Required: No
+- Type: int
+- Allowed:
+  ```Bicep
+  [
+    1
+    2
+  ]
+  ```
+
+### Parameter: `sqlDatabases.throughput`
+
+Default to 400. Request units per second. Will be ignored if autoscaleSettingsMaxThroughput is used.
+
+- Required: No
+- Type: int
+
+### Parameter: `sqlRoleAssignmentsPrincipalIds`
+
+SQL Role Definitions configurations.
+
+- Required: No
+- Type: array
+- Default: `[]`
+
+### Parameter: `sqlRoleDefinitions`
+
+SQL Role Definitions configurations.
+
+- Required: No
+- Type: array
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`name`](#parameter-sqlroledefinitionsname) | string | Name of the SQL Role Definition. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`dataAction`](#parameter-sqlroledefinitionsdataaction) | array | An array of data actions that are allowed. |
+| [`roleName`](#parameter-sqlroledefinitionsrolename) | string | A user-friendly name for the Role Definition. Must be unique for the database account. |
+| [`roleType`](#parameter-sqlroledefinitionsroletype) | string | Indicates whether the Role Definition was built-in or user created. |
+
+### Parameter: `sqlRoleDefinitions.name`
+
+Name of the SQL Role Definition.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `sqlRoleDefinitions.dataAction`
+
+An array of data actions that are allowed.
+
+- Required: No
+- Type: array
+
+### Parameter: `sqlRoleDefinitions.roleName`
+
+A user-friendly name for the Role Definition. Must be unique for the database account.
+
+- Required: No
+- Type: string
+
+### Parameter: `sqlRoleDefinitions.roleType`
+
+Indicates whether the Role Definition was built-in or user created.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'BuiltInRole'
+    'CustomRole'
+  ]
+  ```
+
 ### Parameter: `tags`
 
 Tags of the Database Account resource.
@@ -2532,6 +3783,8 @@ Tags of the Database Account resource.
 
 | Output | Type | Description |
 | :-- | :-- | :-- |
+| `endpoint` | string | The endpoint of the database account. |
+| `exportedSecrets` |  | The references to the secrets exported to the provided Key Vault. |
 | `location` | string | The location the resource was deployed into. |
 | `name` | string | The name of the database account. |
 | `resourceGroupName` | string | The name of the resource group the database account was created in. |
@@ -2540,11 +3793,11 @@ Tags of the Database Account resource.
 
 ## Cross-referenced modules
 
-This section gives you an overview of all local-referenced module files (i.e., other CARML modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
+This section gives you an overview of all local-referenced module files (i.e., other modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
 
 | Reference | Type |
 | :-- | :-- |
-| `br/public:avm/res/network/private-endpoint:0.4.0` | Remote reference |
+| `br/public:avm/res/network/private-endpoint:0.7.0` | Remote reference |
 
 ## Data Collection
 

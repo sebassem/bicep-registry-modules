@@ -28,6 +28,9 @@ param proximityPlacementGroupName string
 @description('Optional. The location to deploy resources to.')
 param location string = resourceGroup().location
 
+@description('Required. The object ID of the Backup Management Service Enterprise Application. Required for Customer-Managed-Keys.')
+param backupManagementServiceApplicationObjectId string
+
 var storageAccountCSEFileName = 'scriptExtensionMasterInstaller.ps1'
 var addressPrefix = '10.0.0.0/16'
 
@@ -66,7 +69,10 @@ resource msiRGContrRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-
   scope: resourceGroup()
   properties: {
     principalId: managedIdentity.properties.principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c') // Contributor
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'b24988ac-6180-42a0-ab88-20f7382dd24c'
+    ) // Contributor
     principalType: 'ServicePrincipal'
   }
 }
@@ -82,7 +88,9 @@ resource loadBalancer 'Microsoft.Network/loadBalancers@2023-04-01' = {
       {
         name: 'privateIPConfig1'
         properties: {
-          subnet: virtualNetwork.properties.subnets[0]
+          subnet: {
+            id: virtualNetwork.properties.subnets[0].id
+          }
         }
       }
     ]
@@ -211,12 +219,28 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   }
 }
 
+resource backupServiceKeyVaultPermissions 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid('${keyVault.name}-${location}-BackupManagementService-KeyVault-KeyVaultAdministrator-RoleAssignment')
+  scope: keyVault
+  properties: {
+    principalId: backupManagementServiceApplicationObjectId
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '00482a5a-887f-4fb3-b363-3b7fe8e74483'
+    ) // Key Vault Administrator
+    principalType: 'ServicePrincipal'
+  }
+}
+
 resource msiKVReadRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid('msi-${keyVault::key.id}-${location}-${managedIdentity.id}-KeyVault-Key-Read-RoleAssignment')
   scope: keyVault::key
   properties: {
     principalId: managedIdentity.properties.principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '12338af0-0e69-4776-bea7-57ae8d297424') // Key Vault Crypto User
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '12338af0-0e69-4776-bea7-57ae8d297424'
+    ) // Key Vault Crypto User
     principalType: 'ServicePrincipal'
   }
 }

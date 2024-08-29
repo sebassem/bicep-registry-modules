@@ -19,8 +19,8 @@ This module deploys a NAT Gateway.
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
 | `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
 | `Microsoft.Network/natGateways` | [2023-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-04-01/natGateways) |
-| `Microsoft.Network/publicIPAddresses` | [2023-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-04-01/publicIPAddresses) |
-| `Microsoft.Network/publicIPPrefixes` | [2023-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-04-01/publicIPPrefixes) |
+| `Microsoft.Network/publicIPAddresses` | [2023-09-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-09-01/publicIPAddresses) |
+| `Microsoft.Network/publicIPPrefixes` | [2023-09-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-09-01/publicIPPrefixes) |
 
 ## Usage examples
 
@@ -46,10 +46,11 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nngmin'
+  name: 'natGatewayDeployment'
   params: {
     // Required parameters
     name: 'nngmin001'
+    zone: 1
     // Non-required parameters
     location: '<location>'
   }
@@ -71,6 +72,9 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
     // Required parameters
     "name": {
       "value": "nngmin001"
+    },
+    "zone": {
+      "value": 1
     },
     // Non-required parameters
     "location": {
@@ -94,10 +98,11 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nngmax'
+  name: 'natGatewayDeployment'
   params: {
     // Required parameters
     name: 'nngmax001'
+    zone: 1
     // Non-required parameters
     location: '<location>'
     lock: {
@@ -140,19 +145,21 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
         ]
         skuTier: 'Regional'
         zones: [
-          '1'
-          '2'
-          '3'
+          1
+          2
+          3
         ]
       }
     ]
     roleAssignments: [
       {
+        name: '69d7ed51-8af4-4eed-bcea-bdadcccb1200'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -187,6 +194,9 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
     // Required parameters
     "name": {
       "value": "nngmax001"
+    },
+    "zone": {
+      "value": 1
     },
     // Non-required parameters
     "location": {
@@ -235,9 +245,9 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
           ],
           "skuTier": "Regional",
           "zones": [
-            "1",
-            "2",
-            "3"
+            1,
+            2,
+            3
           ]
         }
       ]
@@ -245,11 +255,13 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
     "roleAssignments": {
       "value": [
         {
+          "name": "69d7ed51-8af4-4eed-bcea-bdadcccb1200",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -286,10 +298,11 @@ This example shows how you can provide a Public IP Prefix to the module, while a
 
 ```bicep
 module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nngcprx'
+  name: 'natGatewayDeployment'
   params: {
     // Required parameters
     name: 'nngcprx001'
+    zone: 0
     // Non-required parameters
     location: '<location>'
     publicIPPrefixObjects: [
@@ -320,6 +333,9 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
     // Required parameters
     "name": {
       "value": "nngcprx001"
+    },
+    "zone": {
+      "value": 0
     },
     // Non-required parameters
     "location": {
@@ -354,10 +370,11 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nngwaf'
+  name: 'natGatewayDeployment'
   params: {
     // Required parameters
     name: 'nngwaf001'
+    zone: 1
     // Non-required parameters
     location: '<location>'
     lock: {
@@ -383,9 +400,9 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
         name: 'nngwaf001-pip'
         skuTier: 'Regional'
         zones: [
-          '1'
-          '2'
-          '3'
+          1
+          2
+          3
         ]
       }
     ]
@@ -413,6 +430,9 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
     // Required parameters
     "name": {
       "value": "nngwaf001"
+    },
+    "zone": {
+      "value": 1
     },
     // Non-required parameters
     "location": {
@@ -444,9 +464,9 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
           "name": "nngwaf001-pip",
           "skuTier": "Regional",
           "zones": [
-            "1",
-            "2",
-            "3"
+            1,
+            2,
+            3
           ]
         }
       ]
@@ -473,6 +493,7 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`name`](#parameter-name) | string | Name of the Azure Bastion resource. |
+| [`zone`](#parameter-zone) | int | A list of availability zones denoting the zone in which Nat Gateway should be deployed. |
 
 **Optional parameters**
 
@@ -488,7 +509,6 @@ module natGateway 'br/public:avm/res/network/nat-gateway:<version>' = {
 | [`publicIpResourceIds`](#parameter-publicipresourceids) | array | Existing Public IP Address resource IDs to use for the NAT Gateway. |
 | [`roleAssignments`](#parameter-roleassignments) | array | Array of role assignments to create. |
 | [`tags`](#parameter-tags) | object | Tags for the resource. |
-| [`zones`](#parameter-zones) | array | A list of availability zones denoting the zone in which Nat Gateway should be deployed. |
 
 ### Parameter: `name`
 
@@ -496,6 +516,22 @@ Name of the Azure Bastion resource.
 
 - Required: Yes
 - Type: string
+
+### Parameter: `zone`
+
+A list of availability zones denoting the zone in which Nat Gateway should be deployed.
+
+- Required: Yes
+- Type: int
+- Allowed:
+  ```Bicep
+  [
+    0
+    1
+    2
+    3
+  ]
+  ```
 
 ### Parameter: `enableTelemetry`
 
@@ -609,6 +645,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -659,6 +696,13 @@ The description of the role assignment.
 - Required: No
 - Type: string
 
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
 ### Parameter: `roleAssignments.principalType`
 
 The principal type of the assigned principal ID.
@@ -683,14 +727,6 @@ Tags for the resource.
 - Required: No
 - Type: object
 
-### Parameter: `zones`
-
-A list of availability zones denoting the zone in which Nat Gateway should be deployed.
-
-- Required: No
-- Type: array
-- Default: `[]`
-
 
 ## Outputs
 
@@ -703,12 +739,12 @@ A list of availability zones denoting the zone in which Nat Gateway should be de
 
 ## Cross-referenced modules
 
-This section gives you an overview of all local-referenced module files (i.e., other CARML modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
+This section gives you an overview of all local-referenced module files (i.e., other modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
 
 | Reference | Type |
 | :-- | :-- |
-| `br/public:avm/res/network/public-ip-address:0.2.1` | Remote reference |
-| `br/public:avm/res/network/public-ip-prefix:0.1.0` | Remote reference |
+| `br/public:avm/res/network/public-ip-address:0.5.1` | Remote reference |
+| `br/public:avm/res/network/public-ip-prefix:0.4.1` | Remote reference |
 
 ## Data Collection
 

@@ -24,9 +24,10 @@ This module deploys a Synapse Workspace.
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
 | `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
 | `Microsoft.KeyVault/vaults/accessPolicies` | [2022-07-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.KeyVault/2022-07-01/vaults/accessPolicies) |
-| `Microsoft.Network/privateEndpoints` | [2023-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-04-01/privateEndpoints) |
-| `Microsoft.Network/privateEndpoints/privateDnsZoneGroups` | [2023-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-04-01/privateEndpoints/privateDnsZoneGroups) |
+| `Microsoft.Network/privateEndpoints` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints) |
+| `Microsoft.Network/privateEndpoints/privateDnsZoneGroups` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints/privateDnsZoneGroups) |
 | `Microsoft.Synapse/workspaces` | [2021-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Synapse/2021-06-01/workspaces) |
+| `Microsoft.Synapse/workspaces/administrators` | [2021-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Synapse/2021-06-01/workspaces/administrators) |
 | `Microsoft.Synapse/workspaces/integrationRuntimes` | [2021-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Synapse/2021-06-01/workspaces/integrationRuntimes) |
 | `Microsoft.Synapse/workspaces/keys` | [2021-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Synapse/2021-06-01/workspaces/keys) |
 
@@ -56,7 +57,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-swmin'
+  name: 'workspaceDeployment'
   params: {
     // Required parameters
     defaultDataLakeStorageAccountResourceId: '<defaultDataLakeStorageAccountResourceId>'
@@ -116,7 +117,7 @@ This instance deploys the module using Customer-Managed-Keys using a System-Assi
 
 ```bicep
 module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-swensa'
+  name: 'workspaceDeployment'
   params: {
     // Required parameters
     defaultDataLakeStorageAccountResourceId: '<defaultDataLakeStorageAccountResourceId>'
@@ -190,7 +191,7 @@ This instance deploys the module using Customer-Managed-Keys using a User-Assign
 
 ```bicep
 module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-swenua'
+  name: 'workspaceDeployment'
   params: {
     // Required parameters
     defaultDataLakeStorageAccountResourceId: '<defaultDataLakeStorageAccountResourceId>'
@@ -262,7 +263,7 @@ This instance deploys the module using a managed Vnet.
 
 ```bicep
 module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-swmanv'
+  name: 'workspaceDeployment'
   params: {
     // Required parameters
     defaultDataLakeStorageAccountResourceId: '<defaultDataLakeStorageAccountResourceId>'
@@ -338,7 +339,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-swmax'
+  name: 'workspaceDeployment'
   params: {
     // Required parameters
     defaultDataLakeStorageAccountResourceId: '<defaultDataLakeStorageAccountResourceId>'
@@ -346,6 +347,11 @@ module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
     name: 'swmax001'
     sqlAdministratorLogin: 'synwsadmin'
     // Non-required parameters
+    administrator: {
+      administratorType: 'ServicePrincipal'
+      login: 'dep-msi-swmax'
+      sid: '<sid>'
+    }
     diagnosticSettings: [
       {
         eventHubAuthorizationRuleResourceId: '<eventHubAuthorizationRuleResourceId>'
@@ -390,14 +396,47 @@ module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
           Role: 'DeploymentValidation'
         }
       }
+      {
+        privateDnsZoneResourceIds: [
+          '<privateDNSZoneResourceId>'
+        ]
+        service: 'SQL'
+        subnetResourceId: '<subnetResourceId>'
+        tags: {
+          Environment: 'Non-Prod'
+          'hidden-title': 'This is visible in the resource name'
+          Role: 'DeploymentValidation'
+        }
+      }
+      {
+        privateDnsZoneResourceIds: [
+          '<privateDNSZoneResourceId>'
+        ]
+        service: 'SqlOnDemand'
+        subnetResourceId: '<subnetResourceId>'
+        tags: {
+          Environment: 'Non-Prod'
+          'hidden-title': 'This is visible in the resource name'
+          Role: 'DeploymentValidation'
+        }
+      }
+      {
+        privateDnsZoneResourceIds: [
+          '<privateDNSZoneResourceId>'
+        ]
+        service: 'Dev'
+        subnetResourceId: '<subnetResourceId>'
+      }
     ]
     roleAssignments: [
       {
+        name: '499f9243-2170-4204-807d-ee6d0f94a0d0'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -438,6 +477,13 @@ module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
       "value": "synwsadmin"
     },
     // Non-required parameters
+    "administrator": {
+      "value": {
+        "administratorType": "ServicePrincipal",
+        "login": "dep-msi-swmax",
+        "sid": "<sid>"
+      }
+    },
     "diagnosticSettings": {
       "value": [
         {
@@ -494,17 +540,50 @@ module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
             "hidden-title": "This is visible in the resource name",
             "Role": "DeploymentValidation"
           }
+        },
+        {
+          "privateDnsZoneResourceIds": [
+            "<privateDNSZoneResourceId>"
+          ],
+          "service": "SQL",
+          "subnetResourceId": "<subnetResourceId>",
+          "tags": {
+            "Environment": "Non-Prod",
+            "hidden-title": "This is visible in the resource name",
+            "Role": "DeploymentValidation"
+          }
+        },
+        {
+          "privateDnsZoneResourceIds": [
+            "<privateDNSZoneResourceId>"
+          ],
+          "service": "SqlOnDemand",
+          "subnetResourceId": "<subnetResourceId>",
+          "tags": {
+            "Environment": "Non-Prod",
+            "hidden-title": "This is visible in the resource name",
+            "Role": "DeploymentValidation"
+          }
+        },
+        {
+          "privateDnsZoneResourceIds": [
+            "<privateDNSZoneResourceId>"
+          ],
+          "service": "Dev",
+          "subnetResourceId": "<subnetResourceId>"
         }
       ]
     },
     "roleAssignments": {
       "value": [
         {
+          "name": "499f9243-2170-4204-807d-ee6d0f94a0d0",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -534,7 +613,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-swwaf'
+  name: 'workspaceDeployment'
   params: {
     // Required parameters
     defaultDataLakeStorageAccountResourceId: '<defaultDataLakeStorageAccountResourceId>'
@@ -695,6 +774,8 @@ module workspace 'br/public:avm/res/synapse/workspace:<version>' = {
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
+| [`accountUrl`](#parameter-accounturl) | string | The account URL of the data lake storage account. |
+| [`administrator`](#parameter-administrator) | object | The Entra ID administrator for the synapse workspace. |
 | [`allowedAadTenantIdsForLinking`](#parameter-allowedaadtenantidsforlinking) | array | Allowed AAD Tenant IDs For Linking. |
 | [`azureADOnlyAuthentication`](#parameter-azureadonlyauthentication) | bool | Enable or Disable AzureADOnlyAuthentication on All Workspace sub-resource. |
 | [`customerManagedKey`](#parameter-customermanagedkey) | object | The customer managed key definition. |
@@ -746,6 +827,63 @@ Login for administrator access to the workspace's SQL pools.
 
 - Required: Yes
 - Type: string
+
+### Parameter: `accountUrl`
+
+The account URL of the data lake storage account.
+
+- Required: No
+- Type: string
+- Default: `[format('https://{0}.dfs.{1}', last(split(parameters('defaultDataLakeStorageAccountResourceId'), '/')), environment().suffixes.storage)]`
+
+### Parameter: `administrator`
+
+The Entra ID administrator for the synapse workspace.
+
+- Required: No
+- Type: object
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`administratorType`](#parameter-administratoradministratortype) | string | Workspace active directory administrator type. |
+| [`login`](#parameter-administratorlogin) | securestring | Login of the workspace active directory administrator. |
+| [`sid`](#parameter-administratorsid) | securestring | Object ID of the workspace active directory administrator. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`tenantId`](#parameter-administratortenantid) | securestring | Tenant ID of the workspace active directory administrator. |
+
+### Parameter: `administrator.administratorType`
+
+Workspace active directory administrator type.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `administrator.login`
+
+Login of the workspace active directory administrator.
+
+- Required: Yes
+- Type: securestring
+
+### Parameter: `administrator.sid`
+
+Object ID of the workspace active directory administrator.
+
+- Required: Yes
+- Type: securestring
+
+### Parameter: `administrator.tenantId`
+
+Tenant ID of the workspace active directory administrator.
+
+- Required: No
+- Type: securestring
 
 ### Parameter: `allowedAadTenantIdsForLinking`
 
@@ -1063,7 +1201,7 @@ Configuration details for private endpoints. For security reasons, it is recomme
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`service`](#parameter-privateendpointsservice) | string | The service (sub-) type to deploy the private endpoint for. For example "vault" or "blob". |
+| [`service`](#parameter-privateendpointsservice) | string | The subresource to deploy the private endpoint for. For example "blob", "table", "queue" or "file". |
 | [`subnetResourceId`](#parameter-privateendpointssubnetresourceid) | string | Resource ID of the subnet where the endpoint needs to be created. |
 
 **Optional parameters**
@@ -1075,18 +1213,21 @@ Configuration details for private endpoints. For security reasons, it is recomme
 | [`customNetworkInterfaceName`](#parameter-privateendpointscustomnetworkinterfacename) | string | The custom name of the network interface attached to the private endpoint. |
 | [`enableTelemetry`](#parameter-privateendpointsenabletelemetry) | bool | Enable/Disable usage telemetry for module. |
 | [`ipConfigurations`](#parameter-privateendpointsipconfigurations) | array | A list of IP configurations of the private endpoint. This will be used to map to the First Party Service endpoints. |
+| [`isManualConnection`](#parameter-privateendpointsismanualconnection) | bool | If Manual Private Link Connection is required. |
 | [`location`](#parameter-privateendpointslocation) | string | The location to deploy the private endpoint to. |
 | [`lock`](#parameter-privateendpointslock) | object | Specify the type of lock. |
-| [`manualPrivateLinkServiceConnections`](#parameter-privateendpointsmanualprivatelinkserviceconnections) | array | Manual PrivateLink Service Connections. |
+| [`manualConnectionRequestMessage`](#parameter-privateendpointsmanualconnectionrequestmessage) | string | A message passed to the owner of the remote resource with the manual connection request. |
 | [`name`](#parameter-privateendpointsname) | string | The name of the private endpoint. |
 | [`privateDnsZoneGroupName`](#parameter-privateendpointsprivatednszonegroupname) | string | The name of the private DNS zone group to create if privateDnsZoneResourceIds were provided. |
 | [`privateDnsZoneResourceIds`](#parameter-privateendpointsprivatednszoneresourceids) | array | The private DNS zone groups to associate the private endpoint with. A DNS zone group can support up to 5 DNS zones. |
+| [`privateLinkServiceConnectionName`](#parameter-privateendpointsprivatelinkserviceconnectionname) | string | The name of the private link connection to create. |
+| [`resourceGroupName`](#parameter-privateendpointsresourcegroupname) | string | Specify if you want to deploy the Private Endpoint into a different resource group than the main resource. |
 | [`roleAssignments`](#parameter-privateendpointsroleassignments) | array | Array of role assignments to create. |
 | [`tags`](#parameter-privateendpointstags) | object | Tags to be applied on all resources/resource groups in this deployment. |
 
 ### Parameter: `privateEndpoints.service`
 
-The service (sub-) type to deploy the private endpoint for. For example "vault" or "blob".
+The subresource to deploy the private endpoint for. For example "blob", "table", "queue" or "file".
 
 - Required: Yes
 - Type: string
@@ -1116,19 +1257,19 @@ Custom DNS configurations.
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`fqdn`](#parameter-privateendpointscustomdnsconfigsfqdn) | string | Fqdn that resolves to private endpoint ip address. |
-| [`ipAddresses`](#parameter-privateendpointscustomdnsconfigsipaddresses) | array | A list of private ip addresses of the private endpoint. |
+| [`fqdn`](#parameter-privateendpointscustomdnsconfigsfqdn) | string | Fqdn that resolves to private endpoint IP address. |
+| [`ipAddresses`](#parameter-privateendpointscustomdnsconfigsipaddresses) | array | A list of private IP addresses of the private endpoint. |
 
 ### Parameter: `privateEndpoints.customDnsConfigs.fqdn`
 
-Fqdn that resolves to private endpoint ip address.
+Fqdn that resolves to private endpoint IP address.
 
 - Required: No
 - Type: string
 
 ### Parameter: `privateEndpoints.customDnsConfigs.ipAddresses`
 
-A list of private ip addresses of the private endpoint.
+A list of private IP addresses of the private endpoint.
 
 - Required: Yes
 - Type: array
@@ -1181,7 +1322,7 @@ Properties of private endpoint IP configurations.
 | :-- | :-- | :-- |
 | [`groupId`](#parameter-privateendpointsipconfigurationspropertiesgroupid) | string | The ID of a group obtained from the remote resource that this private endpoint should connect to. |
 | [`memberName`](#parameter-privateendpointsipconfigurationspropertiesmembername) | string | The member name of a group obtained from the remote resource that this private endpoint should connect to. |
-| [`privateIPAddress`](#parameter-privateendpointsipconfigurationspropertiesprivateipaddress) | string | A private ip address obtained from the private endpoint's subnet. |
+| [`privateIPAddress`](#parameter-privateendpointsipconfigurationspropertiesprivateipaddress) | string | A private IP address obtained from the private endpoint's subnet. |
 
 ### Parameter: `privateEndpoints.ipConfigurations.properties.groupId`
 
@@ -1199,10 +1340,17 @@ The member name of a group obtained from the remote resource that this private e
 
 ### Parameter: `privateEndpoints.ipConfigurations.properties.privateIPAddress`
 
-A private ip address obtained from the private endpoint's subnet.
+A private IP address obtained from the private endpoint's subnet.
 
 - Required: Yes
 - Type: string
+
+### Parameter: `privateEndpoints.isManualConnection`
+
+If Manual Private Link Connection is required.
+
+- Required: No
+- Type: bool
 
 ### Parameter: `privateEndpoints.location`
 
@@ -1247,12 +1395,12 @@ Specify the name of lock.
 - Required: No
 - Type: string
 
-### Parameter: `privateEndpoints.manualPrivateLinkServiceConnections`
+### Parameter: `privateEndpoints.manualConnectionRequestMessage`
 
-Manual PrivateLink Service Connections.
+A message passed to the owner of the remote resource with the manual connection request.
 
 - Required: No
-- Type: array
+- Type: string
 
 ### Parameter: `privateEndpoints.name`
 
@@ -1274,6 +1422,20 @@ The private DNS zone groups to associate the private endpoint with. A DNS zone g
 
 - Required: No
 - Type: array
+
+### Parameter: `privateEndpoints.privateLinkServiceConnectionName`
+
+The name of the private link connection to create.
+
+- Required: No
+- Type: string
+
+### Parameter: `privateEndpoints.resourceGroupName`
+
+Specify if you want to deploy the Private Endpoint into a different resource group than the main resource.
+
+- Required: No
+- Type: string
 
 ### Parameter: `privateEndpoints.roleAssignments`
 
@@ -1297,6 +1459,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-privateendpointsroleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-privateendpointsroleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-privateendpointsroleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-privateendpointsroleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-privateendpointsroleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `privateEndpoints.roleAssignments.principalId`
@@ -1343,6 +1506,13 @@ The Resource Id of the delegated managed identity resource.
 ### Parameter: `privateEndpoints.roleAssignments.description`
 
 The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `privateEndpoints.roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
 
 - Required: No
 - Type: string
@@ -1416,6 +1586,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -1466,6 +1637,13 @@ The description of the role assignment.
 - Required: No
 - Type: string
 
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
 ### Parameter: `roleAssignments.principalType`
 
 The principal type of the assigned principal ID.
@@ -1504,7 +1682,6 @@ Git integration settings.
 
 - Required: No
 - Type: object
-- Default: `{}`
 
 
 ## Outputs
@@ -1520,11 +1697,11 @@ Git integration settings.
 
 ## Cross-referenced modules
 
-This section gives you an overview of all local-referenced module files (i.e., other CARML modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
+This section gives you an overview of all local-referenced module files (i.e., other modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
 
 | Reference | Type |
 | :-- | :-- |
-| `br/public:avm/res/network/private-endpoint:0.3.1` | Remote reference |
+| `br/public:avm/res/network/private-endpoint:0.6.1` | Remote reference |
 
 ## Data Collection
 

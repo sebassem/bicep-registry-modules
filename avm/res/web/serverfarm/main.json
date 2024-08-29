@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.25.53.49325",
-      "templateHash": "1573932068035500098"
+      "version": "0.28.1.47646",
+      "templateHash": "16609348340052214807"
     },
     "name": "App Service Plan",
     "description": "This module deploys an App Service Plan.",
@@ -201,11 +201,17 @@
         "description": "Required. Name of the app service plan."
       }
     },
-    "sku": {
-      "type": "object",
+    "skuName": {
+      "type": "string",
       "metadata": {
-        "example": "  {\n    name: 'P1v3'\n    tier: 'Premium'\n    size: 'P1v3'\n    family: 'P'\n    capacity: 3\n  }\n  ",
-        "description": "Required. Defines the name, tier, size, family and capacity of the App Service Plan."
+        "example": "  'F1'\n  'B1'\n  'P1v3'\n  'I1v2'\n  ",
+        "description": "Required. The name of the SKU will Determine the tier, size, family of the App Service Plan."
+      }
+    },
+    "skuCapacity": {
+      "type": "int",
+      "metadata": {
+        "description": "Required. Number of workers associated with the App Service Plan."
       }
     },
     "location": {
@@ -231,7 +237,7 @@
     },
     "reserved": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": "[equals(parameters('kind'), 'Linux')]",
       "metadata": {
         "description": "Conditional. Defaults to false when creating Windows/app App Service Plan. Required if creating a Linux App Service Plan and must be set to true."
       }
@@ -255,6 +261,13 @@
       "defaultValue": false,
       "metadata": {
         "description": "Optional. If true, apps assigned to this App Service plan can be scaled independently. If false, apps assigned to this App Service plan will scale to all instances of the plan."
+      }
+    },
+    "elasticScaleEnabled": {
+      "type": "bool",
+      "defaultValue": "[greater(parameters('maximumElasticWorkerCount'), 1)]",
+      "metadata": {
+        "description": "Optional. Enable/Disable ElasticScaleEnabled App Service Plan."
       }
     },
     "maximumElasticWorkerCount": {
@@ -285,9 +298,9 @@
     },
     "zoneRedundant": {
       "type": "bool",
-      "defaultValue": "[if(or(equals(parameters('sku').tier, 'Premium'), equals(parameters('sku').tier, 'ElasticPremium')), true(), false())]",
+      "defaultValue": "[if(or(startsWith(parameters('skuName'), 'P'), startsWith(parameters('skuName'), 'EP')), true(), false())]",
       "metadata": {
-        "description": "Optional. Zone Redundancy can only be used on Premium or ElasticPremium SKU Tiers within ZRS Supported regions (https://learn.microsoft.com/en-us/azure/storage/common/redundancy-regions-zrs)."
+        "description": "Optional. Zone Redundant server farms can only be used on Premium or ElasticPremium SKU tiers within ZRS Supported regions (https://learn.microsoft.com/en-us/azure/storage/common/redundancy-regions-zrs)."
       }
     },
     "lock": {
@@ -328,7 +341,7 @@
       "Contributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
       "Owner": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
       "Reader": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-      "Role Based Access Control Administrator (Preview)": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'f58310d9-a9f6-439a-9e8d-f62e7b41a168')]",
+      "Role Based Access Control Administrator": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'f58310d9-a9f6-439a-9e8d-f62e7b41a168')]",
       "User Access Administrator": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '18d7d88d-d35e-4fb5-a5c3-7773c20a72d9')]",
       "Web Plan Contributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '2cc479cb-7b4d-49a8-b449-8c00fd0f0a4b')]",
       "Website Contributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'de139f84-1756-47ae-9be6-808fbbe84772')]"
@@ -338,7 +351,7 @@
     "avmTelemetry": {
       "condition": "[parameters('enableTelemetry')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2023-07-01",
+      "apiVersion": "2024-03-01",
       "name": "[format('46d3xbcp.res.web-serverfarm.{0}.{1}', replace('-..--..-', '.', '-'), substring(uniqueString(deployment().name, parameters('location')), 0, 4))]",
       "properties": {
         "mode": "Incremental",
@@ -362,12 +375,16 @@
       "kind": "[parameters('kind')]",
       "location": "[parameters('location')]",
       "tags": "[parameters('tags')]",
-      "sku": "[parameters('sku')]",
+      "sku": {
+        "name": "[parameters('skuName')]",
+        "capacity": "[parameters('skuCapacity')]"
+      },
       "properties": {
         "workerTierName": "[parameters('workerTierName')]",
         "hostingEnvironmentProfile": "[if(not(empty(parameters('appServiceEnvironmentId'))), createObject('id', parameters('appServiceEnvironmentId')), null())]",
         "perSiteScaling": "[parameters('perSiteScaling')]",
         "maximumElasticWorkerCount": "[parameters('maximumElasticWorkerCount')]",
+        "elasticScaleEnabled": "[parameters('elasticScaleEnabled')]",
         "reserved": "[parameters('reserved')]",
         "targetWorkerCount": "[parameters('targetWorkerCount')]",
         "targetWorkerSizeId": "[parameters('targetWorkerSize')]",

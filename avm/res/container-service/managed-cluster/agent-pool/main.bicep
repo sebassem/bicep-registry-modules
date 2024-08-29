@@ -146,7 +146,7 @@ param vnetSubnetId string?
 @description('Optional. Determines the type of workload a node can run.')
 param workloadRuntime string?
 
-resource managedCluster 'Microsoft.ContainerService/managedClusters@2023-07-02-preview' existing = {
+resource managedCluster 'Microsoft.ContainerService/managedClusters@2024-03-02-preview' existing = {
   name: managedClusterName
 }
 
@@ -156,9 +156,11 @@ resource agentPool 'Microsoft.ContainerService/managedClusters/agentPools@2023-0
   properties: {
     availabilityZones: availabilityZones
     count: count
-    creationData: !empty(sourceResourceId) ? {
-      sourceResourceId: sourceResourceId
-    } : null
+    creationData: !empty(sourceResourceId)
+      ? {
+          sourceResourceId: sourceResourceId
+        }
+      : null
     enableAutoScaling: enableAutoScaling
     enableEncryptionAtHost: enableEncryptionAtHost
     enableFIPS: enableFIPS

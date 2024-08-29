@@ -17,6 +17,13 @@ configuration:
         then:
           - addLabel:
               label: "Needs: Triage :mag:"
+          - addReply:
+              reply: |
+                > [!IMPORTANT]
+                > **The "Needs: Triage :mag:" label must be removed once the triage process is complete!**
+
+                > [!TIP]
+                > For additional guidance on how to triage this issue/PR, see the [BRM Issue Triage](https://azure.github.io/Azure-Verified-Modules/help-support/issue-triage/brm-issue-triage/) documentation.
 
       - description: 'ITA08BCP - If "AVM" or "Azure Verified Modules" is mentioned in a new issue, add label of "Type: AVM :a: :v: :m:" on the issue'
         if:
@@ -50,6 +57,9 @@ configuration:
                       pattern: "AVM"
                   - commentContains:
                       pattern: "azure verified modules"
+              - not:
+                  hasLabel:
+                    label: "Type: AVM :a: :v: :m:"
         then:
           - addLabel:
               label: "Type: AVM :a: :v: :m:"
@@ -61,6 +71,9 @@ configuration:
               - payloadType: Issue_Comment
           - commentContains:
               pattern: "#RR"
+          - not:
+              hasLabel:
+                label: "Needs: Author Feedback :ear:"
         then:
           - addLabel:
               label: "Needs: Author Feedback :ear:"
@@ -72,6 +85,9 @@ configuration:
               - payloadType: Issue_Comment
           - commentContains:
               pattern: "#wontfix"
+          - not:
+              hasLabel:
+                label: "Status: Won't Fix :broken_heart:"
         then:
           - addLabel:
               label: "Status: Won't Fix :broken_heart:"
@@ -99,9 +115,11 @@ configuration:
         then:
           - cleanEmailReply
 
-      - description: 'ITA15 - remove the "Needs: Triage" label from a PR, if it already has a "Type: XYZ" label assigned at the time of creating it.'
+      - description: 'ITA15 - remove the "Needs: Triage" label from a PR, if it already has a "Type: XYZ" label added at the time of creating it.'
         if:
           - payloadType: Pull_Request
+          - isAction:
+              action: Opened
           - or:
               - hasLabel:
                   label: "Type: Bug :bug:"
@@ -119,26 +137,10 @@ configuration:
                   label: "Type: Question/Feedback :raising_hand:"
               - hasLabel:
                   label: "Type: Security Bug :lock:"
-              - hasLabel:
-                  label: "Type: AVM :a: :v: :m:"
-          - isAction:
-              action: Opened
+          - isAssignedToSomeone
         then:
           - removeLabel:
               label: "Needs: Triage :mag:"
-
-      - description: 'ITA16 - Add the "Status: Owners Identified :metal:" label when someone is assigned to a Module Proposal'
-        if:
-          - payloadType: Issues
-          - not:
-              isAction:
-                action: Closed
-          - hasLabel:
-              label: "Type: New Module Proposal :bulb:"
-          - isAssignedToSomeone
-        then:
-          - addLabel:
-              label: "Status: Owners Identified :metal:"
 
       - description: 'ITA20 - If the type is feature request, assign the "Type: Feature Request :heavy_plus_sign:" label on the issue'
         if:
@@ -150,6 +152,9 @@ configuration:
                 ### Issue Type?
 
                 Feature Request
+          - not:
+              hasLabel:
+                label: "Type: Feature Request :heavy_plus_sign:"
         then:
           - addLabel:
               label: "Type: Feature Request :heavy_plus_sign:"
@@ -164,6 +169,9 @@ configuration:
                 ### Issue Type?
 
                 Bug
+          - not:
+              hasLabel:
+                label: "Type: Bug :bug:"
         then:
           - addLabel:
               label: "Type: Bug :bug:"
@@ -178,6 +186,25 @@ configuration:
                 ### Issue Type?
 
                 Security Bug
+          - not:
+              hasLabel:
+                label: "Type: Security Bug :lock:"
         then:
           - addLabel:
               label: "Type: Security Bug :lock:"
+
+      - description: "ITA25 - If a new PR is opened, inform module owners about the usage of the Needs Core Team label"
+        if:
+          - or:
+              - payloadType: Pull_Request
+          - isAction:
+              action: Opened
+        then:
+          - addReply:
+              reply: |
+                > [!IMPORTANT]
+                > If this is a module-related PR, being submitted by the sole owner of the module, the AVM core team must review and approve it (as module owners can't approve their own PRs).
+                >
+                > **To indicate this PR needs the core team''s attention, apply the "Needs: Core Team 🧞" label!**
+                >
+                > The core team will only review and approve PRs that have this label applied!

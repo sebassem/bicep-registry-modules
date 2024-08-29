@@ -36,6 +36,8 @@ module nestedDependencies 'dependencies.bicep' = {
   name: '${uniqueString(deployment().name, resourceLocation)}-nestedDependencies'
   params: {
     actionGroupName: 'dep-${namePrefix}-ag-${serviceShort}'
+    appInsightsName: 'dep-${namePrefix}-app-${serviceShort}'
+    resourceLocation: resourceLocation
   }
 }
 
@@ -44,34 +46,33 @@ module nestedDependencies 'dependencies.bicep' = {
 // ============== //
 
 @batchSize(1)
-module testDeployment '../../../main.bicep' = [for iteration in [ 'init', 'idem' ]: {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
-  params: {
-    name: '${namePrefix}${serviceShort}001'
-    location: 'Global'
-    criterias: [
-      {
-        criterionType: 'StaticThresholdCriterion'
-        metricName: 'Percentage CPU'
-        metricNamespace: 'microsoft.compute/virtualmachines'
-        name: 'HighCPU'
-        operator: 'GreaterThan'
-        threshold: '90'
-        timeAggregation: 'Average'
+module testDeployment '../../../main.bicep' = [
+  for iteration in ['init', 'idem']: {
+    scope: resourceGroup
+    name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
+    params: {
+      name: '${namePrefix}${serviceShort}001'
+      location: 'global'
+      scopes: [
+        nestedDependencies.outputs.pingTestResourceId
+        nestedDependencies.outputs.appInsightsResourceId
+      ]
+      criteria: {
+        componentResourceId: nestedDependencies.outputs.appInsightsResourceId
+        failedLocationCount: 3
+        'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
+        webTestResourceId: nestedDependencies.outputs.pingTestResourceId
       }
-    ]
-    actions: [
-      nestedDependencies.outputs.actionGroupResourceId
-    ]
-    alertCriteriaType: 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
-    targetResourceRegion: 'westeurope'
-    targetResourceType: 'microsoft.compute/virtualmachines'
-    windowSize: 'PT15M'
-    tags: {
-      'hidden-title': 'This is visible in the resource name'
-      Environment: 'Non-Prod'
-      Role: 'DeploymentValidation'
+      actions: [
+        nestedDependencies.outputs.actionGroupResourceId
+      ]
+      windowSize: 'PT5M'
+      evaluationFrequency: 'PT5M'
+      tags: {
+        'hidden-title': 'This is visible in the resource name'
+        Environment: 'Non-Prod'
+        Role: 'DeploymentValidation'
+      }
     }
   }
-}]
+]

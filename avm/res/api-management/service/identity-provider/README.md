@@ -14,7 +14,7 @@ This module deploys an API Management Service Identity Provider.
 
 | Resource Type | API Version |
 | :-- | :-- |
-| `Microsoft.ApiManagement/service/identityProviders` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/identityProviders) |
+| `Microsoft.ApiManagement/service/identityProviders` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/identityProviders) |
 
 ## Parameters
 
@@ -38,6 +38,7 @@ This module deploys an API Management Service Identity Provider.
 | :-- | :-- | :-- |
 | [`allowedTenants`](#parameter-allowedtenants) | array | List of Allowed Tenants when configuring Azure Active Directory login. - string. |
 | [`authority`](#parameter-authority) | string | OpenID Connect discovery endpoint hostname for AAD or AAD B2C. |
+| [`clientLibrary`](#parameter-clientlibrary) | string | The client library to be used in the developer portal. Only applies to AAD and AAD B2C Identity Provider. |
 | [`passwordResetPolicyName`](#parameter-passwordresetpolicyname) | string | Password Reset Policy Name. Only applies to AAD B2C Identity Provider. |
 | [`profileEditingPolicyName`](#parameter-profileeditingpolicyname) | string | Profile Editing Policy Name. Only applies to AAD B2C Identity Provider. |
 | [`signInPolicyName`](#parameter-signinpolicyname) | string | Signin Policy Name. Only applies to AAD B2C Identity Provider. |
@@ -90,6 +91,20 @@ OpenID Connect discovery endpoint hostname for AAD or AAD B2C.
 - Required: No
 - Type: string
 - Default: `''`
+
+### Parameter: `clientLibrary`
+
+The client library to be used in the developer portal. Only applies to AAD and AAD B2C Identity Provider.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'ADAL'
+    'MSAL-2'
+  ]
+  ```
 
 ### Parameter: `passwordResetPolicyName`
 

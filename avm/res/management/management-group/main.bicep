@@ -23,7 +23,8 @@ param location string = deployment().location
 @description('Optional. Enable/Disable usage telemetry for module.')
 param enableTelemetry bool = true
 
-resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
+#disable-next-line no-deployments-resources
+resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableTelemetry) {
   name: '46d3xbcp.res.management-managementgroup.${replace('-..--..-', '.', '-')}.${substring(uniqueString(deployment().name, location), 0, 4)}'
   location: location
   properties: {
@@ -52,11 +53,13 @@ resource managementGroup 'Microsoft.Management/managementGroups@2021-04-01' = {
   scope: tenant()
   properties: {
     displayName: displayName
-    details: !empty(parentId) ? {
-      parent: {
-        id: parentManagementGroup.id
-      }
-    } : null
+    details: !empty(parentId)
+      ? {
+          parent: {
+            id: parentManagementGroup.id
+          }
+        }
+      : null
   }
 }
 

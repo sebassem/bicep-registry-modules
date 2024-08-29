@@ -1,6 +1,6 @@
 # API Management Services `[Microsoft.ApiManagement/service]`
 
-This module deploys an API Management Service.
+This module deploys an API Management Service. The default deployment is set to use a Premium SKU to align with Microsoft WAF-aligned best practices. In most cases, non-prod deployments should use a lower-tier SKU.
 
 ## Navigation
 
@@ -16,21 +16,23 @@ This module deploys an API Management Service.
 
 | Resource Type | API Version |
 | :-- | :-- |
-| `Microsoft.ApiManagement/service` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service) |
-| `Microsoft.ApiManagement/service/apis` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/apis) |
-| `Microsoft.ApiManagement/service/apis/policies` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/apis/policies) |
-| `Microsoft.ApiManagement/service/apiVersionSets` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/apiVersionSets) |
-| `Microsoft.ApiManagement/service/authorizationServers` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/authorizationServers) |
-| `Microsoft.ApiManagement/service/backends` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/backends) |
-| `Microsoft.ApiManagement/service/caches` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/caches) |
-| `Microsoft.ApiManagement/service/identityProviders` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/identityProviders) |
-| `Microsoft.ApiManagement/service/namedValues` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/namedValues) |
-| `Microsoft.ApiManagement/service/policies` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/policies) |
-| `Microsoft.ApiManagement/service/portalsettings` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/service) |
-| `Microsoft.ApiManagement/service/products` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/products) |
-| `Microsoft.ApiManagement/service/products/apis` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/products/apis) |
-| `Microsoft.ApiManagement/service/products/groups` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/products/groups) |
-| `Microsoft.ApiManagement/service/subscriptions` | [2021-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2021-08-01/service/subscriptions) |
+| `Microsoft.ApiManagement/service` | [2023-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/service) |
+| `Microsoft.ApiManagement/service/apis` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/apis) |
+| `Microsoft.ApiManagement/service/apis/diagnostics` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/apis/diagnostics) |
+| `Microsoft.ApiManagement/service/apis/policies` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/apis/policies) |
+| `Microsoft.ApiManagement/service/apiVersionSets` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/apiVersionSets) |
+| `Microsoft.ApiManagement/service/authorizationServers` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/authorizationServers) |
+| `Microsoft.ApiManagement/service/backends` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/backends) |
+| `Microsoft.ApiManagement/service/caches` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/caches) |
+| `Microsoft.ApiManagement/service/identityProviders` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/identityProviders) |
+| `Microsoft.ApiManagement/service/loggers` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/loggers) |
+| `Microsoft.ApiManagement/service/namedValues` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/namedValues) |
+| `Microsoft.ApiManagement/service/policies` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/policies) |
+| `Microsoft.ApiManagement/service/portalsettings` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/service) |
+| `Microsoft.ApiManagement/service/products` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/products) |
+| `Microsoft.ApiManagement/service/products/apis` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/products/apis) |
+| `Microsoft.ApiManagement/service/products/groups` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/products/groups) |
+| `Microsoft.ApiManagement/service/subscriptions` | [2022-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ApiManagement/2022-08-01/service/subscriptions) |
 | `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
 | `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
@@ -43,11 +45,74 @@ The following section provides usage examples for the module, which were used to
 
 >**Note**: To reference the module, please use the following syntax `br/public:avm/res/api-management/service:<version>`.
 
-- [Using only defaults](#example-1-using-only-defaults)
-- [Using large parameter set](#example-2-using-large-parameter-set)
-- [WAF-aligned](#example-3-waf-aligned)
+- [Deploying a Consumption SKU](#example-1-deploying-a-consumption-sku)
+- [Using only defaults](#example-2-using-only-defaults)
+- [Deploying a Developer SKU](#example-3-deploying-a-developer-sku)
+- [Using large parameter set](#example-4-using-large-parameter-set)
+- [Deploying an APIM v2 sku](#example-5-deploying-an-apim-v2-sku)
+- [WAF-aligned](#example-6-waf-aligned)
 
-### Example 1: _Using only defaults_
+### Example 1: _Deploying a Consumption SKU_
+
+This instance deploys the module using a Consumption SKU.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module service 'br/public:avm/res/api-management/service:<version>' = {
+  name: 'serviceDeployment'
+  params: {
+    // Required parameters
+    name: 'apiscon001'
+    publisherEmail: 'apimgmt-noreply@mail.windowsazure.com'
+    publisherName: 'az-amorg-x-001'
+    // Non-required parameters
+    location: '<location>'
+    sku: 'Consumption'
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "apiscon001"
+    },
+    "publisherEmail": {
+      "value": "apimgmt-noreply@mail.windowsazure.com"
+    },
+    "publisherName": {
+      "value": "az-amorg-x-001"
+    },
+    // Non-required parameters
+    "location": {
+      "value": "<location>"
+    },
+    "sku": {
+      "value": "Consumption"
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 2: _Using only defaults_
 
 This instance deploys the module with the minimum set of required parameters.
 
@@ -58,7 +123,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module service 'br/public:avm/res/api-management/service:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-apismin'
+  name: 'serviceDeployment'
   params: {
     // Required parameters
     name: 'apismin001'
@@ -103,7 +168,67 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
 </details>
 <p>
 
-### Example 2: _Using large parameter set_
+### Example 3: _Deploying a Developer SKU_
+
+This instance deploys the module using a Developer SKU.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module service 'br/public:avm/res/api-management/service:<version>' = {
+  name: 'serviceDeployment'
+  params: {
+    // Required parameters
+    name: 'apisdev001'
+    publisherEmail: 'apimgmt-noreply@mail.windowsazure.com'
+    publisherName: 'az-amorg-x-001'
+    // Non-required parameters
+    location: '<location>'
+    sku: 'Developer'
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "apisdev001"
+    },
+    "publisherEmail": {
+      "value": "apimgmt-noreply@mail.windowsazure.com"
+    },
+    "publisherName": {
+      "value": "az-amorg-x-001"
+    },
+    // Non-required parameters
+    "location": {
+      "value": "<location>"
+    },
+    "sku": {
+      "value": "Developer"
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 4: _Using large parameter set_
 
 This instance deploys the module with most of its features enabled.
 
@@ -114,13 +239,35 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module service 'br/public:avm/res/api-management/service:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-apismax'
+  name: 'serviceDeployment'
   params: {
     // Required parameters
     name: 'apismax001'
     publisherEmail: 'apimgmt-noreply@mail.windowsazure.com'
     publisherName: 'az-amorg-x-001'
     // Non-required parameters
+    additionalLocations: [
+      {
+        disableGateway: false
+        location: '<location>'
+        publicIpAddressId: '<publicIpAddressId>'
+        sku: {
+          capacity: 1
+          name: 'Premium'
+        }
+        virtualNetworkConfiguration: {
+          subnetResourceId: '<subnetResourceId>'
+        }
+      }
+    ]
+    apiDiagnostics: [
+      {
+        apiName: 'echo-api'
+        loggerName: 'logger'
+        metrics: true
+        name: 'applicationinsights'
+      }
+    ]
     apis: [
       {
         apiVersionSet: {
@@ -190,6 +337,7 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
         ]
         authority: '<authority>'
         clientId: 'apimClientid'
+        clientLibrary: 'MSAL-2'
         clientSecret: 'apimSlientSecret'
         name: 'aad'
         signinTenant: 'mytenant.onmicrosoft.com'
@@ -200,6 +348,18 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
       kind: 'CanNotDelete'
       name: 'myCustomLockName'
     }
+    loggers: [
+      {
+        credentials: {
+          instrumentationKey: '<instrumentationKey>'
+        }
+        description: 'Logger to Azure Application Insights'
+        isBuffered: false
+        loggerType: 'applicationInsights'
+        name: 'logger'
+        resourceId: '<resourceId>'
+      }
+    ]
     managedIdentities: {
       systemAssigned: true
       userAssignedResourceIds: [
@@ -254,13 +414,16 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
         subscriptionRequired: false
       }
     ]
+    publicIpAddressResourceId: '<publicIpAddressResourceId>'
     roleAssignments: [
       {
+        name: '6352c3e3-ac6b-43d5-ac43-1077ff373721'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -271,9 +434,11 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
         roleDefinitionIdOrName: '<roleDefinitionIdOrName>'
       }
     ]
+    subnetResourceId: '<subnetResourceId>'
     subscriptions: [
       {
         name: 'testArmSubscriptionAllApis'
+        scope: '/apis'
       }
     ]
     tags: {
@@ -281,6 +446,7 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
       'hidden-title': 'This is visible in the resource name'
       Role: 'DeploymentValidation'
     }
+    virtualNetworkType: 'Internal'
   }
 }
 ```
@@ -308,6 +474,32 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
       "value": "az-amorg-x-001"
     },
     // Non-required parameters
+    "additionalLocations": {
+      "value": [
+        {
+          "disableGateway": false,
+          "location": "<location>",
+          "publicIpAddressId": "<publicIpAddressId>",
+          "sku": {
+            "capacity": 1,
+            "name": "Premium"
+          },
+          "virtualNetworkConfiguration": {
+            "subnetResourceId": "<subnetResourceId>"
+          }
+        }
+      ]
+    },
+    "apiDiagnostics": {
+      "value": [
+        {
+          "apiName": "echo-api",
+          "loggerName": "logger",
+          "metrics": true,
+          "name": "applicationinsights"
+        }
+      ]
+    },
     "apis": {
       "value": [
         {
@@ -388,6 +580,7 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
           ],
           "authority": "<authority>",
           "clientId": "apimClientid",
+          "clientLibrary": "MSAL-2",
           "clientSecret": "apimSlientSecret",
           "name": "aad",
           "signinTenant": "mytenant.onmicrosoft.com"
@@ -402,6 +595,20 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
         "kind": "CanNotDelete",
         "name": "myCustomLockName"
       }
+    },
+    "loggers": {
+      "value": [
+        {
+          "credentials": {
+            "instrumentationKey": "<instrumentationKey>"
+          },
+          "description": "Logger to Azure Application Insights",
+          "isBuffered": false,
+          "loggerType": "applicationInsights",
+          "name": "logger",
+          "resourceId": "<resourceId>"
+        }
+      ]
     },
     "managedIdentities": {
       "value": {
@@ -467,14 +674,19 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
         }
       ]
     },
+    "publicIpAddressResourceId": {
+      "value": "<publicIpAddressResourceId>"
+    },
     "roleAssignments": {
       "value": [
         {
+          "name": "6352c3e3-ac6b-43d5-ac43-1077ff373721",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -486,10 +698,14 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
         }
       ]
     },
+    "subnetResourceId": {
+      "value": "<subnetResourceId>"
+    },
     "subscriptions": {
       "value": [
         {
-          "name": "testArmSubscriptionAllApis"
+          "name": "testArmSubscriptionAllApis",
+          "scope": "/apis"
         }
       ]
     },
@@ -499,6 +715,9 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
         "hidden-title": "This is visible in the resource name",
         "Role": "DeploymentValidation"
       }
+    },
+    "virtualNetworkType": {
+      "value": "Internal"
     }
   }
 }
@@ -507,7 +726,67 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
 </details>
 <p>
 
-### Example 3: _WAF-aligned_
+### Example 5: _Deploying an APIM v2 sku_
+
+This instance deploys the module using a v2 SKU.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module service 'br/public:avm/res/api-management/service:<version>' = {
+  name: 'serviceDeployment'
+  params: {
+    // Required parameters
+    name: 'apisv2s001'
+    publisherEmail: 'apimgmt-noreply@mail.windowsazure.com'
+    publisherName: 'az-amorg-x-001'
+    // Non-required parameters
+    location: '<location>'
+    sku: 'BasicV2'
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "name": {
+      "value": "apisv2s001"
+    },
+    "publisherEmail": {
+      "value": "apimgmt-noreply@mail.windowsazure.com"
+    },
+    "publisherName": {
+      "value": "az-amorg-x-001"
+    },
+    // Non-required parameters
+    "location": {
+      "value": "<location>"
+    },
+    "sku": {
+      "value": "BasicV2"
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 6: _WAF-aligned_
 
 This instance deploys the module in alignment with the best-practices of the Azure Well-Architected Framework.
 
@@ -518,13 +797,23 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module service 'br/public:avm/res/api-management/service:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-apiswaf'
+  name: 'serviceDeployment'
   params: {
     // Required parameters
     name: 'apiswaf001'
     publisherEmail: 'apimgmt-noreply@mail.windowsazure.com'
     publisherName: 'az-amorg-x-001'
     // Non-required parameters
+    additionalLocations: [
+      {
+        disableGateway: false
+        location: 'westus'
+        sku: {
+          capacity: 1
+          name: 'Premium'
+        }
+      }
+    ]
     apis: [
       {
         apiVersionSet: {
@@ -606,13 +895,32 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
         ]
         authority: '<authority>'
         clientId: 'apimClientid'
+        clientLibrary: 'MSAL-2'
         clientSecret: '<clientSecret>'
         name: 'aad'
         signinTenant: 'mytenant.onmicrosoft.com'
       }
     ]
     location: '<location>'
-    minApiVersion: '2021-08-01'
+    loggers: [
+      {
+        credentials: {
+          instrumentationKey: '<instrumentationKey>'
+        }
+        description: 'Logger to Azure Application Insights'
+        isBuffered: false
+        loggerType: 'applicationInsights'
+        name: 'logger'
+        resourceId: '<resourceId>'
+      }
+    ]
+    managedIdentities: {
+      systemAssigned: true
+      userAssignedResourceIds: [
+        '<managedIdentityResourceId>'
+      ]
+    }
+    minApiVersion: '2022-08-01'
     namedValues: [
       {
         displayName: 'apimkey'
@@ -667,6 +975,7 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
     subscriptions: [
       {
         name: 'testArmSubscriptionAllApis'
+        scope: '/apis'
       }
     ]
     tags: {
@@ -701,6 +1010,18 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
       "value": "az-amorg-x-001"
     },
     // Non-required parameters
+    "additionalLocations": {
+      "value": [
+        {
+          "disableGateway": false,
+          "location": "westus",
+          "sku": {
+            "capacity": 1,
+            "name": "Premium"
+          }
+        }
+      ]
+    },
     "apis": {
       "value": [
         {
@@ -795,6 +1116,7 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
           ],
           "authority": "<authority>",
           "clientId": "apimClientid",
+          "clientLibrary": "MSAL-2",
           "clientSecret": "<clientSecret>",
           "name": "aad",
           "signinTenant": "mytenant.onmicrosoft.com"
@@ -804,8 +1126,30 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
     "location": {
       "value": "<location>"
     },
+    "loggers": {
+      "value": [
+        {
+          "credentials": {
+            "instrumentationKey": "<instrumentationKey>"
+          },
+          "description": "Logger to Azure Application Insights",
+          "isBuffered": false,
+          "loggerType": "applicationInsights",
+          "name": "logger",
+          "resourceId": "<resourceId>"
+        }
+      ]
+    },
+    "managedIdentities": {
+      "value": {
+        "systemAssigned": true,
+        "userAssignedResourceIds": [
+          "<managedIdentityResourceId>"
+        ]
+      }
+    },
     "minApiVersion": {
-      "value": "2021-08-01"
+      "value": "2022-08-01"
     },
     "namedValues": {
       "value": [
@@ -869,7 +1213,8 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
     "subscriptions": {
       "value": [
         {
-          "name": "testArmSubscriptionAllApis"
+          "name": "testArmSubscriptionAllApis",
+          "scope": "/apis"
         }
       ]
     },
@@ -898,18 +1243,25 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
 | [`publisherEmail`](#parameter-publisheremail) | string | The email address of the owner of the service. |
 | [`publisherName`](#parameter-publishername) | string | The name of the owner of the service. |
 
+**Conditional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`skuCapacity`](#parameter-skucapacity) | int | The scale units for this API Management service. Required if using Basic, Standard, or Premium skus. For range of capacities for each sku, reference https://azure.microsoft.com/en-us/pricing/details/api-management/. |
+
 **Optional parameters**
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`additionalLocations`](#parameter-additionallocations) | array | Additional datacenter locations of the API Management service. |
+| [`additionalLocations`](#parameter-additionallocations) | array | Additional datacenter locations of the API Management service. Not supported with V2 SKUs. |
+| [`apiDiagnostics`](#parameter-apidiagnostics) | array | API Diagnostics. |
 | [`apis`](#parameter-apis) | array | APIs. |
 | [`apiVersionSets`](#parameter-apiversionsets) | array | API Version Sets. |
 | [`authorizationServers`](#parameter-authorizationservers) | secureObject | Authorization servers. |
 | [`backends`](#parameter-backends) | array | Backends. |
 | [`caches`](#parameter-caches) | array | Caches. |
 | [`certificates`](#parameter-certificates) | array | List of Certificates that need to be installed in the API Management service. Max supported certificates that can be installed is 10. |
-| [`customProperties`](#parameter-customproperties) | object | Custom properties of the API Management service. |
+| [`customProperties`](#parameter-customproperties) | object | Custom properties of the API Management service. Not supported if SKU is Consumption. |
 | [`diagnosticSettings`](#parameter-diagnosticsettings) | array | The diagnostic settings of the service. |
 | [`disableGateway`](#parameter-disablegateway) | bool | Property only valid for an API Management service deployed in multiple locations. This can be used to disable the gateway in master region. |
 | [`enableClientCertificate`](#parameter-enableclientcertificate) | bool | Property only meant to be used for Consumption SKU Service. This enforces a client certificate to be presented on each request to the gateway. This also enables the ability to authenticate the certificate in the policy on the gateway. |
@@ -918,6 +1270,7 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
 | [`identityProviders`](#parameter-identityproviders) | array | Identity providers. |
 | [`location`](#parameter-location) | string | Location for all Resources. |
 | [`lock`](#parameter-lock) | object | The lock settings of the service. |
+| [`loggers`](#parameter-loggers) | array | Loggers. |
 | [`managedIdentities`](#parameter-managedidentities) | object | The managed identity definition for this resource. |
 | [`minApiVersion`](#parameter-minapiversion) | string | Limit control plane API calls to API Management service with version equal to or newer than this value. |
 | [`namedValues`](#parameter-namedvalues) | array | Named values. |
@@ -926,15 +1279,15 @@ module service 'br/public:avm/res/api-management/service:<version>' = {
 | [`policies`](#parameter-policies) | array | Policies. |
 | [`portalsettings`](#parameter-portalsettings) | array | Portal settings. |
 | [`products`](#parameter-products) | array | Products. |
+| [`publicIpAddressResourceId`](#parameter-publicipaddressresourceid) | string | Public Standard SKU IP V4 based IP address to be associated with Virtual Network deployed service in the region. Supported only for Developer and Premium SKU being deployed in Virtual Network. |
 | [`restore`](#parameter-restore) | bool | Undelete API Management Service if it was previously soft-deleted. If this flag is specified and set to True all other properties will be ignored. |
 | [`roleAssignments`](#parameter-roleassignments) | array | Array of role assignments to create. |
 | [`sku`](#parameter-sku) | string | The pricing tier of this API Management service. |
-| [`skuCount`](#parameter-skucount) | int | The instance size of this API Management service. |
 | [`subnetResourceId`](#parameter-subnetresourceid) | string | The full resource ID of a subnet in a virtual network to deploy the API Management service in. |
 | [`subscriptions`](#parameter-subscriptions) | array | Subscriptions. |
 | [`tags`](#parameter-tags) | object | Tags of the resource. |
 | [`virtualNetworkType`](#parameter-virtualnetworktype) | string | The type of VPN in which API Management service needs to be configured in. None (Default Value) means the API Management service is not part of any Virtual Network, External means the API Management deployment is set up inside a Virtual Network having an internet Facing Endpoint, and Internal means that API Management deployment is setup inside a Virtual Network having an Intranet Facing Endpoint only. |
-| [`zones`](#parameter-zones) | array | A list of availability zones denoting where the resource needs to come from. |
+| [`zones`](#parameter-zones) | array | A list of availability zones denoting where the resource needs to come from. Only supported by Premium sku. |
 
 ### Parameter: `name`
 
@@ -957,9 +1310,25 @@ The name of the owner of the service.
 - Required: Yes
 - Type: string
 
+### Parameter: `skuCapacity`
+
+The scale units for this API Management service. Required if using Basic, Standard, or Premium skus. For range of capacities for each sku, reference https://azure.microsoft.com/en-us/pricing/details/api-management/.
+
+- Required: No
+- Type: int
+- Default: `2`
+
 ### Parameter: `additionalLocations`
 
-Additional datacenter locations of the API Management service.
+Additional datacenter locations of the API Management service. Not supported with V2 SKUs.
+
+- Required: No
+- Type: array
+- Default: `[]`
+
+### Parameter: `apiDiagnostics`
+
+API Diagnostics.
 
 - Required: No
 - Type: array
@@ -1015,11 +1384,23 @@ List of Certificates that need to be installed in the API Management service. Ma
 
 ### Parameter: `customProperties`
 
-Custom properties of the API Management service.
+Custom properties of the API Management service. Not supported if SKU is Consumption.
 
 - Required: No
 - Type: object
-- Default: `{}`
+- Default:
+  ```Bicep
+  {
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA256': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_GCM_SHA256': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA256': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168': 'False'
+  }
+  ```
 
 ### Parameter: `diagnosticSettings`
 
@@ -1251,6 +1632,14 @@ Specify the name of lock.
 - Required: No
 - Type: string
 
+### Parameter: `loggers`
+
+Loggers.
+
+- Required: No
+- Type: array
+- Default: `[]`
+
 ### Parameter: `managedIdentities`
 
 The managed identity definition for this resource.
@@ -1285,7 +1674,6 @@ Limit control plane API calls to API Management service with version equal to or
 
 - Required: No
 - Type: string
-- Default: `''`
 
 ### Parameter: `namedValues`
 
@@ -1335,6 +1723,13 @@ Products.
 - Type: array
 - Default: `[]`
 
+### Parameter: `publicIpAddressResourceId`
+
+Public Standard SKU IP V4 based IP address to be associated with Virtual Network deployed service in the region. Supported only for Developer and Premium SKU being deployed in Virtual Network.
+
+- Required: No
+- Type: string
+
 ### Parameter: `restore`
 
 Undelete API Management Service if it was previously soft-deleted. If this flag is specified and set to True all other properties will be ignored.
@@ -1365,6 +1760,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -1415,6 +1811,13 @@ The description of the role assignment.
 - Required: No
 - Type: string
 
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
 ### Parameter: `roleAssignments.principalType`
 
 The principal type of the assigned principal ID.
@@ -1438,30 +1841,17 @@ The pricing tier of this API Management service.
 
 - Required: No
 - Type: string
-- Default: `'Developer'`
+- Default: `'Premium'`
 - Allowed:
   ```Bicep
   [
     'Basic'
+    'BasicV2'
     'Consumption'
     'Developer'
     'Premium'
     'Standard'
-  ]
-  ```
-
-### Parameter: `skuCount`
-
-The instance size of this API Management service.
-
-- Required: No
-- Type: int
-- Default: `1`
-- Allowed:
-  ```Bicep
-  [
-    1
-    2
+    'StandardV2'
   ]
   ```
 
@@ -1471,7 +1861,6 @@ The full resource ID of a subnet in a virtual network to deploy the API Manageme
 
 - Required: No
 - Type: string
-- Default: `''`
 
 ### Parameter: `subscriptions`
 
@@ -1506,11 +1895,17 @@ The type of VPN in which API Management service needs to be configured in. None 
 
 ### Parameter: `zones`
 
-A list of availability zones denoting where the resource needs to come from.
+A list of availability zones denoting where the resource needs to come from. Only supported by Premium sku.
 
 - Required: No
 - Type: array
-- Default: `[]`
+- Default:
+  ```Bicep
+  [
+    1
+    2
+  ]
+  ```
 
 
 ## Outputs

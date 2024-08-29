@@ -43,7 +43,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module networkInterface 'br/public:avm/res/network/network-interface:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nnimin'
+  name: 'networkInterfaceDeployment'
   params: {
     // Required parameters
     ipConfigurations: [
@@ -105,7 +105,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module networkInterface 'br/public:avm/res/network/network-interface:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nnimax'
+  name: 'networkInterfaceDeployment'
   params: {
     // Required parameters
     ipConfigurations: [
@@ -150,11 +150,13 @@ module networkInterface 'br/public:avm/res/network/network-interface:<version>' 
     }
     roleAssignments: [
       {
+        name: '026b830f-441f-469a-8cf3-c3ea9f5bcfe1'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -240,11 +242,13 @@ module networkInterface 'br/public:avm/res/network/network-interface:<version>' 
     "roleAssignments": {
       "value": [
         {
+          "name": "026b830f-441f-469a-8cf3-c3ea9f5bcfe1",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -281,7 +285,7 @@ This instance deploys the module in alignment with the best-practices of the Wel
 
 ```bicep
 module networkInterface 'br/public:avm/res/network/network-interface:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nniwaf'
+  name: 'networkInterfaceDeployment'
   params: {
     // Required parameters
     ipConfigurations: [
@@ -736,6 +740,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -782,6 +787,13 @@ The Resource Id of the delegated managed identity resource.
 ### Parameter: `roleAssignments.description`
 
 The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
 
 - Required: No
 - Type: string

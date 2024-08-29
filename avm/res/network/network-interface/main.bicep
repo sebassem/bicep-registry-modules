@@ -65,16 +65,43 @@ param diagnosticSettings diagnosticSettingType
 
 var builtInRoleNames = {
   Contributor: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
-  'DNS Resolver Contributor': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '0f2ebee7-ffd4-4fc0-b3b7-664099fdad5d')
-  'DNS Zone Contributor': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'befefa01-2a29-4197-83a8-272ff33ce314')
-  'Network Contributor': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')
+  'DNS Resolver Contributor': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    '0f2ebee7-ffd4-4fc0-b3b7-664099fdad5d'
+  )
+  'DNS Zone Contributor': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    'befefa01-2a29-4197-83a8-272ff33ce314'
+  )
+  'Network Contributor': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    '4d97b98b-1d4f-4787-a291-c67834d212e7'
+  )
   Owner: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')
-  'Private DNS Zone Contributor': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b12aa53e-6015-4669-85d0-8515ebb3ae7f')
+  'Private DNS Zone Contributor': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    'b12aa53e-6015-4669-85d0-8515ebb3ae7f'
+  )
   Reader: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
-  'Role Based Access Control Administrator (Preview)': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'f58310d9-a9f6-439a-9e8d-f62e7b41a168')
+  'Role Based Access Control Administrator (Preview)': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    'f58310d9-a9f6-439a-9e8d-f62e7b41a168'
+  )
 }
 
-resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
+var formattedRoleAssignments = [
+  for (roleAssignment, index) in (roleAssignments ?? []): union(roleAssignment, {
+    roleDefinitionId: builtInRoleNames[?roleAssignment.roleDefinitionIdOrName] ?? (contains(
+        roleAssignment.roleDefinitionIdOrName,
+        '/providers/Microsoft.Authorization/roleDefinitions/'
+      )
+      ? roleAssignment.roleDefinitionIdOrName
+      : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName))
+  })
+]
+
+#disable-next-line no-deployments-resources
+resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableTelemetry) {
   name: '46d3xbcp.res.network-networkinterface.${replace('-..--..-', '.', '-')}.${substring(uniqueString(deployment().name, location), 0, 4)}'
   properties: {
     mode: 'Incremental'
@@ -100,35 +127,63 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2023-04-01' = {
     auxiliaryMode: auxiliaryMode
     auxiliarySku: auxiliarySku
     disableTcpStateTracking: disableTcpStateTracking
-    dnsSettings: !empty(dnsServers) ? {
-      dnsServers: dnsServers
-    } : null
+    dnsSettings: !empty(dnsServers)
+      ? {
+          dnsServers: dnsServers
+        }
+      : null
     enableAcceleratedNetworking: enableAcceleratedNetworking
     enableIPForwarding: enableIPForwarding
-    networkSecurityGroup: !empty(networkSecurityGroupResourceId) ? {
-      id: networkSecurityGroupResourceId
-    } : null
-    ipConfigurations: [for (ipConfiguration, index) in ipConfigurations: {
-      name: contains(ipConfiguration, 'name') ? ipConfiguration.name : 'ipconfig0${index + 1}'
-      properties: {
-        primary: index == 0 ? true : false
-        privateIPAllocationMethod: contains(ipConfiguration, 'privateIPAllocationMethod') ? (!empty(ipConfiguration.privateIPAllocationMethod) ? ipConfiguration.privateIPAllocationMethod : null) : null
-        privateIPAddress: contains(ipConfiguration, 'privateIPAddress') ? (!empty(ipConfiguration.privateIPAddress) ? ipConfiguration.privateIPAddress : null) : null
-        publicIPAddress: contains(ipConfiguration, 'publicIPAddressResourceId') ? (ipConfiguration.publicIPAddressResourceId != null ? {
-          id: ipConfiguration.publicIPAddressResourceId
-        } : null) : null
-        subnet: {
-          id: ipConfiguration.subnetResourceId
+    networkSecurityGroup: !empty(networkSecurityGroupResourceId)
+      ? {
+          id: networkSecurityGroupResourceId
         }
-        loadBalancerBackendAddressPools: contains(ipConfiguration, 'loadBalancerBackendAddressPools') ? ipConfiguration.loadBalancerBackendAddressPools : null
-        applicationSecurityGroups: contains(ipConfiguration, 'applicationSecurityGroups') ? ipConfiguration.applicationSecurityGroups : null
-        applicationGatewayBackendAddressPools: contains(ipConfiguration, 'applicationGatewayBackendAddressPools') ? ipConfiguration.applicationGatewayBackendAddressPools : null
-        gatewayLoadBalancer: contains(ipConfiguration, 'gatewayLoadBalancer') ? ipConfiguration.gatewayLoadBalancer : null
-        loadBalancerInboundNatRules: contains(ipConfiguration, 'loadBalancerInboundNatRules') ? ipConfiguration.loadBalancerInboundNatRules : null
-        privateIPAddressVersion: contains(ipConfiguration, 'privateIPAddressVersion') ? ipConfiguration.privateIPAddressVersion : null
-        virtualNetworkTaps: contains(ipConfiguration, 'virtualNetworkTaps') ? ipConfiguration.virtualNetworkTaps : null
+      : null
+    ipConfigurations: [
+      for (ipConfiguration, index) in ipConfigurations: {
+        name: contains(ipConfiguration, 'name') ? ipConfiguration.name : 'ipconfig0${index + 1}'
+        properties: {
+          primary: index == 0 ? true : false
+          privateIPAllocationMethod: contains(ipConfiguration, 'privateIPAllocationMethod')
+            ? (!empty(ipConfiguration.privateIPAllocationMethod) ? ipConfiguration.privateIPAllocationMethod : null)
+            : null
+          privateIPAddress: contains(ipConfiguration, 'privateIPAddress')
+            ? (!empty(ipConfiguration.privateIPAddress) ? ipConfiguration.privateIPAddress : null)
+            : null
+          publicIPAddress: contains(ipConfiguration, 'publicIPAddressResourceId')
+            ? (ipConfiguration.publicIPAddressResourceId != null
+                ? {
+                    id: ipConfiguration.publicIPAddressResourceId
+                  }
+                : null)
+            : null
+          subnet: {
+            id: ipConfiguration.subnetResourceId
+          }
+          loadBalancerBackendAddressPools: contains(ipConfiguration, 'loadBalancerBackendAddressPools')
+            ? ipConfiguration.loadBalancerBackendAddressPools
+            : null
+          applicationSecurityGroups: contains(ipConfiguration, 'applicationSecurityGroups')
+            ? ipConfiguration.applicationSecurityGroups
+            : null
+          applicationGatewayBackendAddressPools: contains(ipConfiguration, 'applicationGatewayBackendAddressPools')
+            ? ipConfiguration.applicationGatewayBackendAddressPools
+            : null
+          gatewayLoadBalancer: contains(ipConfiguration, 'gatewayLoadBalancer')
+            ? ipConfiguration.gatewayLoadBalancer
+            : null
+          loadBalancerInboundNatRules: contains(ipConfiguration, 'loadBalancerInboundNatRules')
+            ? ipConfiguration.loadBalancerInboundNatRules
+            : null
+          privateIPAddressVersion: contains(ipConfiguration, 'privateIPAddressVersion')
+            ? ipConfiguration.privateIPAddressVersion
+            : null
+          virtualNetworkTaps: contains(ipConfiguration, 'virtualNetworkTaps')
+            ? ipConfiguration.virtualNetworkTaps
+            : null
+        }
       }
-    }]
+    ]
   }
 }
 
@@ -136,42 +191,50 @@ resource networkInterface_lock 'Microsoft.Authorization/locks@2020-05-01' = if (
   name: lock.?name ?? 'lock-${name}'
   properties: {
     level: lock.?kind ?? ''
-    notes: lock.?kind == 'CanNotDelete' ? 'Cannot delete resource or child resources.' : 'Cannot delete or modify the resource or child resources.'
+    notes: lock.?kind == 'CanNotDelete'
+      ? 'Cannot delete resource or child resources.'
+      : 'Cannot delete or modify the resource or child resources.'
   }
   scope: networkInterface
 }
 
-resource networkInterface_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = [for (diagnosticSetting, index) in (diagnosticSettings ?? []): {
-  name: diagnosticSetting.?name ?? '${name}-diagnosticSettings'
-  properties: {
-    storageAccountId: diagnosticSetting.?storageAccountResourceId
-    workspaceId: diagnosticSetting.?workspaceResourceId
-    eventHubAuthorizationRuleId: diagnosticSetting.?eventHubAuthorizationRuleResourceId
-    eventHubName: diagnosticSetting.?eventHubName
-    metrics: [for group in (diagnosticSetting.?metricCategories ?? [ { category: 'AllMetrics' } ]): {
-      category: group.category
-      enabled: group.?enabled ?? true
-      timeGrain: null
-    }]
-    marketplacePartnerId: diagnosticSetting.?marketplacePartnerResourceId
-    logAnalyticsDestinationType: diagnosticSetting.?logAnalyticsDestinationType
+resource networkInterface_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = [
+  for (diagnosticSetting, index) in (diagnosticSettings ?? []): {
+    name: diagnosticSetting.?name ?? '${name}-diagnosticSettings'
+    properties: {
+      storageAccountId: diagnosticSetting.?storageAccountResourceId
+      workspaceId: diagnosticSetting.?workspaceResourceId
+      eventHubAuthorizationRuleId: diagnosticSetting.?eventHubAuthorizationRuleResourceId
+      eventHubName: diagnosticSetting.?eventHubName
+      metrics: [
+        for group in (diagnosticSetting.?metricCategories ?? [{ category: 'AllMetrics' }]): {
+          category: group.category
+          enabled: group.?enabled ?? true
+          timeGrain: null
+        }
+      ]
+      marketplacePartnerId: diagnosticSetting.?marketplacePartnerResourceId
+      logAnalyticsDestinationType: diagnosticSetting.?logAnalyticsDestinationType
+    }
+    scope: networkInterface
   }
-  scope: networkInterface
-}]
+]
 
-resource networkInterface_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (roleAssignment, index) in (roleAssignments ?? []): {
-  name: guid(networkInterface.id, roleAssignment.principalId, roleAssignment.roleDefinitionIdOrName)
-  properties: {
-    roleDefinitionId: contains(builtInRoleNames, roleAssignment.roleDefinitionIdOrName) ? builtInRoleNames[roleAssignment.roleDefinitionIdOrName] : contains(roleAssignment.roleDefinitionIdOrName, '/providers/Microsoft.Authorization/roleDefinitions/') ? roleAssignment.roleDefinitionIdOrName : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName)
-    principalId: roleAssignment.principalId
-    description: roleAssignment.?description
-    principalType: roleAssignment.?principalType
-    condition: roleAssignment.?condition
-    conditionVersion: !empty(roleAssignment.?condition) ? (roleAssignment.?conditionVersion ?? '2.0') : null // Must only be set if condtion is set
-    delegatedManagedIdentityResourceId: roleAssignment.?delegatedManagedIdentityResourceId
+resource networkInterface_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
+  for (roleAssignment, index) in (formattedRoleAssignments ?? []): {
+    name: roleAssignment.?name ?? guid(networkInterface.id, roleAssignment.principalId, roleAssignment.roleDefinitionId)
+    properties: {
+      roleDefinitionId: roleAssignment.roleDefinitionId
+      principalId: roleAssignment.principalId
+      description: roleAssignment.?description
+      principalType: roleAssignment.?principalType
+      condition: roleAssignment.?condition
+      conditionVersion: !empty(roleAssignment.?condition) ? (roleAssignment.?conditionVersion ?? '2.0') : null // Must only be set if condtion is set
+      delegatedManagedIdentityResourceId: roleAssignment.?delegatedManagedIdentityResourceId
+    }
+    scope: networkInterface
   }
-  scope: networkInterface
-}]
+]
 
 // =========== //
 // Outputs     //
@@ -237,6 +300,9 @@ type diagnosticSettingType = {
 }[]?
 
 type roleAssignmentType = {
+  @description('Optional. The name (as GUID) of the role assignment. If not provided, a GUID will be generated.')
+  name: string?
+
   @description('Required. The role to assign. You can provide either the display name of the role definition, the role definition GUID, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'.')
   roleDefinitionIdOrName: string
 

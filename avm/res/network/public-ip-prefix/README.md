@@ -17,7 +17,7 @@ This module deploys a Public IP Prefix.
 | :-- | :-- |
 | `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.Network/publicIPPrefixes` | [2023-09-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/publicIPPrefixes) |
+| `Microsoft.Network/publicIPPrefixes` | [2023-09-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-09-01/publicIPPrefixes) |
 
 ## Usage examples
 
@@ -42,7 +42,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module publicIpPrefix 'br/public:avm/res/network/public-ip-prefix:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-npipmin'
+  name: 'publicIpPrefixDeployment'
   params: {
     // Required parameters
     name: 'npipmin001'
@@ -94,7 +94,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module publicIpPrefix 'br/public:avm/res/network/public-ip-prefix:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-npipmax'
+  name: 'publicIpPrefixDeployment'
   params: {
     // Required parameters
     name: 'npipmax001'
@@ -107,11 +107,13 @@ module publicIpPrefix 'br/public:avm/res/network/public-ip-prefix:<version>' = {
     }
     roleAssignments: [
       {
+        name: 'bf62ed65-07be-48e8-b760-2d59795cd282'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -127,6 +129,10 @@ module publicIpPrefix 'br/public:avm/res/network/public-ip-prefix:<version>' = {
       'hidden-title': 'This is visible in the resource name'
       Role: 'DeploymentValidation'
     }
+    zones: [
+      1
+      2
+    ]
   }
 }
 ```
@@ -163,11 +169,13 @@ module publicIpPrefix 'br/public:avm/res/network/public-ip-prefix:<version>' = {
     "roleAssignments": {
       "value": [
         {
+          "name": "bf62ed65-07be-48e8-b760-2d59795cd282",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -185,6 +193,12 @@ module publicIpPrefix 'br/public:avm/res/network/public-ip-prefix:<version>' = {
         "hidden-title": "This is visible in the resource name",
         "Role": "DeploymentValidation"
       }
+    },
+    "zones": {
+      "value": [
+        1,
+        2
+      ]
     }
   }
 }
@@ -204,7 +218,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module publicIpPrefix 'br/public:avm/res/network/public-ip-prefix:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-npipwaf'
+  name: 'publicIpPrefixDeployment'
   params: {
     // Required parameters
     name: 'npipwaf001'
@@ -277,6 +291,7 @@ module publicIpPrefix 'br/public:avm/res/network/public-ip-prefix:<version>' = {
 | [`lock`](#parameter-lock) | object | The lock settings of the service. |
 | [`roleAssignments`](#parameter-roleassignments) | array | Array of role assignments to create. |
 | [`tags`](#parameter-tags) | object | Tags of the resource. |
+| [`zones`](#parameter-zones) | array | A list of availability zones denoting the IP allocated for the resource needs to come from. |
 
 ### Parameter: `name`
 
@@ -374,6 +389,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -424,6 +440,13 @@ The description of the role assignment.
 - Required: No
 - Type: string
 
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
 ### Parameter: `roleAssignments.principalType`
 
 The principal type of the assigned principal ID.
@@ -447,6 +470,29 @@ Tags of the resource.
 
 - Required: No
 - Type: object
+
+### Parameter: `zones`
+
+A list of availability zones denoting the IP allocated for the resource needs to come from.
+
+- Required: No
+- Type: array
+- Default:
+  ```Bicep
+  [
+    1
+    2
+    3
+  ]
+  ```
+- Allowed:
+  ```Bicep
+  [
+    1
+    2
+    3
+  ]
+  ```
 
 
 ## Outputs

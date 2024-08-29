@@ -42,7 +42,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module ipGroup 'br/public:avm/res/network/ip-group:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nigmin'
+  name: 'ipGroupDeployment'
   params: {
     // Required parameters
     name: 'nigmin001'
@@ -90,7 +90,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module ipGroup 'br/public:avm/res/network/ip-group:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nigmax'
+  name: 'ipGroupDeployment'
   params: {
     // Required parameters
     name: 'nigmax001'
@@ -106,11 +106,13 @@ module ipGroup 'br/public:avm/res/network/ip-group:<version>' = {
     }
     roleAssignments: [
       {
+        name: '26438d40-c8be-4229-ba65-800cf4e49dc8'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -165,11 +167,13 @@ module ipGroup 'br/public:avm/res/network/ip-group:<version>' = {
     "roleAssignments": {
       "value": [
         {
+          "name": "26438d40-c8be-4229-ba65-800cf4e49dc8",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -206,7 +210,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module ipGroup 'br/public:avm/res/network/ip-group:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-nigwaf'
+  name: 'ipGroupDeployment'
   params: {
     // Required parameters
     name: 'nigwaf001'
@@ -272,14 +276,14 @@ module ipGroup 'br/public:avm/res/network/ip-group:<version>' = {
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`name`](#parameter-name) | string | The name of the ipGroups. |
+| [`name`](#parameter-name) | string | The name of the IP Group. |
 
 **Optional parameters**
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`enableTelemetry`](#parameter-enabletelemetry) | bool | Enable/Disable usage telemetry for module. |
-| [`ipAddresses`](#parameter-ipaddresses) | array | IpAddresses/IpAddressPrefixes in the IpGroups resource. |
+| [`ipAddresses`](#parameter-ipaddresses) | array | IpAddresses/IpAddressPrefixes in the IP Group resource. |
 | [`location`](#parameter-location) | string | Location for all resources. |
 | [`lock`](#parameter-lock) | object | The lock settings of the service. |
 | [`roleAssignments`](#parameter-roleassignments) | array | Array of role assignments to create. |
@@ -287,7 +291,7 @@ module ipGroup 'br/public:avm/res/network/ip-group:<version>' = {
 
 ### Parameter: `name`
 
-The name of the ipGroups.
+The name of the IP Group.
 
 - Required: Yes
 - Type: string
@@ -302,7 +306,7 @@ Enable/Disable usage telemetry for module.
 
 ### Parameter: `ipAddresses`
 
-IpAddresses/IpAddressPrefixes in the IpGroups resource.
+IpAddresses/IpAddressPrefixes in the IP Group resource.
 
 - Required: No
 - Type: array
@@ -374,6 +378,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -420,6 +425,13 @@ The Resource Id of the delegated managed identity resource.
 ### Parameter: `roleAssignments.description`
 
 The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
 
 - Required: No
 - Type: string

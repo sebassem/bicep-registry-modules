@@ -43,6 +43,7 @@ module nestedDependencies 'dependencies.bicep' = {
     managedIdentityName: 'dep-${namePrefix}-msi-${serviceShort}'
     applicationInsightsName: 'dep-${namePrefix}-appI-${serviceShort}'
     storageAccountName: 'dep${namePrefix}st${serviceShort}'
+    secondaryStorageAccountName: 'dep${namePrefix}st${serviceShort}2'
     location: resourceLocation
   }
 }
@@ -52,27 +53,45 @@ module nestedDependencies 'dependencies.bicep' = {
 // ============== //
 
 @batchSize(1)
-module testDeployment '../../../main.bicep' = [for iteration in [ 'init', 'idem' ]: {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
-  params: {
-    name: '${namePrefix}${serviceShort}001'
-    location: resourceLocation
-    associatedApplicationInsightsResourceId: nestedDependencies.outputs.applicationInsightsResourceId
-    associatedKeyVaultResourceId: nestedDependencies.outputs.keyVaultResourceId
-    associatedStorageAccountResourceId: nestedDependencies.outputs.storageAccountResourceId
-    sku: 'Basic'
-    customerManagedKey: {
-      keyName: nestedDependencies.outputs.keyVaultEncryptionKeyName
-      keyVaultResourceId: nestedDependencies.outputs.keyVaultResourceId
-      userAssignedIdentityResourceId: nestedDependencies.outputs.managedIdentityResourceId
+module testDeployment '../../../main.bicep' = [
+  for iteration in ['init', 'idem']: {
+    scope: resourceGroup
+    name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
+    params: {
+      name: '${namePrefix}${serviceShort}001'
+      location: resourceLocation
+      associatedApplicationInsightsResourceId: nestedDependencies.outputs.applicationInsightsResourceId
+      associatedKeyVaultResourceId: nestedDependencies.outputs.keyVaultResourceId
+      associatedStorageAccountResourceId: nestedDependencies.outputs.storageAccountResourceId
+      sku: 'Basic'
+      customerManagedKey: {
+        keyName: nestedDependencies.outputs.keyVaultEncryptionKeyName
+        keyVaultResourceId: nestedDependencies.outputs.keyVaultResourceId
+        userAssignedIdentityResourceId: nestedDependencies.outputs.managedIdentityResourceId
+      }
+      primaryUserAssignedIdentity: nestedDependencies.outputs.managedIdentityResourceId
+      managedIdentities: {
+        systemAssigned: false
+        userAssignedResourceIds: [
+          nestedDependencies.outputs.managedIdentityResourceId
+        ]
+      }
+      managedNetworkSettings: {
+        isolationMode: 'AllowInternetOutbound'
+        outboundRules: {
+          rule: {
+            type: 'PrivateEndpoint'
+            destination: {
+              serviceResourceId: nestedDependencies.outputs.secondaryStorageAccountResourceId
+              subresourceTarget: 'blob'
+            }
+            category: 'UserDefined'
+          }
+        }
+      }
     }
-    primaryUserAssignedIdentity: nestedDependencies.outputs.managedIdentityResourceId
-    managedIdentities: {
-      systemAssigned: false
-      userAssignedResourceIds: [
-        nestedDependencies.outputs.managedIdentityResourceId
-      ]
-    }
+    dependsOn: [
+      nestedDependencies
+    ]
   }
-}]
+]

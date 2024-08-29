@@ -42,7 +42,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module connection 'br/public:avm/res/network/connection:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ncmin'
+  name: 'connectionDeployment'
   params: {
     // Required parameters
     name: 'ncmin001'
@@ -114,7 +114,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module connection 'br/public:avm/res/network/connection:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ncmax'
+  name: 'connectionDeployment'
   params: {
     // Required parameters
     name: 'ncmax001'
@@ -220,7 +220,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module connection 'br/public:avm/res/network/connection:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ncwaf'
+  name: 'connectionDeployment'
   params: {
     // Required parameters
     name: 'ncwaf001'
@@ -333,6 +333,7 @@ module connection 'br/public:avm/res/network/connection:<version>' = {
 | [`peer`](#parameter-peer) | object | The remote peer. Used for connection connectionType [ExpressRoute]. |
 | [`routingWeight`](#parameter-routingweight) | int | The weight added to routes learned from this BGP speaker. |
 | [`tags`](#parameter-tags) | object | Tags of the resource. |
+| [`trafficSelectorPolicies`](#parameter-trafficselectorpolicies) | array | The traffic selector policies to be considered by this connection. |
 | [`useLocalAzureIpAddress`](#parameter-uselocalazureipaddress) | bool | Use private local Azure IP for the connection. Only available for IPSec Virtual Network Gateways that use the Azure Private IP Property. |
 | [`usePolicyBasedTrafficSelectors`](#parameter-usepolicybasedtrafficselectors) | bool | Enable policy-based traffic selectors. |
 | [`virtualNetworkGateway2`](#parameter-virtualnetworkgateway2) | object | The remote Virtual Network Gateway. Used for connection connectionType [Vnet2Vnet]. |
@@ -541,6 +542,14 @@ Tags of the resource.
 
 - Required: No
 - Type: object
+
+### Parameter: `trafficSelectorPolicies`
+
+The traffic selector policies to be considered by this connection.
+
+- Required: No
+- Type: array
+- Default: `[]`
 
 ### Parameter: `useLocalAzureIpAddress`
 

@@ -1,10 +1,5 @@
 # Activity Log Alerts `[Microsoft.Insights/activityLogAlerts]`
 
-> ⚠️THIS MODULE IS CURRENTLY ORPHANED.⚠️
-> 
-> - Only security and bug fixes are being handled by the AVM core team at present.
-> - If interested in becoming the module owner of this orphaned module (must be Microsoft FTE), please look for the related "orphaned module" GitHub issue [here](https://aka.ms/AVM/OrphanedModules)!
-
 This module deploys an Activity Log Alert.
 
 ## Navigation
@@ -46,7 +41,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module activityLogAlert 'br/public:avm/res/insights/activity-log-alert:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ialamin'
+  name: 'activityLogAlertDeployment'
   params: {
     // Required parameters
     conditions: [
@@ -156,7 +151,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module activityLogAlert 'br/public:avm/res/insights/activity-log-alert:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ialamax'
+  name: 'activityLogAlertDeployment'
   params: {
     // Required parameters
     conditions: [
@@ -201,11 +196,13 @@ module activityLogAlert 'br/public:avm/res/insights/activity-log-alert:<version>
     location: 'global'
     roleAssignments: [
       {
+        name: 'be96d7a9-6596-40c7-9acd-db6acd5cd41b'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -292,11 +289,13 @@ module activityLogAlert 'br/public:avm/res/insights/activity-log-alert:<version>
     "roleAssignments": {
       "value": [
         {
+          "name": "be96d7a9-6596-40c7-9acd-db6acd5cd41b",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -338,7 +337,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module activityLogAlert 'br/public:avm/res/insights/activity-log-alert:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ialawaf'
+  name: 'activityLogAlertDeployment'
   params: {
     // Required parameters
     conditions: [
@@ -572,6 +571,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -618,6 +618,13 @@ The Resource Id of the delegated managed identity resource.
 ### Parameter: `roleAssignments.description`
 
 The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
 
 - Required: No
 - Type: string

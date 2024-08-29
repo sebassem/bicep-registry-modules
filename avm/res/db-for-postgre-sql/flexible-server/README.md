@@ -49,15 +49,22 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module flexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dfpsfsmin'
+  name: 'flexibleServerDeployment'
   params: {
     // Required parameters
     name: 'dfpsfsmin001'
-    skuName: 'Standard_B2s'
-    tier: 'Burstable'
+    skuName: 'Standard_D2s_v3'
+    tier: 'GeneralPurpose'
     // Non-required parameters
-    administratorLogin: 'adminUserName'
-    administratorLoginPassword: '<administratorLoginPassword>'
+    administrators: [
+      {
+        objectId: '<objectId>'
+        principalName: '<principalName>'
+        principalType: 'ServicePrincipal'
+      }
+    ]
+    geoRedundantBackup: 'Enabled'
+    highAvailability: 'ZoneRedundant'
     location: '<location>'
   }
 }
@@ -80,17 +87,26 @@ module flexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:<ver
       "value": "dfpsfsmin001"
     },
     "skuName": {
-      "value": "Standard_B2s"
+      "value": "Standard_D2s_v3"
     },
     "tier": {
-      "value": "Burstable"
+      "value": "GeneralPurpose"
     },
     // Non-required parameters
-    "administratorLogin": {
-      "value": "adminUserName"
+    "administrators": {
+      "value": [
+        {
+          "objectId": "<objectId>",
+          "principalName": "<principalName>",
+          "principalType": "ServicePrincipal"
+        }
+      ]
     },
-    "administratorLoginPassword": {
-      "value": "<administratorLoginPassword>"
+    "geoRedundantBackup": {
+      "value": "Enabled"
+    },
+    "highAvailability": {
+      "value": "ZoneRedundant"
     },
     "location": {
       "value": "<location>"
@@ -113,7 +129,7 @@ This instance deploys the module using Customer-Managed-Keys using a User-Assign
 
 ```bicep
 module flexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dfpsfse'
+  name: 'flexibleServerDeployment'
   params: {
     // Required parameters
     name: 'dfpsfse001'
@@ -201,7 +217,7 @@ This instance deploys the module with private access only.
 
 ```bicep
 module flexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dfpsfspvt'
+  name: 'flexibleServerDeployment'
   params: {
     // Required parameters
     name: 'dfpsfspvt001'
@@ -403,7 +419,7 @@ This instance deploys the module with public access.
 
 ```bicep
 module flexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dfpsfsp'
+  name: 'flexibleServerDeployment'
   params: {
     // Required parameters
     name: 'dfpsfsp001'
@@ -647,7 +663,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module flexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-dfpsfswaf'
+  name: 'flexibleServerDeployment'
   params: {
     // Required parameters
     name: 'dfpsfswaf001'
@@ -693,7 +709,14 @@ module flexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:<ver
       }
     ]
     geoRedundantBackup: 'Enabled'
+    highAvailability: 'ZoneRedundant'
     location: '<location>'
+    maintenanceWindow: {
+      customWindow: 'Enabled'
+      dayOfWeek: 0
+      startHour: 1
+      startMinute: 0
+    }
     privateDnsZoneArmResourceId: '<privateDnsZoneArmResourceId>'
     tags: {
       Environment: 'Non-Prod'
@@ -778,8 +801,19 @@ module flexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:<ver
     "geoRedundantBackup": {
       "value": "Enabled"
     },
+    "highAvailability": {
+      "value": "ZoneRedundant"
+    },
     "location": {
       "value": "<location>"
+    },
+    "maintenanceWindow": {
+      "value": {
+        "customWindow": "Enabled",
+        "dayOfWeek": 0,
+        "startHour": 1,
+        "startMinute": 0
+      }
     },
     "privateDnsZoneArmResourceId": {
       "value": "<privateDnsZoneArmResourceId>"
@@ -1250,7 +1284,7 @@ The mode for high availability.
 
 - Required: No
 - Type: string
-- Default: `'Disabled'`
+- Default: `'ZoneRedundant'`
 - Allowed:
   ```Bicep
   [
@@ -1310,7 +1344,15 @@ Properties for the maintenence window. If provided, 'customWindow' property must
 
 - Required: No
 - Type: object
-- Default: `{}`
+- Default:
+  ```Bicep
+  {
+      customWindow: 'Enabled'
+      dayOfWeek: 0
+      startHour: 1
+      startMinute: 0
+  }
+  ```
 
 ### Parameter: `passwordAuth`
 
@@ -1357,6 +1399,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -1403,6 +1446,13 @@ The Resource Id of the delegated managed identity resource.
 ### Parameter: `roleAssignments.description`
 
 The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
 
 - Required: No
 - Type: string
@@ -1468,7 +1518,7 @@ PostgreSQL Server version.
 
 - Required: No
 - Type: string
-- Default: `'15'`
+- Default: `'16'`
 - Allowed:
   ```Bicep
   [
@@ -1477,6 +1527,7 @@ PostgreSQL Server version.
     '13'
     '14'
     '15'
+    '16'
   ]
   ```
 
@@ -1485,6 +1536,7 @@ PostgreSQL Server version.
 
 | Output | Type | Description |
 | :-- | :-- | :-- |
+| `fqdn` | string | The FQDN of the PostgreSQL Flexible server. |
 | `location` | string | The location the resource was deployed into. |
 | `name` | string | The name of the deployed PostgreSQL Flexible server. |
 | `resourceGroupName` | string | The resource group of the deployed PostgreSQL Flexible server. |

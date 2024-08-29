@@ -75,8 +75,12 @@ module testDeployment '../../../main.bicep' = {
     hostingMode: 'highDensity'
     partitionCount: 2
     replicaCount: 3
+    semanticSearch: 'standard'
     managedIdentities: {
       systemAssigned: true
+      userAssignedResourceIds: [
+        nestedDependencies.outputs.managedIdentityResourceId
+      ]
     }
     lock: {
       kind: 'CanNotDelete'
@@ -84,17 +88,22 @@ module testDeployment '../../../main.bicep' = {
     }
     roleAssignments: [
       {
+        name: '73ec30e0-2e25-475f-beec-d90cab332eb7'
         roleDefinitionIdOrName: 'Owner'
         principalId: nestedDependencies.outputs.managedIdentityPrincipalId
         principalType: 'ServicePrincipal'
       }
       {
+        name: guid('Custom seed ${namePrefix}${serviceShort}')
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
         principalId: nestedDependencies.outputs.managedIdentityPrincipalId
         principalType: 'ServicePrincipal'
       }
       {
-        roleDefinitionIdOrName: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
+        roleDefinitionIdOrName: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+        )
         principalId: nestedDependencies.outputs.managedIdentityPrincipalId
         principalType: 'ServicePrincipal'
       }
@@ -129,4 +138,8 @@ module testDeployment '../../../main.bicep' = {
       Role: 'DeploymentValidation'
     }
   }
+  dependsOn: [
+    nestedDependencies
+    diagnosticDependencies
+  ]
 }

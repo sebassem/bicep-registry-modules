@@ -16,7 +16,7 @@ binding:
 # Require minimum versions of modules.
 requires:
   PSRule: "@pre >=2.9.0"
-  PSRule.Rules.Azure: ">=1.29.0"
+  PSRule.Rules.Azure: "@pre >=1.29.0"
 
 # Use PSRule for Azure.
 include:
@@ -35,8 +35,9 @@ input:
   pathIgnore:
     # Exclude all files.
     - "*"
-    # Only process test files.
-    - "!avm/**/*.test.bicep"
+    # Only process defaults and waf-aligned test files.
+    - "!avm/**/defaults/*.test.bicep"
+    - "!avm/**/waf-aligned/*.test.bicep"
 
 configuration:
   # Enable automatic expansion of Azure parameter files.
@@ -46,7 +47,7 @@ configuration:
   AZURE_BICEP_FILE_EXPANSION: true
 
   # Configures the number of seconds to wait for build Bicep files.
-  AZURE_BICEP_FILE_EXPANSION_TIMEOUT: 10
+  AZURE_BICEP_FILE_EXPANSION_TIMEOUT: 20
 
   # Custom non-sensitive parameters' names
   AZURE_DEPLOYMENT_NONSENSITIVE_PARAMETER_NAMES:
@@ -68,7 +69,7 @@ configuration:
       "tokenname",
       "ssoClientSecretKeyVaultPath",
       "ssoSecretType",
-      "tokenValidityLength"
+      "tokenValidityLength",
     ]
 
 rule:
@@ -78,3 +79,5 @@ rule:
     # Ignore the following rules for all resources
     - Azure.KeyVault.PurgeProtect
     - Azure.VM.UseHybridUseBenefit
+    - Azure.AppConfig.PurgeProtect
+    - Azure.MySQL.MaintenanceWindow # Must be excluded until https://msdata.visualstudio.com/Database%20Systems/_workitems/edit/2788114 is fixed

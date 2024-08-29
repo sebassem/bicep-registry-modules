@@ -17,6 +17,9 @@ param resourceLocation string = deployment().location
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
 param serviceShort string = 'mlswwaf'
 
+@description('Generated. Used as a basis for unique resource names.')
+param baseTime string = utcNow('u')
+
 @description('Optional. A token to inject into the name of each resource.')
 param namePrefix string = '#_namePrefix_#'
 
@@ -37,7 +40,7 @@ module nestedDependencies 'dependencies.bicep' = {
   params: {
     virtualNetworkName: 'dep-${namePrefix}-vnet-${serviceShort}'
     managedIdentityName: 'dep-${namePrefix}-msi-${serviceShort}'
-    keyVaultName: 'dep-${namePrefix}-kv-${serviceShort}'
+    keyVaultName: 'dep-${namePrefix}-kv-${serviceShort}-${substring(uniqueString(baseTime), 0, 3)}'
     applicationInsightsName: 'dep-${namePrefix}-appi-${serviceShort}'
     storageAccountName: 'dep${namePrefix}st${serviceShort}'
     location: resourceLocation
@@ -63,41 +66,80 @@ module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/t
 // ============== //
 
 @batchSize(1)
-module testDeployment '../../../main.bicep' = [for iteration in [ 'init', 'idem' ]: {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
-  params: {
-    name: '${namePrefix}${serviceShort}001'
-    location: resourceLocation
-    associatedApplicationInsightsResourceId: nestedDependencies.outputs.applicationInsightsResourceId
-    associatedKeyVaultResourceId: nestedDependencies.outputs.keyVaultResourceId
-    associatedStorageAccountResourceId: nestedDependencies.outputs.storageAccountResourceId
-    sku: 'Standard'
-    diagnosticSettings: [
-      {
-        eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
-        eventHubAuthorizationRuleResourceId: diagnosticDependencies.outputs.eventHubAuthorizationRuleId
-        storageAccountResourceId: diagnosticDependencies.outputs.storageAccountResourceId
-        workspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
-      }
-    ]
-    privateEndpoints: [
-      {
-        subnetResourceId: nestedDependencies.outputs.subnetResourceId
-        privateDnsZoneResourceIds: [
-          nestedDependencies.outputs.privateDNSZoneResourceId
-        ]
-        tags: {
-          'hidden-title': 'This is visible in the resource name'
-          Environment: 'Non-Prod'
-          Role: 'DeploymentValidation'
+module testDeployment '../../../main.bicep' = [
+  for iteration in ['init', 'idem']: {
+    scope: resourceGroup
+    name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
+    params: {
+      name: '${namePrefix}${serviceShort}001'
+      location: resourceLocation
+      associatedApplicationInsightsResourceId: nestedDependencies.outputs.applicationInsightsResourceId
+      associatedKeyVaultResourceId: nestedDependencies.outputs.keyVaultResourceId
+      associatedStorageAccountResourceId: nestedDependencies.outputs.storageAccountResourceId
+      sku: 'Standard'
+      diagnosticSettings: [
+        {
+          eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
+          eventHubAuthorizationRuleResourceId: diagnosticDependencies.outputs.eventHubAuthorizationRuleId
+          storageAccountResourceId: diagnosticDependencies.outputs.storageAccountResourceId
+          workspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
+        }
+      ]
+      privateEndpoints: [
+        {
+          subnetResourceId: nestedDependencies.outputs.subnetResourceId
+          privateDnsZoneGroup: {
+            privateDnsZoneGroupConfigs: [
+              {
+                privateDnsZoneResourceId: nestedDependencies.outputs.privateDNSZoneResourceId
+              }
+            ]
+          }
+          tags: {
+            'hidden-title': 'This is visible in the resource name'
+            Environment: 'Non-Prod'
+            Role: 'DeploymentValidation'
+          }
+        }
+      ]
+      managedNetworkSettings: {
+        isolationMode: 'AllowOnlyApprovedOutbound'
+        outboundRules: {
+          rule1: {
+            type: 'PrivateEndpoint'
+            destination: {
+              serviceResourceId: diagnosticDependencies.outputs.storageAccountResourceId
+              subresourceTarget: 'blob'
+              sparkEnabled: true
+            }
+            category: 'UserDefined'
+          }
+          rule2: {
+            type: 'FQDN'
+            destination: 'pypi.org'
+            category: 'UserDefined'
+          }
+          rule3: {
+            type: 'ServiceTag'
+            destination: {
+              serviceTag: 'AppService'
+              portRanges: '80,443'
+              protocol: 'TCP'
+            }
+            category: 'UserDefined'
+          }
         }
       }
-    ]
-    tags: {
-      'hidden-title': 'This is visible in the resource name'
-      Environment: 'Non-Prod'
-      Role: 'DeploymentValidation'
+      systemDatastoresAuthMode: 'identity'
+      tags: {
+        'hidden-title': 'This is visible in the resource name'
+        Environment: 'Non-Prod'
+        Role: 'DeploymentValidation'
+      }
     }
+    dependsOn: [
+      nestedDependencies
+      diagnosticDependencies
+    ]
   }
-}]
+]

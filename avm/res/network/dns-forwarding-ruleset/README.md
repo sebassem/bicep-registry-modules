@@ -44,7 +44,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ndfrsmin'
+  name: 'dnsForwardingRulesetDeployment'
   params: {
     // Required parameters
     dnsForwardingRulesetOutboundEndpointResourceIds: [
@@ -100,7 +100,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ndfrsmax'
+  name: 'dnsForwardingRulesetDeployment'
   params: {
     // Required parameters
     dnsForwardingRulesetOutboundEndpointResourceIds: [
@@ -128,11 +128,13 @@ module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<v
     }
     roleAssignments: [
       {
+        name: '38837eb6-838b-4c77-8d7d-baa102195d9f'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -148,8 +150,11 @@ module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<v
       'hidden-title': 'This is visible in the resource name'
       Role: 'DeploymentValidation'
     }
-    vNetLinks: [
-      '<virtualNetworkResourceId>'
+    virtualNetworkLinks: [
+      {
+        name: 'mytestvnetlink1'
+        virtualNetworkResourceId: '<virtualNetworkResourceId>'
+      }
     ]
   }
 }
@@ -204,11 +209,13 @@ module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<v
     "roleAssignments": {
       "value": [
         {
+          "name": "38837eb6-838b-4c77-8d7d-baa102195d9f",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -227,9 +234,12 @@ module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<v
         "Role": "DeploymentValidation"
       }
     },
-    "vNetLinks": {
+    "virtualNetworkLinks": {
       "value": [
-        "<virtualNetworkResourceId>"
+        {
+          "name": "mytestvnetlink1",
+          "virtualNetworkResourceId": "<virtualNetworkResourceId>"
+        }
       ]
     }
   }
@@ -250,7 +260,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-ndfrswaf'
+  name: 'dnsForwardingRulesetDeployment'
   params: {
     // Required parameters
     dnsForwardingRulesetOutboundEndpointResourceIds: [
@@ -337,7 +347,7 @@ module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<v
 | [`lock`](#parameter-lock) | object | The lock settings of the service. |
 | [`roleAssignments`](#parameter-roleassignments) | array | Array of role assignments to create. |
 | [`tags`](#parameter-tags) | object | Tags of the resource. |
-| [`vNetLinks`](#parameter-vnetlinks) | array | Array of virtual network links. |
+| [`virtualNetworkLinks`](#parameter-virtualnetworklinks) | array | Array of virtual network links. |
 
 ### Parameter: `dnsForwardingRulesetOutboundEndpointResourceIds`
 
@@ -512,6 +522,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -562,6 +573,13 @@ The description of the role assignment.
 - Required: No
 - Type: string
 
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
 ### Parameter: `roleAssignments.principalType`
 
 The principal type of the assigned principal ID.
@@ -586,12 +604,38 @@ Tags of the resource.
 - Required: No
 - Type: object
 
-### Parameter: `vNetLinks`
+### Parameter: `virtualNetworkLinks`
 
 Array of virtual network links.
 
 - Required: No
 - Type: array
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`virtualNetworkResourceId`](#parameter-virtualnetworklinksvirtualnetworkresourceid) | string | The resource ID of the virtual network to link. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`name`](#parameter-virtualnetworklinksname) | string | The name of the virtual network link. |
+
+### Parameter: `virtualNetworkLinks.virtualNetworkResourceId`
+
+The resource ID of the virtual network to link.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `virtualNetworkLinks.name`
+
+The name of the virtual network link.
+
+- Required: No
+- Type: string
 
 
 ## Outputs

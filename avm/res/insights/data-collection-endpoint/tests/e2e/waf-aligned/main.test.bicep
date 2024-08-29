@@ -25,7 +25,7 @@ param namePrefix string = '#_namePrefix_#'
 
 // General resources
 // =================
-resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
   location: resourceLocation
 }
@@ -35,18 +35,20 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 // ============== //
 
 @batchSize(1)
-module testDeployment '../../../main.bicep' = [for iteration in [ 'init', 'idem' ]: {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
-  params: {
-    name: '${namePrefix}${serviceShort}001'
-    location: resourceLocation
-    publicNetworkAccess: 'Disabled'
-    kind: 'Windows'
-    tags: {
-      'hidden-title': 'This is visible in the resource name'
-      resourceType: 'Data Collection Rules'
+module testDeployment '../../../main.bicep' = [
+  for iteration in ['init', 'idem']: {
+    scope: resourceGroup
+    name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
+    params: {
+      name: '${namePrefix}${serviceShort}001'
+      location: resourceLocation
+      publicNetworkAccess: 'Disabled'
       kind: 'Windows'
+      tags: {
+        'hidden-title': 'This is visible in the resource name'
+        resourceType: 'Data Collection Rules'
+        kind: 'Windows'
+      }
     }
   }
-}]
+]

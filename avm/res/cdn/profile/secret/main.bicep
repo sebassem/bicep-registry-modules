@@ -38,15 +38,19 @@ resource secret 'Microsoft.Cdn/profiles/secrets@2023-05-01' = {
   name: name
   parent: profile
   properties: {
-    parameters: (type == 'CustomerCertificate') ? {
-      type: type
-      secretSource: {
-        id: secretSourceResourceId
-      }
-      secretVersion: secretVersion
-      subjectAlternativeNames: subjectAlternativeNames
-      useLatestVersion: useLatestVersion
-    } : null
+    // False positive
+    #disable-next-line BCP225
+    parameters: (type == 'CustomerCertificate')
+      ? {
+          type: type
+          secretSource: {
+            id: secretSourceResourceId
+          }
+          secretVersion: secretVersion
+          subjectAlternativeNames: subjectAlternativeNames
+          useLatestVersion: useLatestVersion
+        }
+      : null
   }
 }
 

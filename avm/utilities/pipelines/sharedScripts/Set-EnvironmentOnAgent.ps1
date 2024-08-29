@@ -63,7 +63,7 @@ function Install-CustomModule {
                 $alreadyInstalled = $alreadyInstalled | Where-Object { $_.Version -eq $Module.Version }
             } else {
                 # Get latest in case of multiple
-                $alreadyInstalled = ($alreadyInstalled | Sort-Object -Property Version -Descending)[0]
+                $alreadyInstalled = ($alreadyInstalled | Sort-Object -Culture 'en-US' -Property 'Version' -Descending)[0]
             }
             Write-Verbose ('Module [{0}] already installed with version [{1}]' -f $alreadyInstalled.Name, $alreadyInstalled.Version) -Verbose
             continue
@@ -170,7 +170,7 @@ function Set-EnvironmentOnAgent {
     Write-Verbose 'Preinstalled Bicep CLI version:' -Verbose
     bicep --version
 
-    Write-Verbose ("Install latest Bicep CLI") -Verbose
+    Write-Verbose ('Install latest Bicep CLI') -Verbose
     # Fetch the latest Bicep CLI binary
     curl -Lo bicep 'https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64'
     # Mark it as executable

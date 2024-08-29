@@ -17,7 +17,7 @@ This module deploys a Compute Disk
 | :-- | :-- |
 | `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.Compute/disks` | [2022-07-02](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Compute/2022-07-02/disks) |
+| `Microsoft.Compute/disks` | [2023-10-02](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Compute/2023-10-02/disks) |
 
 ## Usage examples
 
@@ -44,9 +44,10 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module disk 'br/public:avm/res/compute/disk:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-cdmin'
+  name: 'diskDeployment'
   params: {
     // Required parameters
+    availabilityZone: 0
     name: 'cdmin001'
     sku: 'Standard_LRS'
     // Non-required parameters
@@ -69,6 +70,9 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
+    "availabilityZone": {
+      "value": 0
+    },
     "name": {
       "value": "cdmin001"
     },
@@ -100,9 +104,10 @@ This instance deploys the module with an image reference.
 
 ```bicep
 module disk 'br/public:avm/res/compute/disk:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-cdimg'
+  name: 'diskDeployment'
   params: {
     // Required parameters
+    availabilityZone: 0
     name: 'cdimg001'
     sku: 'Standard_LRS'
     // Non-required parameters
@@ -126,6 +131,9 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
+    "availabilityZone": {
+      "value": 0
+    },
     "name": {
       "value": "cdimg001"
     },
@@ -160,9 +168,10 @@ This instance deploys the module with a custom image that is imported from a VHD
 
 ```bicep
 module disk 'br/public:avm/res/compute/disk:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-cdimp'
+  name: 'diskDeployment'
   params: {
     // Required parameters
+    availabilityZone: 0
     name: 'cdimp001'
     sku: 'Standard_LRS'
     // Non-required parameters
@@ -187,6 +196,9 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
+    "availabilityZone": {
+      "value": 0
+    },
     "name": {
       "value": "cdimp001"
     },
@@ -224,11 +236,12 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module disk 'br/public:avm/res/compute/disk:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-cdmax'
+  name: 'diskDeployment'
   params: {
     // Required parameters
+    availabilityZone: 2
     name: 'cdmax001'
-    sku: 'UltraSSD_LRS'
+    sku: 'Premium_LRS'
     // Non-required parameters
     diskIOPSReadWrite: 500
     diskMBpsReadWrite: 60
@@ -243,11 +256,13 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
     publicNetworkAccess: 'Enabled'
     roleAssignments: [
       {
+        name: '89cc419c-8383-461d-9a70-5cfae4045a8d'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -280,11 +295,14 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
+    "availabilityZone": {
+      "value": 2
+    },
     "name": {
       "value": "cdmax001"
     },
     "sku": {
-      "value": "UltraSSD_LRS"
+      "value": "Premium_LRS"
     },
     // Non-required parameters
     "diskIOPSReadWrite": {
@@ -317,11 +335,13 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
     "roleAssignments": {
       "value": [
         {
+          "name": "89cc419c-8383-461d-9a70-5cfae4045a8d",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -358,11 +378,12 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module disk 'br/public:avm/res/compute/disk:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-cdwaf'
+  name: 'diskDeployment'
   params: {
     // Required parameters
+    availabilityZone: 2
     name: 'cdwaf001'
-    sku: 'UltraSSD_LRS'
+    sku: 'Premium_LRS'
     // Non-required parameters
     diskIOPSReadWrite: 500
     diskMBpsReadWrite: 60
@@ -397,11 +418,14 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
+    "availabilityZone": {
+      "value": 2
+    },
     "name": {
       "value": "cdwaf001"
     },
     "sku": {
-      "value": "UltraSSD_LRS"
+      "value": "Premium_LRS"
     },
     // Non-required parameters
     "diskIOPSReadWrite": {
@@ -452,6 +476,7 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
+| [`availabilityZone`](#parameter-availabilityzone) | int | If set to 1, 2 or 3, the availability zone is hardcoded to that value. If zero, then availability zones are not used. Note that the availability zone number here are the logical availability zone in your Azure subscription. Different subscriptions might have a different mapping of the physical zone and logical zone.To understand more, please refer to [Physical and logical availability zones](https://learn.microsoft.com/en-us/azure/reliability/availability-zones-overview?tabs=azure-cli#physical-and-logical-availability-zones) and [Distribute VMs and disks across availability zones](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-high-availability#distribute-vms-and-disks-across-availability-zones). |
 | [`name`](#parameter-name) | string | The name of the disk that is being created. |
 | [`sku`](#parameter-sku) | string | The disks sku name. Can be . |
 
@@ -473,6 +498,7 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
 | [`createOption`](#parameter-createoption) | string | Sources of a disk creation. |
 | [`diskIOPSReadWrite`](#parameter-diskiopsreadwrite) | int | The number of IOPS allowed for this disk; only settable for UltraSSD disks. |
 | [`diskMBpsReadWrite`](#parameter-diskmbpsreadwrite) | int | The bandwidth allowed for this disk; only settable for UltraSSD disks. |
+| [`edgeZone`](#parameter-edgezone) | string | Specifies the Edge Zone within the Azure Region where this Managed Disk should exist. Changing this forces a new Managed Disk to be created. |
 | [`enableTelemetry`](#parameter-enabletelemetry) | bool | Enable/Disable usage telemetry for module. |
 | [`hyperVGeneration`](#parameter-hypervgeneration) | string | The hypervisor generation of the Virtual Machine. Applicable to OS disks only. |
 | [`imageReferenceId`](#parameter-imagereferenceid) | string | A relative uri containing either a Platform Image Repository or user image reference. |
@@ -491,6 +517,22 @@ module disk 'br/public:avm/res/compute/disk:<version>' = {
 | [`tags`](#parameter-tags) | object | Tags of the availability set resource. |
 | [`uploadSizeBytes`](#parameter-uploadsizebytes) | int | If create option is Upload, this is the size of the contents of the upload including the VHD footer. |
 
+### Parameter: `availabilityZone`
+
+If set to 1, 2 or 3, the availability zone is hardcoded to that value. If zero, then availability zones are not used. Note that the availability zone number here are the logical availability zone in your Azure subscription. Different subscriptions might have a different mapping of the physical zone and logical zone.To understand more, please refer to [Physical and logical availability zones](https://learn.microsoft.com/en-us/azure/reliability/availability-zones-overview?tabs=azure-cli#physical-and-logical-availability-zones) and [Distribute VMs and disks across availability zones](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-high-availability#distribute-vms-and-disks-across-availability-zones).
+
+- Required: Yes
+- Type: int
+- Allowed:
+  ```Bicep
+  [
+    0
+    1
+    2
+    3
+  ]
+  ```
+
 ### Parameter: `name`
 
 The name of the disk that is being created.
@@ -508,7 +550,6 @@ The disks sku name. Can be .
   ```Bicep
   [
     'Premium_LRS'
-    'Premium_ZRS'
     'Premium_ZRS'
     'PremiumV2_LRS'
     'Standard_LRS'
@@ -611,6 +652,21 @@ The bandwidth allowed for this disk; only settable for UltraSSD disks.
 - Required: No
 - Type: int
 - Default: `0`
+
+### Parameter: `edgeZone`
+
+Specifies the Edge Zone within the Azure Region where this Managed Disk should exist. Changing this forces a new Managed Disk to be created.
+
+- Required: No
+- Type: string
+- Default: `''`
+- Allowed:
+  ```Bicep
+  [
+    ''
+    'EdgeZone'
+  ]
+  ```
 
 ### Parameter: `enableTelemetry`
 
@@ -780,6 +836,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -826,6 +883,13 @@ The Resource Id of the delegated managed identity resource.
 ### Parameter: `roleAssignments.description`
 
 The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
 
 - Required: No
 - Type: string

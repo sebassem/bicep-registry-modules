@@ -44,6 +44,9 @@ param tier string
 @description('Optional. Availability zone information of the server. Default will have no preference set.')
 param availabilityZone string = ''
 
+@description('Optional. Standby availability zone information of the server. Default will have no preference set.')
+param highAvailabilityZone string = ''
+
 @minValue(1)
 @maxValue(35)
 @description('Optional. Backup retention days for the server.')
@@ -54,7 +57,7 @@ param backupRetentionDays int = 7
   'Enabled'
 ])
 @description('Optional. A value indicating whether Geo-Redundant backup is enabled on the server. If "Enabled" and "cMKKeyName" is not empty, then "geoBackupCMKKeyVaultResourceId" and "cMKUserAssignedIdentityResourceId" are also required.')
-param geoRedundantBackup string = 'Disabled'
+param geoRedundantBackup string = 'Enabled'
 
 @allowed([
   'Default'
@@ -80,7 +83,7 @@ param customerManagedKeyGeo customerManagedKeyType
   'ZoneRedundant'
 ])
 @description('Optional. The mode for High Availability (HA). It is not supported for the Burstable pricing tier and Zone redundant HA can only be set during server provisioning.')
-param highAvailability string = 'Disabled'
+param highAvailability string = 'ZoneRedundant'
 
 @description('Optional. Properties for the maintenence window. If provided, "customWindow" property must exist and set to "Enabled".')
 param maintenanceWindow object = {}
@@ -145,7 +148,7 @@ param storageSizeGB int = 64
   '8.0.21'
 ])
 @description('Optional. MySQL Server version.')
-param version string = '5.7'
+param version string = '8.0.21'
 
 @description('Optional. The databases to create in the server.')
 param databases array = []
@@ -162,23 +165,58 @@ param diagnosticSettings diagnosticSettingType
 @description('Optional. Enable/Disable usage telemetry for module.')
 param enableTelemetry bool = true
 
-var formattedUserAssignedIdentities = reduce(map((managedIdentities.?userAssignedResourceIds ?? []), (id) => { '${id}': {} }), {}, (cur, next) => union(cur, next)) // Converts the flat array to an object like { '${id1}': {}, '${id2}': {} }
+var standByAvailabilityZoneTable = {
+  Disabled: null
+  SameZone: availabilityZone
+  ZoneRedundant: highAvailabilityZone
+}
 
-var identity = !empty(managedIdentities) ? {
-  type: !empty(managedIdentities.?userAssignedResourceIds ?? {}) ? 'UserAssigned' : null
-  userAssignedIdentities: !empty(formattedUserAssignedIdentities) ? formattedUserAssignedIdentities : null
-} : null
+var standByAvailabilityZone = standByAvailabilityZoneTable[?highAvailability]
+
+var formattedUserAssignedIdentities = reduce(
+  map((managedIdentities.?userAssignedResourceIds ?? []), (id) => { '${id}': {} }),
+  {},
+  (cur, next) => union(cur, next)
+) // Converts the flat array to an object like { '${id1}': {}, '${id2}': {} }
+
+var identity = !empty(managedIdentities)
+  ? {
+      type: !empty(managedIdentities.?userAssignedResourceIds ?? {}) ? 'UserAssigned' : null
+      userAssignedIdentities: !empty(formattedUserAssignedIdentities) ? formattedUserAssignedIdentities : null
+    }
+  : null
 
 var builtInRoleNames = {
   Contributor: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
-  'MySQL Backup And Export Operator': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'd18ad5f3-1baf-4119-b49b-d944edb1f9d0')
+  'MySQL Backup And Export Operator': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    'd18ad5f3-1baf-4119-b49b-d944edb1f9d0'
+  )
   Owner: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')
   Reader: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
-  'Role Based Access Control Administrator (Preview)': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'f58310d9-a9f6-439a-9e8d-f62e7b41a168')
-  'User Access Administrator': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '18d7d88d-d35e-4fb5-a5c3-7773c20a72d9')
+  'Role Based Access Control Administrator (Preview)': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    'f58310d9-a9f6-439a-9e8d-f62e7b41a168'
+  )
+  'User Access Administrator': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    '18d7d88d-d35e-4fb5-a5c3-7773c20a72d9'
+  )
 }
 
-resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
+var formattedRoleAssignments = [
+  for (roleAssignment, index) in (roleAssignments ?? []): union(roleAssignment, {
+    roleDefinitionId: builtInRoleNames[?roleAssignment.roleDefinitionIdOrName] ?? (contains(
+        roleAssignment.roleDefinitionIdOrName,
+        '/providers/Microsoft.Authorization/roleDefinitions/'
+      )
+      ? roleAssignment.roleDefinitionIdOrName
+      : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName))
+  })
+]
+
+#disable-next-line no-deployments-resources
+resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableTelemetry) {
   name: '46d3xbcp.res.dbformysql-flexibleserver.${replace('-..--..-', '.', '-')}.${substring(uniqueString(deployment().name, location), 0, 4)}'
   properties: {
     mode: 'Incremental'
@@ -198,7 +236,10 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableT
 
 resource cMKKeyVault 'Microsoft.KeyVault/vaults@2023-02-01' existing = if (!empty(customerManagedKey.?keyVaultResourceId)) {
   name: last(split((customerManagedKey.?keyVaultResourceId ?? 'dummyVault'), '/'))
-  scope: resourceGroup(split((customerManagedKey.?keyVaultResourceId ?? '//'), '/')[2], split((customerManagedKey.?keyVaultResourceId ?? '////'), '/')[4])
+  scope: resourceGroup(
+    split((customerManagedKey.?keyVaultResourceId ?? '//'), '/')[2],
+    split((customerManagedKey.?keyVaultResourceId ?? '////'), '/')[4]
+  )
 
   resource cMKKey 'keys@2023-02-01' existing = if (!empty(customerManagedKey.?keyVaultResourceId) && !empty(customerManagedKey.?keyName)) {
     name: customerManagedKey.?keyName ?? 'dummyKey'
@@ -207,12 +248,18 @@ resource cMKKeyVault 'Microsoft.KeyVault/vaults@2023-02-01' existing = if (!empt
 
 resource cMKUserAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = if (!empty(customerManagedKey.?userAssignedIdentityResourceId)) {
   name: last(split(customerManagedKey.?userAssignedIdentityResourceId ?? 'dummyMsi', '/'))
-  scope: resourceGroup(split((customerManagedKey.?userAssignedIdentityResourceId ?? '//'), '/')[2], split((customerManagedKey.?userAssignedIdentityResourceId ?? '////'), '/')[4])
+  scope: resourceGroup(
+    split((customerManagedKey.?userAssignedIdentityResourceId ?? '//'), '/')[2],
+    split((customerManagedKey.?userAssignedIdentityResourceId ?? '////'), '/')[4]
+  )
 }
 
 resource cMKGeoKeyVault 'Microsoft.KeyVault/vaults@2023-02-01' existing = if (!empty(customerManagedKeyGeo.?keyVaultResourceId)) {
   name: last(split((customerManagedKeyGeo.?keyVaultResourceId ?? 'dummyVault'), '/'))
-  scope: resourceGroup(split((customerManagedKeyGeo.?keyVaultResourceId ?? '//'), '/')[2], split((customerManagedKeyGeo.?keyVaultResourceId ?? '////'), '/')[4])
+  scope: resourceGroup(
+    split((customerManagedKeyGeo.?keyVaultResourceId ?? '//'), '/')[2],
+    split((customerManagedKeyGeo.?keyVaultResourceId ?? '////'), '/')[4]
+  )
 
   resource cMKKey 'keys@2023-02-01' existing = if (!empty(customerManagedKeyGeo.?keyVaultResourceId) && !empty(customerManagedKeyGeo.?keyName)) {
     name: customerManagedKeyGeo.?keyName ?? 'dummyKey'
@@ -221,10 +268,13 @@ resource cMKGeoKeyVault 'Microsoft.KeyVault/vaults@2023-02-01' existing = if (!e
 
 resource cMKGeoUserAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = if (!empty(customerManagedKeyGeo.?userAssignedIdentityResourceId)) {
   name: last(split(customerManagedKeyGeo.?userAssignedIdentityResourceId ?? 'dummyMsi', '/'))
-  scope: resourceGroup(split((customerManagedKeyGeo.?userAssignedIdentityResourceId ?? '//'), '/')[2], split((customerManagedKeyGeo.?userAssignedIdentityResourceId ?? '////'), '/')[4])
+  scope: resourceGroup(
+    split((customerManagedKeyGeo.?userAssignedIdentityResourceId ?? '//'), '/')[2],
+    split((customerManagedKeyGeo.?userAssignedIdentityResourceId ?? '////'), '/')[4]
+  )
 }
 
-resource flexibleServer 'Microsoft.DBforMySQL/flexibleServers@2022-09-30-preview' = {
+resource flexibleServer 'Microsoft.DBforMySQL/flexibleServers@2023-12-30' = {
   name: name
   location: location
   tags: tags
@@ -242,27 +292,39 @@ resource flexibleServer 'Microsoft.DBforMySQL/flexibleServers@2022-09-30-preview
       geoRedundantBackup: geoRedundantBackup
     }
     createMode: createMode
-    dataEncryption: !empty(customerManagedKey) ? {
-      type: 'AzureKeyVault'
-      geoBackupKeyURI: geoRedundantBackup == 'Enabled' ? (!empty(customerManagedKeyGeo.?keyVersion ?? '') ? '${cMKGeoKeyVault::cMKKey.properties.keyUri}/${customerManagedKeyGeo!.keyVersion}' : cMKGeoKeyVault::cMKKey.properties.keyUriWithVersion) : null
-      geoBackupUserAssignedIdentityId: geoRedundantBackup == 'Enabled' ? cMKGeoUserAssignedIdentity.id : null
-      primaryKeyURI: !empty(customerManagedKey.?keyVersion ?? '') ? '${cMKKeyVault::cMKKey.properties.keyUri}/${customerManagedKey!.keyVersion}' : cMKKeyVault::cMKKey.properties.keyUriWithVersion
-      primaryUserAssignedIdentityId: cMKUserAssignedIdentity.id
-    } : null
+    dataEncryption: !empty(customerManagedKey)
+      ? {
+          type: 'AzureKeyVault'
+          geoBackupKeyURI: geoRedundantBackup == 'Enabled'
+            ? (!empty(customerManagedKeyGeo.?keyVersion ?? '')
+                ? '${cMKGeoKeyVault::cMKKey.properties.keyUri}/${customerManagedKeyGeo!.keyVersion}'
+                : cMKGeoKeyVault::cMKKey.properties.keyUriWithVersion)
+            : null
+          geoBackupUserAssignedIdentityId: geoRedundantBackup == 'Enabled' ? cMKGeoUserAssignedIdentity.id : null
+          primaryKeyURI: !empty(customerManagedKey.?keyVersion ?? '')
+            ? '${cMKKeyVault::cMKKey.properties.keyUri}/${customerManagedKey!.keyVersion}'
+            : cMKKeyVault::cMKKey.properties.keyUriWithVersion
+          primaryUserAssignedIdentityId: cMKUserAssignedIdentity.id
+        }
+      : null
     highAvailability: {
       mode: highAvailability
-      standbyAvailabilityZone: highAvailability == 'SameZone' ? availabilityZone : null
+      standbyAvailabilityZone: standByAvailabilityZone
     }
-    maintenanceWindow: !empty(maintenanceWindow) ? {
-      customWindow: maintenanceWindow.customWindow
-      dayOfWeek: maintenanceWindow.customWindow == 'Enabled' ? maintenanceWindow.dayOfWeek : 0
-      startHour: maintenanceWindow.customWindow == 'Enabled' ? maintenanceWindow.startHour : 0
-      startMinute: maintenanceWindow.customWindow == 'Enabled' ? maintenanceWindow.startMinute : 0
-    } : null
-    network: !empty(delegatedSubnetResourceId) && empty(firewallRules) ? {
-      delegatedSubnetResourceId: delegatedSubnetResourceId
-      privateDnsZoneResourceId: privateDnsZoneResourceId
-    } : null
+    maintenanceWindow: !empty(maintenanceWindow)
+      ? {
+          customWindow: maintenanceWindow.customWindow
+          dayOfWeek: maintenanceWindow.customWindow == 'Enabled' ? maintenanceWindow.dayOfWeek : 0
+          startHour: maintenanceWindow.customWindow == 'Enabled' ? maintenanceWindow.startHour : 0
+          startMinute: maintenanceWindow.customWindow == 'Enabled' ? maintenanceWindow.startMinute : 0
+        }
+      : null
+    network: !empty(delegatedSubnetResourceId) && empty(firewallRules)
+      ? {
+          delegatedSubnetResourceId: delegatedSubnetResourceId
+          privateDnsZoneResourceId: privateDnsZoneResourceId
+        }
+      : null
     replicationRole: replicationRole
     restorePointInTime: restorePointInTime
     sourceServerResourceId: !empty(sourceServerResourceId) ? sourceServerResourceId : null
@@ -280,78 +342,94 @@ resource flexibleServer_lock 'Microsoft.Authorization/locks@2020-05-01' = if (!e
   name: lock.?name ?? 'lock-${name}'
   properties: {
     level: lock.?kind ?? ''
-    notes: lock.?kind == 'CanNotDelete' ? 'Cannot delete resource or child resources.' : 'Cannot delete or modify the resource or child resources.'
+    notes: lock.?kind == 'CanNotDelete'
+      ? 'Cannot delete resource or child resources.'
+      : 'Cannot delete or modify the resource or child resources.'
   }
   scope: flexibleServer
 }
 
-resource flexibleServer_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (roleAssignment, index) in (roleAssignments ?? []): {
-  name: guid(flexibleServer.id, roleAssignment.principalId, roleAssignment.roleDefinitionIdOrName)
-  properties: {
-    roleDefinitionId: contains(builtInRoleNames, roleAssignment.roleDefinitionIdOrName) ? builtInRoleNames[roleAssignment.roleDefinitionIdOrName] : contains(roleAssignment.roleDefinitionIdOrName, '/providers/Microsoft.Authorization/roleDefinitions/') ? roleAssignment.roleDefinitionIdOrName : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName)
-    principalId: roleAssignment.principalId
-    description: roleAssignment.?description
-    principalType: roleAssignment.?principalType
-    condition: roleAssignment.?condition
-    conditionVersion: !empty(roleAssignment.?condition) ? (roleAssignment.?conditionVersion ?? '2.0') : null // Must only be set if condtion is set
-    delegatedManagedIdentityResourceId: roleAssignment.?delegatedManagedIdentityResourceId
+resource flexibleServer_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
+  for (roleAssignment, index) in (formattedRoleAssignments ?? []): {
+    name: roleAssignment.?name ?? guid(flexibleServer.id, roleAssignment.principalId, roleAssignment.roleDefinitionId)
+    properties: {
+      roleDefinitionId: roleAssignment.roleDefinitionId
+      principalId: roleAssignment.principalId
+      description: roleAssignment.?description
+      principalType: roleAssignment.?principalType
+      condition: roleAssignment.?condition
+      conditionVersion: !empty(roleAssignment.?condition) ? (roleAssignment.?conditionVersion ?? '2.0') : null // Must only be set if condtion is set
+      delegatedManagedIdentityResourceId: roleAssignment.?delegatedManagedIdentityResourceId
+    }
+    scope: flexibleServer
   }
-  scope: flexibleServer
-}]
+]
 
-module flexibleServer_databases 'database/main.bicep' = [for (database, index) in databases: {
-  name: '${uniqueString(deployment().name, location)}-MySQL-DB-${index}'
-  params: {
-    name: database.name
-    flexibleServerName: flexibleServer.name
-    collation: contains(database, 'collation') ? database.collation : ''
-    charset: contains(database, 'charset') ? database.charset : ''
+module flexibleServer_databases 'database/main.bicep' = [
+  for (database, index) in databases: {
+    name: '${uniqueString(deployment().name, location)}-MySQL-DB-${index}'
+    params: {
+      name: database.name
+      flexibleServerName: flexibleServer.name
+      collation: contains(database, 'collation') ? database.collation : ''
+      charset: contains(database, 'charset') ? database.charset : ''
+    }
   }
-}]
+]
 
-module flexibleServer_firewallRules 'firewall-rule/main.bicep' = [for (firewallRule, index) in firewallRules: {
-  name: '${uniqueString(deployment().name, location)}-MySQL-FirewallRules-${index}'
-  params: {
-    name: firewallRule.name
-    flexibleServerName: flexibleServer.name
-    startIpAddress: firewallRule.startIpAddress
-    endIpAddress: firewallRule.endIpAddress
+module flexibleServer_firewallRules 'firewall-rule/main.bicep' = [
+  for (firewallRule, index) in firewallRules: {
+    name: '${uniqueString(deployment().name, location)}-MySQL-FirewallRules-${index}'
+    params: {
+      name: firewallRule.name
+      flexibleServerName: flexibleServer.name
+      startIpAddress: firewallRule.startIpAddress
+      endIpAddress: firewallRule.endIpAddress
+    }
   }
-}]
+]
 
-module flexibleServer_administrators 'administrator/main.bicep' = [for (administrator, index) in administrators: {
-  name: '${uniqueString(deployment().name, location)}-MySQL-Administrators-${index}'
-  params: {
-    flexibleServerName: flexibleServer.name
-    login: administrator.login
-    sid: administrator.sid
-    identityResourceId: administrator.identityResourceId
-    tenantId: contains(administrator, 'tenantId') ? administrator.tenantId : tenant().tenantId
+module flexibleServer_administrators 'administrator/main.bicep' = [
+  for (administrator, index) in administrators: {
+    name: '${uniqueString(deployment().name, location)}-MySQL-Administrators-${index}'
+    params: {
+      flexibleServerName: flexibleServer.name
+      login: administrator.login
+      sid: administrator.sid
+      identityResourceId: administrator.identityResourceId
+      tenantId: contains(administrator, 'tenantId') ? administrator.tenantId : tenant().tenantId
+    }
   }
-}]
+]
 
-resource flexibleServer_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = [for (diagnosticSetting, index) in (diagnosticSettings ?? []): {
-  name: diagnosticSetting.?name ?? '${name}-diagnosticSettings'
-  properties: {
-    storageAccountId: diagnosticSetting.?storageAccountResourceId
-    workspaceId: diagnosticSetting.?workspaceResourceId
-    eventHubAuthorizationRuleId: diagnosticSetting.?eventHubAuthorizationRuleResourceId
-    eventHubName: diagnosticSetting.?eventHubName
-    metrics: [for group in (diagnosticSetting.?metricCategories ?? [ { category: 'AllMetrics' } ]): {
-      category: group.category
-      enabled: group.?enabled ?? true
-      timeGrain: null
-    }]
-    logs: [for group in (diagnosticSetting.?logCategoriesAndGroups ?? [ { categoryGroup: 'allLogs' } ]): {
-      categoryGroup: group.?categoryGroup
-      category: group.?category
-      enabled: group.?enabled ?? true
-    }]
-    marketplacePartnerId: diagnosticSetting.?marketplacePartnerResourceId
-    logAnalyticsDestinationType: diagnosticSetting.?logAnalyticsDestinationType
+resource flexibleServer_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = [
+  for (diagnosticSetting, index) in (diagnosticSettings ?? []): {
+    name: diagnosticSetting.?name ?? '${name}-diagnosticSettings'
+    properties: {
+      storageAccountId: diagnosticSetting.?storageAccountResourceId
+      workspaceId: diagnosticSetting.?workspaceResourceId
+      eventHubAuthorizationRuleId: diagnosticSetting.?eventHubAuthorizationRuleResourceId
+      eventHubName: diagnosticSetting.?eventHubName
+      metrics: [
+        for group in (diagnosticSetting.?metricCategories ?? [{ category: 'AllMetrics' }]): {
+          category: group.category
+          enabled: group.?enabled ?? true
+          timeGrain: null
+        }
+      ]
+      logs: [
+        for group in (diagnosticSetting.?logCategoriesAndGroups ?? [{ categoryGroup: 'allLogs' }]): {
+          categoryGroup: group.?categoryGroup
+          category: group.?category
+          enabled: group.?enabled ?? true
+        }
+      ]
+      marketplacePartnerId: diagnosticSetting.?marketplacePartnerResourceId
+      logAnalyticsDestinationType: diagnosticSetting.?logAnalyticsDestinationType
+    }
+    scope: flexibleServer
   }
-  scope: flexibleServer
-}]
+]
 
 @description('The name of the deployed MySQL Flexible server.')
 output name string = flexibleServer.name
@@ -364,6 +442,9 @@ output resourceGroupName string = resourceGroup().name
 
 @description('The location the resource was deployed into.')
 output location string = flexibleServer.location
+
+@description('The FQDN of the MySQL Flexible server.')
+output fqdn string = flexibleServer.properties.fullyQualifiedDomainName
 
 // =============== //
 //   Definitions   //
@@ -383,6 +464,9 @@ type lockType = {
 }?
 
 type roleAssignmentType = {
+  @description('Optional. The name (as GUID) of the role assignment. If not provided, a GUID will be generated.')
+  name: string?
+
   @description('Required. The role to assign. You can provide either the display name of the role definition, the role definition GUID, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'.')
   roleDefinitionIdOrName: string
 

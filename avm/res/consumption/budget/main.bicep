@@ -63,9 +63,9 @@ param actionGroups array?
 
 @allowed([
   'Actual'
-  'Forecast'
+  'Forecasted'
 ])
-@description('Required. The type of threshold to use for the budget. The threshold type can be either `Actual` or `Forecast`.')
+@description('Required. The type of threshold to use for the budget. The threshold type can be either `Actual` or `Forecasted`.')
 param thresholdType string = 'Actual'
 
 @description('Optional. The filter to use for restricting which resources are considered within the budget.')
@@ -80,19 +80,22 @@ param enableTelemetry bool = true
 @description('Optional. Location deployment metadata.')
 param location string = deployment().location
 
-var notificationsArray = [for threshold in thresholds: {
-  'Actual_GreaterThan_${threshold}_Percentage': {
-    enabled: true
-    operator: operator
-    threshold: threshold
-    contactEmails: contactEmails
-    contactRoles: contactRoles
-    contactGroups: actionGroups
-    thresholdType: thresholdType
+var notificationsArray = [
+  for threshold in thresholds: {
+    'Actual_GreaterThan_${threshold}_Percentage': {
+      enabled: true
+      operator: operator
+      threshold: threshold
+      contactEmails: contactEmails
+      contactRoles: contactRoles
+      contactGroups: actionGroups
+      thresholdType: thresholdType
+    }
   }
-}]
+]
 
-resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
+#disable-next-line no-deployments-resources
+resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableTelemetry) {
   name: '46d3xbcp.res.consumption-budget.${replace('-..--..-', '.', '-')}.${substring(uniqueString(deployment().name, location), 0, 4)}'
   location: location
   properties: {
@@ -121,13 +124,15 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
       startDate: startDate
       endDate: endDate
     }
-    filter: filter ?? (!empty(resourceGroupFilter) ? {
-      dimensions: {
-        name: 'ResourceGroupName'
-        operator: 'In'
-        values: resourceGroupFilter
-      }
-    } : {})
+    filter: filter ?? (!empty(resourceGroupFilter)
+      ? {
+          dimensions: {
+            name: 'ResourceGroupName'
+            operator: 'In'
+            values: resourceGroupFilter
+          }
+        }
+      : {})
     notifications: json(replace(replace(replace(string(notificationsArray), '[{', '{'), '}]', '}'), '}},{', '},'))
   }
 }

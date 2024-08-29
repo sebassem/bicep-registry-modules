@@ -39,7 +39,8 @@ param version string?
 @description('Optional. A list of flux configuraitons.')
 param fluxConfigurations array?
 
-resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
+#disable-next-line no-deployments-resources
+resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableTelemetry) {
   name: '46d3xbcp.res.kubernetesconfiguration-extension.${replace('-..--..-', '.', '-')}.${substring(uniqueString(deployment().name, location), 0, 4)}'
   properties: {
     mode: 'Incremental'
@@ -71,36 +72,42 @@ resource extension 'Microsoft.KubernetesConfiguration/extensions@2022-03-01' = {
     extensionType: extensionType
     releaseTrain: releaseTrain
     scope: {
-      cluster: !empty(releaseNamespace ?? '') ? {
-        releaseNamespace: releaseNamespace
-      } : null
-      namespace: !empty(targetNamespace ?? '') ? {
-        targetNamespace: targetNamespace
-      } : null
+      cluster: !empty(releaseNamespace ?? '')
+        ? {
+            releaseNamespace: releaseNamespace
+          }
+        : null
+      namespace: !empty(targetNamespace ?? '')
+        ? {
+            targetNamespace: targetNamespace
+          }
+        : null
     }
     version: version
   }
 }
 
-module fluxConfiguration 'br/public:avm/res/kubernetes-configuration/flux-configuration:0.3.1' = [for (fluxConfiguration, index) in (fluxConfigurations ?? []): {
-  name: '${uniqueString(deployment().name, location)}-ManagedCluster-FluxConfiguration${index}'
-  params: {
-    enableTelemetry: fluxConfiguration.?enableTelemetry ?? enableTelemetry
-    clusterName: managedCluster.name
-    scope: fluxConfiguration.scope
-    namespace: fluxConfiguration.namespace
-    sourceKind: contains(fluxConfiguration, 'gitRepository') ? 'GitRepository' : 'Bucket'
-    name: fluxConfiguration.?name ?? toLower('${managedCluster.name}-fluxconfiguration${index}')
-    bucket: fluxConfiguration.?bucket
-    configurationProtectedSettings: fluxConfiguration.?configurationProtectedSettings
-    gitRepository: fluxConfiguration.?gitRepository
-    kustomizations: fluxConfiguration.kustomizations
-    suspend: fluxConfiguration.?suspend
+module fluxConfiguration 'br/public:avm/res/kubernetes-configuration/flux-configuration:0.3.1' = [
+  for (fluxConfiguration, index) in (fluxConfigurations ?? []): {
+    name: '${uniqueString(deployment().name, location)}-ManagedCluster-FluxConfiguration${index}'
+    params: {
+      enableTelemetry: fluxConfiguration.?enableTelemetry ?? enableTelemetry
+      clusterName: managedCluster.name
+      scope: fluxConfiguration.scope
+      namespace: fluxConfiguration.namespace
+      sourceKind: contains(fluxConfiguration, 'gitRepository') ? 'GitRepository' : 'Bucket'
+      name: fluxConfiguration.?name ?? toLower('${managedCluster.name}-fluxconfiguration${index}')
+      bucket: fluxConfiguration.?bucket
+      configurationProtectedSettings: fluxConfiguration.?configurationProtectedSettings
+      gitRepository: fluxConfiguration.?gitRepository
+      kustomizations: fluxConfiguration.kustomizations
+      suspend: fluxConfiguration.?suspend
+    }
+    dependsOn: [
+      extension
+    ]
   }
-  dependsOn: [
-    extension
-  ]
-}]
+]
 
 @description('The name of the extension.')
 output name string = extension.name

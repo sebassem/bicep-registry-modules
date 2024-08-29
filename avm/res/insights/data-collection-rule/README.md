@@ -47,7 +47,7 @@ This instance deploys the module to setup collection of custom logs and ingestio
 
 ```bicep
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-idcrcusadv'
+  name: 'dataCollectionRuleDeployment'
   params: {
     // Required parameters
     dataFlows: [
@@ -267,7 +267,7 @@ This instance deploys the module to setup collection of custom logs.
 
 ```bicep
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-idcrcusbas'
+  name: 'dataCollectionRuleDeployment'
   params: {
     // Required parameters
     dataFlows: [
@@ -455,7 +455,7 @@ This instance deploys the module to setup the collection of IIS logs.
 
 ```bicep
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-idcrcusiis'
+  name: 'dataCollectionRuleDeployment'
   params: {
     // Required parameters
     dataFlows: [
@@ -599,7 +599,7 @@ This instance deploys the module with the minimum set of required parameters.
 
 ```bicep
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-idcrmin'
+  name: 'dataCollectionRuleDeployment'
   params: {
     // Required parameters
     dataFlows: [
@@ -733,7 +733,7 @@ This instance deploys the module to setup the collection of Linux-specific perfo
 
 ```bicep
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-idcrlin'
+  name: 'dataCollectionRuleDeployment'
   params: {
     // Required parameters
     dataFlows: [
@@ -1101,7 +1101,7 @@ This instance deploys the module with most of its features enabled.
 
 ```bicep
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-idcrmax'
+  name: 'dataCollectionRuleDeployment'
   params: {
     // Required parameters
     dataFlows: [
@@ -1156,11 +1156,13 @@ module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<vers
     }
     roleAssignments: [
       {
+        name: '89a4d6fa-defb-4099-9196-173d94b91d67'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Owner'
       }
       {
+        name: '<name>'
         principalId: '<principalId>'
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -1278,11 +1280,13 @@ module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<vers
     "roleAssignments": {
       "value": [
         {
+          "name": "89a4d6fa-defb-4099-9196-173d94b91d67",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "Owner"
         },
         {
+          "name": "<name>",
           "principalId": "<principalId>",
           "principalType": "ServicePrincipal",
           "roleDefinitionIdOrName": "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -1335,7 +1339,7 @@ This instance deploys the module in alignment with the best-practices of the Azu
 
 ```bicep
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-idcrwaf'
+  name: 'dataCollectionRuleDeployment'
   params: {
     // Required parameters
     dataFlows: [
@@ -1611,7 +1615,7 @@ This instance deploys the module to setup the connection of Windows-specific per
 
 ```bicep
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:<version>' = {
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-idcrwin'
+  name: 'dataCollectionRuleDeployment'
   params: {
     // Required parameters
     dataFlows: [
@@ -2033,6 +2037,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -2079,6 +2084,13 @@ The Resource Id of the delegated managed identity resource.
 ### Parameter: `roleAssignments.description`
 
 The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
 
 - Required: No
 - Type: string

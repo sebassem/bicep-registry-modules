@@ -14,8 +14,8 @@ param afdEndpointName string
 @description('Optional. The caching configuration for this route. To disable caching, do not provide a cacheConfiguration object.')
 param cacheConfiguration object?
 
-@description('Optional. The name of the custom domain. The custom domain must be defined in the profile customDomains.')
-param customDomainName string?
+@description('Optional. The names of the custom domains. The custom domains must be defined in the profile customDomains array.')
+param customDomainNames string[]?
 
 @allowed([
   'HttpOnly'
@@ -58,7 +58,7 @@ param patternsToMatch array?
 @description('Optional. The rule sets of the rule. The rule sets must be defined in the profile ruleSets.')
 param ruleSets array = []
 
-@allowed([ 'Http', 'Https' ])
+@allowed(['Http', 'Https'])
 @description('Optional. The supported protocols of the rule.')
 param supportedProtocols array?
 
@@ -69,17 +69,21 @@ resource profile 'Microsoft.Cdn/profiles@2023-05-01' existing = {
     name: afdEndpointName
   }
 
-  resource customDomain 'customDomains@2023-05-01' existing = if (!empty(customDomainName)) {
-    name: customDomainName ?? ''
-  }
+  resource customDomains 'customDomains@2023-05-01' existing = [
+    for customDomainName in (customDomainNames ?? []): {
+      name: customDomainName
+    }
+  ]
 
   resource originGroup 'originGroups@2023-05-01' existing = {
     name: originGroupName
   }
 
-  resource ruleSet 'ruleSets@2023-05-01' existing = [for ruleSet in ruleSets: {
-    name: ruleSet.name
-  }]
+  resource ruleSet 'ruleSets@2023-05-01' existing = [
+    for ruleSet in ruleSets: {
+      name: ruleSet.name
+    }
+  ]
 }
 
 resource route 'Microsoft.Cdn/profiles/afdEndpoints/routes@2023-05-01' = {
@@ -87,9 +91,11 @@ resource route 'Microsoft.Cdn/profiles/afdEndpoints/routes@2023-05-01' = {
   parent: profile::afdEndpoint
   properties: {
     cacheConfiguration: cacheConfiguration
-    customDomains: !empty(customDomainName) ? [ {
-        id: profile::customDomain.id
-      } ] : []
+    customDomains: [
+      for index in range(0, length(customDomainNames ?? [])): {
+        id: profile::customDomains[index].id
+      }
+    ]
     enabledState: enabledState
     forwardingProtocol: forwardingProtocol
     httpsRedirect: httpsRedirect
@@ -99,9 +105,11 @@ resource route 'Microsoft.Cdn/profiles/afdEndpoints/routes@2023-05-01' = {
     }
     originPath: originPath
     patternsToMatch: patternsToMatch
-    ruleSets: [for (item, index) in ruleSets: {
-      id: profile::ruleSet[index].id
-    }]
+    ruleSets: [
+      for (item, index) in ruleSets: {
+        id: profile::ruleSet[index].id
+      }
+    ]
     supportedProtocols: supportedProtocols
   }
 }
