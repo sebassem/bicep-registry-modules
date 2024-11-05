@@ -51,7 +51,7 @@ var imagePaths = [
 ]
 
 //var githubURL = 'https://github.com/azure/bicep-registry-modules#main:avm/ptn/dev-ops/cicd-agents-and-runners/scripts'
-var githubURL = 'https://github.com/azure/avm-container-images-cicd-agents-and-runners#main'
+var githubURL = 'https://github.com/azure/avm-container-images-cicd-agents-and-runners'
 
 var acaGitHubRules = (selfHostedConfig.selfHostedType == 'github')
   ? [
