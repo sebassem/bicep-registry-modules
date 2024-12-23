@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "14555734508471938883"
+      "templateHash": "6001450753869128172"
     },
     "name": "CI CD Agents and Runners",
     "description": "This module deploys self-hosted agents and runners for Azure DevOps and GitHub on Azure Container Instances and/or Azure Container Apps.",
@@ -128,9 +128,6 @@
             "description": "Optional. The deployment script private DNS zone Id. If not provided, a new private DNS zone will be created. Only required if private networking is used."
           }
         }
-      },
-      "metadata": {
-        "__bicep_export!": true
       }
     },
     "existingNetworkType": {
@@ -182,9 +179,6 @@
             "description": "Required. The compute type networking type."
           }
         }
-      },
-      "metadata": {
-        "__bicep_export!": true
       }
     },
     "containerAppNetworkConfigType": {
@@ -225,9 +219,6 @@
             "description": "Required. The container instance subnet name in the created virtual network. If not provided, a default name will be used. This subnet is required for private networking Azure DevOps scenarios to deploy the deployment script which starts the placeholder agent privately."
           }
         }
-      },
-      "metadata": {
-        "__bicep_export!": true
       }
     },
     "containerInstanceNetworkConfigType": {
@@ -262,9 +253,6 @@
             "$ref": "#/definitions/existingNetworkType"
           }
         }
-      },
-      "metadata": {
-        "__bicep_export!": true
       }
     },
     "computeNetworkingType": {
@@ -279,9 +267,6 @@
             "$ref": "#/definitions/containerInstanceNetworkConfigType"
           }
         }
-      },
-      "metadata": {
-        "__bicep_export!": true
       }
     },
     "azureContainerInstanceTargetType": {
@@ -327,9 +312,7 @@
           }
         }
       },
-      "metadata": {
-        "__bicep_export!": true
-      }
+      "nullable": true
     },
     "azureContainerAppTargetType": {
       "type": "object",
@@ -341,9 +324,6 @@
             "description": "Optional. The Azure Container App Job CPU and memory resources."
           }
         }
-      },
-      "metadata": {
-        "__bicep_export!": true
       }
     },
     "gitHubRunnersType": {
@@ -441,9 +421,6 @@
             "description": "Optional. The GitHub runner Azure Container app configuration."
           }
         }
-      },
-      "metadata": {
-        "__bicep_export!": true
       }
     },
     "devOpsAgentsType": {
@@ -518,9 +495,6 @@
             "description": "Optional. The AzureDevOps agents Azure Container app configuration."
           }
         }
-      },
-      "metadata": {
-        "__bicep_export!": true
       }
     },
     "acaResourcesType": {
@@ -590,10 +564,7 @@
           "cpu": "4",
           "memory": "8Gi"
         }
-      ],
-      "metadata": {
-        "__bicep_export!": true
-      }
+      ]
     },
     "selfHostedRunnerType": {
       "type": "object",
@@ -607,19 +578,15 @@
             "$ref": "#/definitions/devOpsAgentsType"
           }
         }
-      },
-      "metadata": {
-        "__bicep_export!": true
       }
     },
     "computeTypesType": {
-      "type": "string",
+      "type": "array",
       "allowedValues": [
         "azure-container-app",
         "azure-container-instance"
       ],
       "metadata": {
-        "__bicep_export!": true,
         "description": "Required. The target compute environments for the private runners."
       }
     }
@@ -639,10 +606,7 @@
       }
     },
     "computeTypes": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/computeTypesType"
-      },
+      "$ref": "#/definitions/computeTypesType",
       "metadata": {
         "description": "Required. The compute target for the private runners."
       }
