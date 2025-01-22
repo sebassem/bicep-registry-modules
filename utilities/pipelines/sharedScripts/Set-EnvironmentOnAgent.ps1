@@ -59,18 +59,17 @@ function Install-CustomModule {
 
         # Check if already installed as required
         if ($alreadyInstalled = $InstalledModule | Where-Object { $_.Name -eq $Module.Name }) {
-            if ($Module.Version) {
-                $alreadyInstalled = $alreadyInstalled | Where-Object { $_.Version -eq $Module.Version }
-            } else {
-                # Get latest in case of multiple
-                $alreadyInstalled = ($alreadyInstalled | Sort-Object -Culture 'en-US' -Property 'Version' -Descending)[0]
-            }
-            if ($alreadyInstalled) {
-                Write-Verbose ('Module [{0}] already installed with version [{1}]' -f $alreadyInstalled.Name, $alreadyInstalled.Version) -Verbose
-                continue
-            }
-            continue
-        }
+    if ($Module.Version) {
+        $alreadyInstalled = $alreadyInstalled | Where-Object { $_.Version -eq $Module.Version }
+    } else {
+        # Get latest in case of multiple
+        $alreadyInstalled = ($alreadyInstalled | Sort-Object -Culture 'en-US' -Property 'Version' -Descending)[0]
+    }
+    if ($alreadyInstalled) {
+        Write-Verbose ('Module [{0}] already installed with version [{1}]' -f $alreadyInstalled.Name, $alreadyInstalled.Version) -Verbose
+        continue
+    }
+}
 
         # Check if not to be excluded
         if ($Module.ExcludeModules -and $Module.excludeModules.contains($foundModule.Name)) {
