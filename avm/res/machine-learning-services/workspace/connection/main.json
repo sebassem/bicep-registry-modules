@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.33.93.31351",
-      "templateHash": "14592202711795767071"
+      "templateHash": "6559633702094012952"
     },
     "name": "Machine Learning Services Workspaces Connections",
     "description": "This module creates a connection in a Machine Learning Services workspace."
@@ -444,7 +444,7 @@
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection auth URL. Required by Concur connection category."
+            "description": "Optional. The connection auth URL. Required by Concur connection category."
           }
         },
         "clientId": {
@@ -465,35 +465,35 @@
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection developer token. Required by GoogleAdWords connection category."
+            "description": "Optional. The connection developer token. Required by GoogleAdWords connection category."
           }
         },
         "password": {
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection password. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
+            "description": "Optional. The connection password. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
           }
         },
         "refreshToken": {
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories."
+            "description": "Optional. The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories."
           }
         },
         "tenantId": {
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Required. The connection tenant ID. Required by QuickBooks and Xero connection categories."
+            "description": "Optional. The connection tenant ID. Required by QuickBooks and Xero connection categories."
           }
         },
         "username": {
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
+            "description": "Optional. The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
           }
         }
       }
@@ -556,7 +556,7 @@
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection security token. Required by connections like SalesForce for extra security in addition to 'UsernamePassword'."
+            "description": "Optional. The connection security token. Required by connections like SalesForce for extra security in addition to 'UsernamePassword'."
           }
         },
         "username": {
@@ -683,6 +683,13 @@
       "metadata": {
         "description": "Required. The properties of the connection, specific to the auth type."
       }
+    },
+    "useWorkspaceManagedIdentity": {
+      "type": "bool",
+      "nullable": true,
+      "metadata": {
+        "description": "Optional. Indicates whether to use the workspace managed identity."
+      }
     }
   },
   "resources": {
@@ -694,9 +701,9 @@
     },
     "connection": {
       "type": "Microsoft.MachineLearningServices/workspaces/connections",
-      "apiVersion": "2024-10-01",
+      "apiVersion": "2024-10-01-preview",
       "name": "[format('{0}/{1}', parameters('machineLearningWorkspaceName'), parameters('name'))]",
-      "properties": "[union(createObject('category', parameters('category'), 'expiryTime', parameters('expiryTime'), 'isSharedToAll', parameters('isSharedToAll'), 'metadata', parameters('metadata'), 'sharedUserList', parameters('sharedUserList'), 'target', parameters('target'), 'value', parameters('value')), parameters('connectionProperties'))]"
+      "properties": "[union(createObject('category', parameters('category'), 'expiryTime', parameters('expiryTime'), 'isSharedToAll', parameters('isSharedToAll'), 'metadata', parameters('metadata'), 'sharedUserList', parameters('sharedUserList'), 'target', parameters('target'), 'value', parameters('value'), 'useWorkspaceManagedIdentity', parameters('useWorkspaceManagedIdentity')), parameters('connectionProperties'))]"
     }
   },
   "outputs": {

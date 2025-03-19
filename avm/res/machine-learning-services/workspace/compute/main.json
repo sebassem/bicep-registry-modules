@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.33.93.31351",
-      "templateHash": "13679175688936595005"
+      "templateHash": "603546953116842006"
     },
     "name": "Machine Learning Services Workspaces Computes",
     "description": "This module deploys a Machine Learning Services Workspaces Compute.\n\nAttaching a compute is not idempotent and will fail in case you try to redeploy over an existing compute in AML (see parameter `deployCompute`)."
@@ -45,7 +45,7 @@
     "machineLearningWorkspaceName": {
       "type": "string",
       "metadata": {
-        "description": "Conditional. The name of the parent Machine Learning Workspace. Required if the template is used in a standalone deployment."
+        "description": "Required. The name of the parent Machine Learning Workspace. Required if the template is used in a standalone deployment."
       }
     },
     "name": {
