@@ -275,7 +275,7 @@ resource workspace 'Microsoft.MachineLearningServices/workspaces@2024-10-01-prev
           keyVaultProperties: {
             keyVaultArmId: cMKKeyVault.id
             keyIdentifier: !empty(customerManagedKey.?keyVersion ?? '')
-              ? '${cMKKeyVault::cMKKey.properties.keyUri}/${customerManagedKey!.keyVersion}'
+              ? '${cMKKeyVault::cMKKey.properties.keyUri}/${customerManagedKey!.?keyVersion}'
               : cMKKeyVault::cMKKey.properties.keyUriWithVersion
           }
         }
@@ -341,6 +341,7 @@ module workspace_connections 'connection/main.bicep' = [
       target: connection.target
       value: connection.?value
       connectionProperties: connection.connectionProperties
+      useWorkspaceManagedIdentity: connection.?useWorkspaceManagedIdentity
     }
   }
 ]
@@ -615,4 +616,7 @@ type connectionType = {
 
   @sys.description('Required. The properties of the connection, specific to the auth type.')
   connectionProperties: connectionPropertyType
+
+  @sys.description('Optional. Indicates whether to use the workspace managed identity.')
+  useWorkspaceManagedIdentity: bool?
 }

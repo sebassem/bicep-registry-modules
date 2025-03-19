@@ -21,7 +21,7 @@ This module deploys a Machine Learning Services Workspace.
 | `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
 | `Microsoft.MachineLearningServices/workspaces` | [2024-10-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.MachineLearningServices/2024-10-01-preview/workspaces) |
 | `Microsoft.MachineLearningServices/workspaces/computes` | [2024-10-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.MachineLearningServices/2024-10-01/workspaces/computes) |
-| `Microsoft.MachineLearningServices/workspaces/connections` | [2024-10-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.MachineLearningServices/2024-10-01/workspaces/connections) |
+| `Microsoft.MachineLearningServices/workspaces/connections` | [2024-10-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.MachineLearningServices/2024-10-01-preview/workspaces/connections) |
 | `Microsoft.Network/privateEndpoints` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints) |
 | `Microsoft.Network/privateEndpoints/privateDnsZoneGroups` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints/privateDnsZoneGroups) |
 
@@ -1585,6 +1585,7 @@ Connections to create in the workspace.
 | [`isSharedToAll`](#parameter-connectionsissharedtoall) | bool | Indicates whether the connection is shared to all users in the workspace. |
 | [`metadata`](#parameter-connectionsmetadata) | object | User metadata for the connection. |
 | [`sharedUserList`](#parameter-connectionsshareduserlist) | array | The shared user list of the connection. |
+| [`useWorkspaceManagedIdentity`](#parameter-connectionsuseworkspacemanagedidentity) | bool | Indicates whether to use the workspace managed identity. |
 | [`value`](#parameter-connectionsvalue) | string | Value details of the workspace connection. |
 
 ### Parameter: `connections.category`
@@ -2408,6 +2409,13 @@ The shared user list of the connection.
 
 - Required: No
 - Type: array
+
+### Parameter: `connections.useWorkspaceManagedIdentity`
+
+Indicates whether to use the workspace managed identity.
+
+- Required: No
+- Type: bool
 
 ### Parameter: `connections.value`
 

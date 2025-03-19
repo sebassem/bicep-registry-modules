@@ -35,6 +35,9 @@ param value string?
 @description('Required. The properties of the connection, specific to the auth type.')
 param connectionProperties connectionPropertyType
 
+@description('Optional. Indicates whether to use the workspace managed identity.')
+param useWorkspaceManagedIdentity bool?
+
 // ============================= //
 // Existing resources references //
 // ============================= //
@@ -47,7 +50,7 @@ resource machineLearningWorkspace 'Microsoft.MachineLearningServices/workspaces@
 // Resources      //
 // ============== //
 
-resource connection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01' = {
+resource connection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01-preview' = {
   name: name
   parent: machineLearningWorkspace
   properties: union(
@@ -59,6 +62,7 @@ resource connection 'Microsoft.MachineLearningServices/workspaces/connections@20
       sharedUserList: sharedUserList
       target: target
       value: value
+      useWorkspaceManagedIdentity: useWorkspaceManagedIdentity
     },
     connectionProperties
   )
