@@ -2002,7 +2002,6 @@ The credentials for the connection.
 | :-- | :-- | :-- |
 | [`clientId`](#parameter-connectionsconnectionpropertiesauthtype-oauth2credentialsclientid) | string | The connection client ID in the format of UUID. |
 | [`clientSecret`](#parameter-connectionsconnectionpropertiesauthtype-oauth2credentialsclientsecret) | string | The connection client secret. |
-| [`tenantId`](#parameter-connectionsconnectionpropertiesauthtype-oauth2credentialstenantid) | string | The connection tenant ID. Required by QuickBooks and Xero connection categories. |
 
 **Optional parameters**
 
@@ -2012,6 +2011,7 @@ The credentials for the connection.
 | [`developerToken`](#parameter-connectionsconnectionpropertiesauthtype-oauth2credentialsdevelopertoken) | string | The connection developer token. Required by GoogleAdWords connection category. |
 | [`password`](#parameter-connectionsconnectionpropertiesauthtype-oauth2credentialspassword) | string | The connection password. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'. |
 | [`refreshToken`](#parameter-connectionsconnectionpropertiesauthtype-oauth2credentialsrefreshtoken) | string | The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories. |
+| [`tenantId`](#parameter-connectionsconnectionpropertiesauthtype-oauth2credentialstenantid) | string | The connection tenant ID. Required by QuickBooks and Xero connection categories. |
 | [`username`](#parameter-connectionsconnectionpropertiesauthtype-oauth2credentialsusername) | string | The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'. |
 
 ### Parameter: `connections.connectionProperties.authType-OAuth2.credentials.clientId`
@@ -2026,13 +2026,6 @@ The connection client ID in the format of UUID.
 The connection client secret.
 
 - Required: Yes
-- Type: string
-
-### Parameter: `connections.connectionProperties.authType-OAuth2.credentials.tenantId`
-
-The connection tenant ID. Required by QuickBooks and Xero connection categories.
-
-- Required: No
 - Type: string
 
 ### Parameter: `connections.connectionProperties.authType-OAuth2.credentials.authUrl`
@@ -2059,6 +2052,13 @@ The connection password. Required by Concur and ServiceNow connection categories
 ### Parameter: `connections.connectionProperties.authType-OAuth2.credentials.refreshToken`
 
 The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories.
+
+- Required: No
+- Type: string
+
+### Parameter: `connections.connectionProperties.authType-OAuth2.credentials.tenantId`
+
+The connection tenant ID. Required by QuickBooks and Xero connection categories.
 
 - Required: No
 - Type: string

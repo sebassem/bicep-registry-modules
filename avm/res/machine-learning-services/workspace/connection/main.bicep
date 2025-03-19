@@ -343,7 +343,7 @@ type workspaceConnectionOAuth2Type = {
   @description('Optional. The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories.')
   refreshToken: string?
 
-  @description('Required. The connection tenant ID. Required by QuickBooks and Xero connection categories.')
+  @description('Optional. The connection tenant ID. Required by QuickBooks and Xero connection categories.')
   tenantId: string?
 
   @description('Optional. The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is \'Password\'.')

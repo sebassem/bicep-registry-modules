@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.33.93.31351",
-      "templateHash": "7166291363659028202"
+      "templateHash": "17640993107304544467"
     },
     "name": "Machine Learning Services Workspaces",
     "description": "This module deploys a Machine Learning Services Workspace."
@@ -945,7 +945,7 @@
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Required. The connection tenant ID. Required by QuickBooks and Xero connection categories."
+            "description": "Optional. The connection tenant ID. Required by QuickBooks and Xero connection categories."
           }
         },
         "username": {
@@ -2436,7 +2436,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.33.93.31351",
-              "templateHash": "13510578759113019410"
+              "templateHash": "6559633702094012952"
             },
             "name": "Machine Learning Services Workspaces Connections",
             "description": "This module creates a connection in a Machine Learning Services workspace."
@@ -2916,7 +2916,7 @@
                   "type": "string",
                   "nullable": true,
                   "metadata": {
-                    "description": "Required. The connection tenant ID. Required by QuickBooks and Xero connection categories."
+                    "description": "Optional. The connection tenant ID. Required by QuickBooks and Xero connection categories."
                   }
                 },
                 "username": {
