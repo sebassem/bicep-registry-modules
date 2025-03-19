@@ -24,13 +24,8 @@ Attaching a compute is not idempotent and will fail in case you try to redeploy 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`computeType`](#parameter-computetype) | string | Set the object type. |
-| [`name`](#parameter-name) | string | Name of the compute. |
-
-**Conditional parameters**
-
-| Parameter | Type | Description |
-| :-- | :-- | :-- |
 | [`machineLearningWorkspaceName`](#parameter-machinelearningworkspacename) | string | The name of the parent Machine Learning Workspace. Required if the template is used in a standalone deployment. |
+| [`name`](#parameter-name) | string | Name of the compute. |
 
 **Optional parameters**
 
@@ -69,16 +64,16 @@ Set the object type.
   ]
   ```
 
-### Parameter: `name`
+### Parameter: `machineLearningWorkspaceName`
 
-Name of the compute.
+The name of the parent Machine Learning Workspace. Required if the template is used in a standalone deployment.
 
 - Required: Yes
 - Type: string
 
-### Parameter: `machineLearningWorkspaceName`
+### Parameter: `name`
 
-The name of the parent Machine Learning Workspace. Required if the template is used in a standalone deployment.
+Name of the compute.
 
 - Required: Yes
 - Type: string
