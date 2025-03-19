@@ -38,7 +38,6 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName
   location: location
   kind: ''
-  properties: {}
 }
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
