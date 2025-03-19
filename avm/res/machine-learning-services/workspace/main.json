@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.33.93.31351",
-      "templateHash": "10051284306430828793"
+      "templateHash": "7166291363659028202"
     },
     "name": "Machine Learning Services Workspaces",
     "description": "This module deploys a Machine Learning Services Workspace."
@@ -903,7 +903,7 @@
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection auth URL. Required by Concur connection category."
+            "description": "Optional. The connection auth URL. Required by Concur connection category."
           }
         },
         "clientId": {
@@ -924,21 +924,21 @@
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection developer token. Required by GoogleAdWords connection category."
+            "description": "Optional. The connection developer token. Required by GoogleAdWords connection category."
           }
         },
         "password": {
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection password. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
+            "description": "Optional. The connection password. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
           }
         },
         "refreshToken": {
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories."
+            "description": "Optional. The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories."
           }
         },
         "tenantId": {
@@ -952,7 +952,7 @@
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
+            "description": "Optional. The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
           }
         }
       },
@@ -1035,7 +1035,7 @@
           "type": "string",
           "nullable": true,
           "metadata": {
-            "description": "Conditional. The connection security token. Required by connections like SalesForce for extra security in addition to 'UsernamePassword'."
+            "description": "Optional. The connection security token. Required by connections like SalesForce for extra security in addition to 'UsernamePassword'."
           }
         },
         "username": {
@@ -1700,21 +1700,21 @@
       "type": "string",
       "nullable": true,
       "metadata": {
-        "description": "Conditional. The resource ID of the associated Storage Account. Required if 'kind' is 'Default', 'FeatureStore' or 'Hub'."
+        "description": "Optional. The resource ID of the associated Storage Account. Required if 'kind' is 'Default', 'FeatureStore' or 'Hub'."
       }
     },
     "associatedKeyVaultResourceId": {
       "type": "string",
       "nullable": true,
       "metadata": {
-        "description": "Conditional. The resource ID of the associated Key Vault. Required if 'kind' is 'Default' or 'FeatureStore'. If not provided, the key vault will be managed by Microsoft."
+        "description": "Optional. The resource ID of the associated Key Vault. Required if 'kind' is 'Default' or 'FeatureStore'. If not provided, the key vault will be managed by Microsoft."
       }
     },
     "associatedApplicationInsightsResourceId": {
       "type": "string",
       "nullable": true,
       "metadata": {
-        "description": "Conditional. The resource ID of the associated Application Insights. Required if 'kind' is 'Default' or 'FeatureStore'."
+        "description": "Optional. The resource ID of the associated Application Insights. Required if 'kind' is 'Default' or 'FeatureStore'."
       }
     },
     "associatedContainerRegistryResourceId": {
@@ -1749,7 +1749,7 @@
       "type": "string",
       "nullable": true,
       "metadata": {
-        "description": "Conditional. The resource ID of the hub to associate with the workspace. Required if 'kind' is set to 'Project'."
+        "description": "Optional. The resource ID of the hub to associate with the workspace. Required if 'kind' is set to 'Project'."
       }
     },
     "roleAssignments": {
@@ -1816,7 +1816,7 @@
       "$ref": "#/definitions/featureStoreSettingType",
       "nullable": true,
       "metadata": {
-        "description": "Conditional. Settings for feature store type workspaces. Required if 'kind' is set to 'FeatureStore'."
+        "description": "Optional. Settings for feature store type workspaces. Required if 'kind' is set to 'FeatureStore'."
       }
     },
     "ipAllowlist": {
@@ -1911,7 +1911,7 @@
       "type": "string",
       "nullable": true,
       "metadata": {
-        "description": "Conditional. The user assigned identity resource ID that represents the workspace identity. Required if 'userAssignedIdentities' is not empty and may not be used if 'systemAssignedIdentity' is enabled."
+        "description": "Optional. The user assigned identity resource ID that represents the workspace identity. Required if 'userAssignedIdentities' is not empty and may not be used if 'systemAssignedIdentity' is enabled."
       }
     },
     "serviceManagedResourcesSettings": {
@@ -2167,7 +2167,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.33.93.31351",
-              "templateHash": "13679175688936595005"
+              "templateHash": "603546953116842006"
             },
             "name": "Machine Learning Services Workspaces Computes",
             "description": "This module deploys a Machine Learning Services Workspaces Compute.\n\nAttaching a compute is not idempotent and will fail in case you try to redeploy over an existing compute in AML (see parameter `deployCompute`)."
@@ -2206,7 +2206,7 @@
             "machineLearningWorkspaceName": {
               "type": "string",
               "metadata": {
-                "description": "Conditional. The name of the parent Machine Learning Workspace. Required if the template is used in a standalone deployment."
+                "description": "Required. The name of the parent Machine Learning Workspace. Required if the template is used in a standalone deployment."
               }
             },
             "name": {
@@ -2436,7 +2436,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.33.93.31351",
-              "templateHash": "789689298748728898"
+              "templateHash": "13510578759113019410"
             },
             "name": "Machine Learning Services Workspaces Connections",
             "description": "This module creates a connection in a Machine Learning Services workspace."
@@ -2874,7 +2874,7 @@
                   "type": "string",
                   "nullable": true,
                   "metadata": {
-                    "description": "Conditional. The connection auth URL. Required by Concur connection category."
+                    "description": "Optional. The connection auth URL. Required by Concur connection category."
                   }
                 },
                 "clientId": {
@@ -2895,21 +2895,21 @@
                   "type": "string",
                   "nullable": true,
                   "metadata": {
-                    "description": "Conditional. The connection developer token. Required by GoogleAdWords connection category."
+                    "description": "Optional. The connection developer token. Required by GoogleAdWords connection category."
                   }
                 },
                 "password": {
                   "type": "string",
                   "nullable": true,
                   "metadata": {
-                    "description": "Conditional. The connection password. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
+                    "description": "Optional. The connection password. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
                   }
                 },
                 "refreshToken": {
                   "type": "string",
                   "nullable": true,
                   "metadata": {
-                    "description": "Conditional. The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories."
+                    "description": "Optional. The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories."
                   }
                 },
                 "tenantId": {
@@ -2923,7 +2923,7 @@
                   "type": "string",
                   "nullable": true,
                   "metadata": {
-                    "description": "Conditional. The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
+                    "description": "Optional. The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is 'Password'."
                   }
                 }
               }
@@ -2986,7 +2986,7 @@
                   "type": "string",
                   "nullable": true,
                   "metadata": {
-                    "description": "Conditional. The connection security token. Required by connections like SalesForce for extra security in addition to 'UsernamePassword'."
+                    "description": "Optional. The connection security token. Required by connections like SalesForce for extra security in addition to 'UsernamePassword'."
                   }
                 },
                 "username": {

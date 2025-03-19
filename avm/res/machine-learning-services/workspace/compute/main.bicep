@@ -7,7 +7,7 @@ Attaching a compute is not idempotent and will fail in case you try to redeploy 
 // Parameters       //
 // ================ //
 
-@sys.description('Conditional. The name of the parent Machine Learning Workspace. Required if the template is used in a standalone deployment.')
+@sys.description('Required. The name of the parent Machine Learning Workspace. Required if the template is used in a standalone deployment.')
 param machineLearningWorkspaceName string
 
 @sys.description('Required. Name of the compute.')

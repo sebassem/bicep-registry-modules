@@ -323,7 +323,7 @@ type workspaceConnectionManagedIdentityType = {
 }
 
 type workspaceConnectionOAuth2Type = {
-  @description('Conditional. The connection auth URL. Required by Concur connection category.')
+  @description('Optional. The connection auth URL. Required by Concur connection category.')
   authUrl: string?
 
   @minLength(36)
@@ -334,19 +334,19 @@ type workspaceConnectionOAuth2Type = {
   @description('Required. The connection client secret.')
   clientSecret: string
 
-  @description('Conditional. The connection developer token. Required by GoogleAdWords connection category.')
+  @description('Optional. The connection developer token. Required by GoogleAdWords connection category.')
   developerToken: string?
 
-  @description('Conditional. The connection password. Required by Concur and ServiceNow connection categories where AccessToken grant type is \'Password\'.')
+  @description('Optional. The connection password. Required by Concur and ServiceNow connection categories where AccessToken grant type is \'Password\'.')
   password: string?
 
-  @description('Conditional. The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories.')
+  @description('Optional. The connection refresh token. Required by GoogleBigQuery, GoogleAdWords, Hubspot, QuickBooks, Square, Xero and Zoho connection categories.')
   refreshToken: string?
 
   @description('Required. The connection tenant ID. Required by QuickBooks and Xero connection categories.')
   tenantId: string?
 
-  @description('Conditional. The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is \'Password\'.')
+  @description('Optional. The connection username. Required by Concur and ServiceNow connection categories where AccessToken grant type is \'Password\'.')
   username: string?
 }
 
@@ -375,7 +375,7 @@ type workspaceConnectionUsernamePasswordType = {
   @description('Required. The connection password.')
   password: string
 
-  @description('Conditional. The connection security token. Required by connections like SalesForce for extra security in addition to \'UsernamePassword\'.')
+  @description('Optional. The connection security token. Required by connections like SalesForce for extra security in addition to \'UsernamePassword\'.')
   securityToken: string?
 
   @description('Required. The connection username.')

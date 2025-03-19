@@ -31,13 +31,13 @@ param sku string
 ])
 param kind string = 'Default'
 
-@sys.description('Conditional. The resource ID of the associated Storage Account. Required if \'kind\' is \'Default\', \'FeatureStore\' or \'Hub\'.')
+@sys.description('Optional. The resource ID of the associated Storage Account. Required if \'kind\' is \'Default\', \'FeatureStore\' or \'Hub\'.')
 param associatedStorageAccountResourceId string?
 
-@sys.description('Conditional. The resource ID of the associated Key Vault. Required if \'kind\' is \'Default\' or \'FeatureStore\'. If not provided, the key vault will be managed by Microsoft.')
+@sys.description('Optional. The resource ID of the associated Key Vault. Required if \'kind\' is \'Default\' or \'FeatureStore\'. If not provided, the key vault will be managed by Microsoft.')
 param associatedKeyVaultResourceId string?
 
-@sys.description('Conditional. The resource ID of the associated Application Insights. Required if \'kind\' is \'Default\' or \'FeatureStore\'.')
+@sys.description('Optional. The resource ID of the associated Application Insights. Required if \'kind\' is \'Default\' or \'FeatureStore\'.')
 param associatedApplicationInsightsResourceId string?
 
 @sys.description('Optional. The resource ID of the associated Container Registry.')
@@ -53,7 +53,7 @@ param lock lockType?
 @sys.description('Optional. The flag to signal HBI data in the workspace and reduce diagnostic data collected by the service.')
 param hbiWorkspace bool = false
 
-@sys.description('Conditional. The resource ID of the hub to associate with the workspace. Required if \'kind\' is set to \'Project\'.')
+@sys.description('Optional. The resource ID of the hub to associate with the workspace. Required if \'kind\' is set to \'Project\'.')
 param hubResourceId string?
 
 import { roleAssignmentType } from 'br/public:avm/utl/types/avm-common-types:0.4.0'
@@ -82,7 +82,7 @@ param managedIdentities managedIdentityAllType = {
   systemAssigned: true
 }
 
-@sys.description('Conditional. Settings for feature store type workspaces. Required if \'kind\' is set to \'FeatureStore\'.')
+@sys.description('Optional. Settings for feature store type workspaces. Required if \'kind\' is set to \'FeatureStore\'.')
 param featureStoreSettings featureStoreSettingType?
 
 @sys.description('Optional. List of IPv4 addresse ranges that are allowed to access the workspace.')
@@ -126,7 +126,7 @@ param customerManagedKey customerManagedKeyType?
 @sys.description('Optional. The compute name for image build.')
 param imageBuildCompute string?
 
-@sys.description('Conditional. The user assigned identity resource ID that represents the workspace identity. Required if \'userAssignedIdentities\' is not empty and may not be used if \'systemAssignedIdentity\' is enabled.')
+@sys.description('Optional. The user assigned identity resource ID that represents the workspace identity. Required if \'userAssignedIdentities\' is not empty and may not be used if \'systemAssignedIdentity\' is enabled.')
 param primaryUserAssignedIdentity string?
 
 @sys.description('Optional. The service managed resource settings.')
