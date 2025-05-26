@@ -2235,7 +2235,7 @@ This section gives you an overview of all local-referenced module files (i.e., o
 | :-- | :-- |
 | `br/public:avm/ptn/authorization/resource-role-assignment:0.1.2` | Remote reference |
 | `br/public:avm/res/app/job:0.6.0` | Remote reference |
-| `br/public:avm/res/app/managed-environment:0.10.2` | Remote reference |
+| `br/public:avm/res/app/managed-environment:0.11.1` | Remote reference |
 | `br/public:avm/res/container-instance/container-group:0.2.0` | Remote reference |
 | `br/public:avm/res/container-registry/registry:0.9.1` | Remote reference |
 | `br/public:avm/res/managed-identity/user-assigned-identity:0.4.0` | Remote reference |
@@ -2244,7 +2244,7 @@ This section gives you an overview of all local-referenced module files (i.e., o
 | `br/public:avm/res/network/private-dns-zone:0.7.0` | Remote reference |
 | `br/public:avm/res/network/public-ip-address:0.8.0` | Remote reference |
 | `br/public:avm/res/network/virtual-network:0.6.1` | Remote reference |
-| `br/public:avm/res/operational-insights/workspace:0.11.1` | Remote reference |
+| `br/public:avm/res/operational-insights/workspace:0.11.2` | Remote reference |
 | `br/public:avm/res/resources/deployment-script:0.3.1` | Remote reference |
 | `br/public:avm/res/storage/storage-account:0.13.0` | Remote reference |
 
