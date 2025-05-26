@@ -350,7 +350,7 @@ module cicdAgentsAndRunners 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<
     computeTypes: [
       'azure-container-app'
     ]
-    namingPrefix: 'ghaca'
+    namingPrefix: '<namingPrefix>'
     networkingConfiguration: {
       addressSpace: '10.0.0.0/16'
       networkType: 'createNew'
@@ -388,7 +388,7 @@ module cicdAgentsAndRunners 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<
       ]
     },
     "namingPrefix": {
-      "value": "ghaca"
+      "value": "<namingPrefix>"
     },
     "networkingConfiguration": {
       "value": {
@@ -430,7 +430,7 @@ using 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<version>'
 param computeTypes = [
   'azure-container-app'
 ]
-param namingPrefix = 'ghaca'
+param namingPrefix = '<namingPrefix>'
 param networkingConfiguration = {
   addressSpace: '10.0.0.0/16'
   networkType: 'createNew'
@@ -467,7 +467,7 @@ module cicdAgentsAndRunners 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<
     computeTypes: [
       'azure-container-app'
     ]
-    namingPrefix: 'mxdev'
+    namingPrefix: '<namingPrefix>'
     networkingConfiguration: {
       addressSpace: '10.0.0.0/16'
       containerAppSubnetAddressPrefix: '10.0.1.0/24'
@@ -516,7 +516,7 @@ module cicdAgentsAndRunners 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<
       ]
     },
     "namingPrefix": {
-      "value": "mxdev"
+      "value": "<namingPrefix>"
     },
     "networkingConfiguration": {
       "value": {
@@ -569,7 +569,7 @@ using 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<version>'
 param computeTypes = [
   'azure-container-app'
 ]
-param namingPrefix = 'mxdev'
+param namingPrefix = '<namingPrefix>'
 param networkingConfiguration = {
   addressSpace: '10.0.0.0/16'
   containerAppSubnetAddressPrefix: '10.0.1.0/24'
@@ -770,7 +770,7 @@ module cicdAgentsAndRunners 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<
     computeTypes: [
       'azure-container-app'
     ]
-    namingPrefix: 'ghorg'
+    namingPrefix: '<namingPrefix>'
     networkingConfiguration: {
       addressSpace: '10.0.0.0/16'
       networkType: 'createNew'
@@ -808,7 +808,7 @@ module cicdAgentsAndRunners 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<
       ]
     },
     "namingPrefix": {
-      "value": "ghorg"
+      "value": "<namingPrefix>"
     },
     "networkingConfiguration": {
       "value": {
@@ -850,7 +850,7 @@ using 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<version>'
 param computeTypes = [
   'azure-container-app'
 ]
-param namingPrefix = 'ghorg'
+param namingPrefix = '<namingPrefix>'
 param networkingConfiguration = {
   addressSpace: '10.0.0.0/16'
   networkType: 'createNew'
@@ -1037,7 +1037,7 @@ module cicdAgentsAndRunners 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<
     computeTypes: [
       'azure-container-instance'
     ]
-    namingPrefix: 'pnexg'
+    namingPrefix: '<namingPrefix>'
     networkingConfiguration: {
       computeNetworking: {
         computeNetworkType: 'azureContainerApp'
@@ -1085,7 +1085,7 @@ module cicdAgentsAndRunners 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<
       ]
     },
     "namingPrefix": {
-      "value": "pnexg"
+      "value": "<namingPrefix>"
     },
     "networkingConfiguration": {
       "value": {
@@ -1137,7 +1137,7 @@ using 'br/public:avm/ptn/dev-ops/cicd-agents-and-runners:<version>'
 param computeTypes = [
   'azure-container-instance'
 ]
-param namingPrefix = 'pnexg'
+param namingPrefix = '<namingPrefix>'
 param networkingConfiguration = {
   computeNetworking: {
     computeNetworkType: 'azureContainerApp'

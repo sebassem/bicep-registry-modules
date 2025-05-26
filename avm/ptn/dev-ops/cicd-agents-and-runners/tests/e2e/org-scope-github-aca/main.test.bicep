@@ -40,7 +40,7 @@ module testDeployment '../../../main.bicep' = {
   name: '${uniqueString(deployment().name, enforcedLocation)}-test-${serviceShort}'
   scope: resourceGroup
   params: {
-    namingPrefix: '${namePrefix}${serviceShort}'
+    namingPrefix: serviceShort
     location: enforcedLocation
     computeTypes: [
       'azure-container-app'
