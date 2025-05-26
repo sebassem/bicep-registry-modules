@@ -207,7 +207,7 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableT
   }
 }
 
-module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.11.1' = {
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.11.2' = {
   name: 'logAnalyticsWorkspace-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'law-${namingPrefix}-${uniqueString(resourceGroup().id)}-law'
@@ -345,18 +345,24 @@ module newVnet 'br/public:avm/res/network/virtual-network:0.6.1' = if (networkin
     )
   }
 }
-module appEnvironment 'br/public:avm/res/app/managed-environment:0.10.2' = if (contains(
+module appEnvironment 'br/public:avm/res/app/managed-environment:0.11.1' = if (contains(
   computeTypes,
   'azure-container-app'
 )) {
   name: 'appEnv-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'appEnv${namingPrefix}${uniqueString(resourceGroup().id)}'
-    logAnalyticsWorkspaceResourceId: logAnalyticsWorkspace.outputs.resourceId
+    appLogsConfiguration: {
+      destination: 'log-analytics'
+      logAnalyticsConfiguration: {
+        customerId: logAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+        sharedKey: logAnalyticsWorkspace.outputs.primarySharedKey
+      }
+    }
     location: location
     enableTelemetry: enableTelemetry
     infrastructureResourceGroupName: infrastructureResourceGroupName
-    infrastructureSubnetId: networkingConfiguration.networkType == 'createNew'
+    infrastructureSubnetResourceId: networkingConfiguration.networkType == 'createNew'
       ? filter(
           newVnet.outputs.subnetResourceIds,
           subnetId => contains(subnetId, networkingConfiguration.?containerAppSubnetName ?? 'app-subnet')
