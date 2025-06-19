@@ -8,6 +8,7 @@ This module deploys a Private DNS zone.
 - [Usage examples](#Usage-examples)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
+- [Cross-referenced modules](#Cross-referenced-modules)
 - [Data Collection](#Data-Collection)
 
 ## Resource Types
@@ -25,7 +26,7 @@ This module deploys a Private DNS zone.
 | `Microsoft.Network/privateDnsZones/SOA` | [2020-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2020-06-01/privateDnsZones/SOA) |
 | `Microsoft.Network/privateDnsZones/SRV` | [2020-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2020-06-01/privateDnsZones/SRV) |
 | `Microsoft.Network/privateDnsZones/TXT` | [2020-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2020-06-01/privateDnsZones/TXT) |
-| `Microsoft.Network/privateDnsZones/virtualNetworkLinks` | [2020-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2020-06-01/privateDnsZones/virtualNetworkLinks) |
+| `Microsoft.Network/privateDnsZones/virtualNetworkLinks` | [2024-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2024-06-01/privateDnsZones/virtualNetworkLinks) |
 
 ## Usage examples
 
@@ -2674,6 +2675,7 @@ Array of custom objects describing vNet links of the DNS zone. Each object shoul
 | [`location`](#parameter-virtualnetworklinkslocation) | string | The Azure Region where the resource lives. |
 | [`name`](#parameter-virtualnetworklinksname) | string | The resource name. |
 | [`registrationEnabled`](#parameter-virtualnetworklinksregistrationenabled) | bool | Is auto-registration of virtual machine records in the virtual network in the Private DNS zone enabled?. |
+| [`resolutionPolicy`](#parameter-virtualnetworklinksresolutionpolicy) | string | The resolution type of the private-dns-zone fallback machanism. |
 | [`tags`](#parameter-virtualnetworklinkstags) | object | Resource tags. |
 
 ### Parameter: `virtualNetworkLinks.virtualNetworkResourceId`
@@ -2704,6 +2706,20 @@ Is auto-registration of virtual machine records in the virtual network in the Pr
 - Required: No
 - Type: bool
 
+### Parameter: `virtualNetworkLinks.resolutionPolicy`
+
+The resolution type of the private-dns-zone fallback machanism.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'Default'
+    'NxDomainRedirect'
+  ]
+  ```
+
 ### Parameter: `virtualNetworkLinks.tags`
 
 Resource tags.
@@ -2719,6 +2735,14 @@ Resource tags.
 | `name` | string | The name of the private DNS zone. |
 | `resourceGroupName` | string | The resource group the private DNS zone was deployed into. |
 | `resourceId` | string | The resource ID of the private DNS zone. |
+
+## Cross-referenced modules
+
+This section gives you an overview of all local-referenced module files (i.e., other modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
+
+| Reference | Type |
+| :-- | :-- |
+| `br/public:avm/utl/types/avm-common-types:0.5.1` | Remote reference |
 
 ## Data Collection
 

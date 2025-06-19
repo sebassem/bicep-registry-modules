@@ -7,6 +7,7 @@ This module deploys an Event Hub Namespace Event Hub.
 - [Resource Types](#Resource-Types)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
+- [Cross-referenced modules](#Cross-referenced-modules)
 
 ## Resource Types
 
@@ -14,7 +15,7 @@ This module deploys an Event Hub Namespace Event Hub.
 | :-- | :-- |
 | `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.EventHub/namespaces/eventhubs` | [2022-10-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.EventHub/2022-10-01-preview/namespaces/eventhubs) |
+| `Microsoft.EventHub/namespaces/eventhubs` | [2024-01-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.EventHub/2024-01-01/namespaces/eventhubs) |
 | `Microsoft.EventHub/namespaces/eventhubs/authorizationRules` | [2024-01-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.EventHub/2024-01-01/namespaces/eventhubs/authorizationRules) |
 | `Microsoft.EventHub/namespaces/eventhubs/consumergroups` | [2024-01-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.EventHub/2024-01-01/namespaces/eventhubs/consumergroups) |
 
@@ -51,7 +52,8 @@ This module deploys an Event Hub Namespace Event Hub.
 | [`messageRetentionInDays`](#parameter-messageretentionindays) | int | Number of days to retain the events for this Event Hub, value should be 1 to 7 days. Will be automatically set to infinite retention if cleanup policy is set to "Compact". |
 | [`partitionCount`](#parameter-partitioncount) | int | Number of partitions created for the Event Hub, allowed values are from 1 to 32 partitions. |
 | [`retentionDescriptionCleanupPolicy`](#parameter-retentiondescriptioncleanuppolicy) | string | Retention cleanup policy. Enumerates the possible values for cleanup policy. |
-| [`retentionDescriptionRetentionTimeInHours`](#parameter-retentiondescriptionretentiontimeinhours) | int | Retention time in hours. Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compact the returned value of this property is Long.MaxValue. |
+| [`retentionDescriptionEnabled`](#parameter-retentiondescriptionenabled) | bool | A value that indicates whether to enable retention description properties. If it is set to true the messageRetentionInDays property is ignored. |
+| [`retentionDescriptionRetentionTimeInHours`](#parameter-retentiondescriptionretentiontimeinhours) | int | Retention time in hours. Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete and it overrides the messageRetentionInDays. If cleanupPolicy is Compact the returned value of this property is Long.MaxValue. |
 | [`retentionDescriptionTombstoneRetentionTimeInHours`](#parameter-retentiondescriptiontombstoneretentiontimeinhours) | int | Retention cleanup policy. Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compact. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub. |
 | [`roleAssignments`](#parameter-roleassignments) | array | Array of role assignments to create. |
 | [`status`](#parameter-status) | string | Enumerates the possible values for the status of the Event Hub. |
@@ -152,6 +154,8 @@ The time window allows you to set the frequency with which the capture to Azure 
 - Required: No
 - Type: int
 - Default: `300`
+- MinValue: 60
+- MaxValue: 900
 
 ### Parameter: `captureDescriptionSizeLimitInBytes`
 
@@ -160,6 +164,8 @@ The size window defines the amount of data built up in your Event Hub before an 
 - Required: No
 - Type: int
 - Default: `314572800`
+- MinValue: 10485760
+- MaxValue: 524288000
 
 ### Parameter: `captureDescriptionSkipEmptyArchives`
 
@@ -227,6 +233,8 @@ Number of days to retain the events for this Event Hub, value should be 1 to 7 d
 - Required: No
 - Type: int
 - Default: `1`
+- MinValue: 1
+- MaxValue: 90
 
 ### Parameter: `partitionCount`
 
@@ -235,6 +243,8 @@ Number of partitions created for the Event Hub, allowed values are from 1 to 32 
 - Required: No
 - Type: int
 - Default: `2`
+- MinValue: 1
+- MaxValue: 32
 
 ### Parameter: `retentionDescriptionCleanupPolicy`
 
@@ -251,13 +261,23 @@ Retention cleanup policy. Enumerates the possible values for cleanup policy.
   ]
   ```
 
+### Parameter: `retentionDescriptionEnabled`
+
+A value that indicates whether to enable retention description properties. If it is set to true the messageRetentionInDays property is ignored.
+
+- Required: No
+- Type: bool
+- Default: `False`
+
 ### Parameter: `retentionDescriptionRetentionTimeInHours`
 
-Retention time in hours. Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compact the returned value of this property is Long.MaxValue.
+Retention time in hours. Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete and it overrides the messageRetentionInDays. If cleanupPolicy is Compact the returned value of this property is Long.MaxValue.
 
 - Required: No
 - Type: int
 - Default: `1`
+- MinValue: 1
+- MaxValue: 2160
 
 ### Parameter: `retentionDescriptionTombstoneRetentionTimeInHours`
 
@@ -266,6 +286,8 @@ Retention cleanup policy. Number of hours to retain the tombstone markers of a c
 - Required: No
 - Type: int
 - Default: `1`
+- MinValue: 1
+- MaxValue: 2160
 
 ### Parameter: `roleAssignments`
 
@@ -402,3 +424,11 @@ Enumerates the possible values for the status of the Event Hub.
 | `name` | string | The name of the event hub. |
 | `resourceGroupName` | string | The resource group the event hub was deployed into. |
 | `resourceId` | string | The resource ID of the event hub. |
+
+## Cross-referenced modules
+
+This section gives you an overview of all local-referenced module files (i.e., other modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
+
+| Reference | Type |
+| :-- | :-- |
+| `br/public:avm/utl/types/avm-common-types:0.5.1` | Remote reference |

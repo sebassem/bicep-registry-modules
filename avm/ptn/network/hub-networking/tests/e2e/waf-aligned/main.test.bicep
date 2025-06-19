@@ -33,7 +33,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2023-07-01' = {
 
 // Diagnostics
 // ===========
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
+module diagnosticDependencies '../../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
   scope: resourceGroup
   name: '${uniqueString(deployment().name, resourceLocation)}-diagnosticDependencies'
   params: {
@@ -57,19 +57,17 @@ module testDeployment '../../../main.bicep' = [
     scope: resourceGroup
     name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
     params: {
-      // You parameters go here
       location: resourceLocation
       hubVirtualNetworks: {
         hub1: {
           addressPrefixes: array(addressPrefix)
           azureFirewallSettings: {
             azureSkuTier: 'Standard'
-            enableTelemetry: true
             location: resourceLocation
             publicIPAddressObject: {
               name: 'hub1PublicIp'
             }
-            threatIntelMode: 'Alert'
+            threatIntelMode: 'Deny'
             zones: [
               1
               2
@@ -87,7 +85,6 @@ module testDeployment '../../../main.bicep' = [
           enableAzureFirewall: true
           enableBastion: true
           enablePeering: false
-          enableTelemetry: true
           flowTimeoutInMinutes: 30
           dnsServers: ['10.0.1.6', '10.0.1.7']
           diagnosticSettings: [
@@ -105,10 +102,6 @@ module testDeployment '../../../main.bicep' = [
             }
           ]
           location: resourceLocation
-          lock: {
-            kind: 'CanNotDelete'
-            name: 'hub1Lock'
-          }
           routes: [
             {
               name: 'defaultRoute'

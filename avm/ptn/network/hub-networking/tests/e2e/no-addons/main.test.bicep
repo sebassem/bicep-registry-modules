@@ -33,7 +33,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2023-07-01' = {
 
 // Diagnostics
 // ===========
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
+module diagnosticDependencies '../../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
   scope: resourceGroup
   name: '${uniqueString(deployment().name, resourceLocation)}-diagnosticDependencies'
   params: {
@@ -57,7 +57,6 @@ module testDeployment '../../../main.bicep' = [
     scope: resourceGroup
     name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
     params: {
-      // You parameters go here
       location: resourceLocation
       hubVirtualNetworks: {
         hub1: {
@@ -65,7 +64,6 @@ module testDeployment '../../../main.bicep' = [
           enableAzureFirewall: false
           enableBastion: false
           enablePeering: false
-          enableTelemetry: true
           flowTimeoutInMinutes: 30
           dnsServers: ['10.0.1.6', '10.0.1.7']
           diagnosticSettings: [
@@ -83,10 +81,6 @@ module testDeployment '../../../main.bicep' = [
             }
           ]
           location: resourceLocation
-          lock: {
-            kind: 'CanNotDelete'
-            name: 'hub1Lock'
-          }
           routes: [
             {
               name: 'defaultRoute'
@@ -110,11 +104,6 @@ module testDeployment '../../../main.bicep' = [
               addressPrefix: cidrSubnet(addressPrefix, 26, 2)
             }
           ]
-          tags: {
-            'hidden-title': 'This is visible in the resource name'
-            Environment: 'Non-Prod'
-            Role: 'DeploymentValidation'
-          }
           vnetEncryption: false
           vnetEncryptionEnforcement: 'AllowUnencrypted'
         }

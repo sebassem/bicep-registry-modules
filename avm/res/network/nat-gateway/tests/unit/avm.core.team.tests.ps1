@@ -6,15 +6,15 @@ If you wish to add your own Pester tests for you module create a new <something>
 #>
 
 param (
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $true)]
     [array] $moduleFolderPaths,
 
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $true)]
     [string] $repoRootPath
 )
 
 BeforeAll {
-    . (Join-Path $RepoRootPath 'avm' 'utilities' 'pipelines' 'sharedScripts' 'helper' 'Get-IsParameterRequired.ps1')
+    . (Join-Path $RepoRootPath 'utilities' 'pipelines' 'sharedScripts' 'helper' 'Get-IsParameterRequired.ps1')
 
     if ($moduleFolderPaths.Count -gt 1) {
         $topLevelModuleTemplatePath = $moduleFolderPaths | Sort-Object -Culture 'en-US' | Select-Object -First 1
@@ -30,7 +30,7 @@ Describe 'AVM Core Team Module Specific Tests' {
     Context 'WAF - Reliability Pillar - Parameter Tests' {
 
         It 'NAT Gateway Module Availability Zone Parameter Should Not Have A Default Value Set' {
-            $isRequired = Get-IsParameterRequired -TemplateFileContent $moduleJsonContentHashtable -Parameter $moduleJsonContentHashtable.parameters.zone
+            $isRequired = Get-IsParameterRequired -TemplateFileContent $moduleJsonContentHashtable -Parameter $moduleJsonContentHashtable.parameters.availabilityZone
             $isRequired | Should -Be $true
         }
 

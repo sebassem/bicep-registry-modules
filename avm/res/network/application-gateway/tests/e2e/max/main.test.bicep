@@ -32,7 +32,7 @@ param namePrefix string = '#_namePrefix_#'
 
 // General resources
 // =================
-resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {
   name: resourceGroupName
   location: resourceLocation
 }
@@ -47,12 +47,13 @@ module nestedDependencies 'dependencies.bicep' = {
     managedIdentityName: 'dep-${namePrefix}-msi-${serviceShort}'
     certDeploymentScriptName: 'dep-${namePrefix}-ds-${serviceShort}'
     keyVaultName: 'dep-${namePrefix}-kv-${serviceShort}-${substring(uniqueString(baseTime), 0, 3)}'
+    fwPolicyName: 'dep-${namePrefix}-fwp-${serviceShort}'
   }
 }
 
 // Diagnostics
 // ===========
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
+module diagnosticDependencies '../../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
   scope: resourceGroup
   name: '${uniqueString(deployment().name, resourceLocation)}-diagnosticDependencies'
   params: {
@@ -84,6 +85,7 @@ module testDeployment '../../../main.bicep' = [
         '2'
         '3'
       ]
+      firewallPolicyResourceId: nestedDependencies.outputs.fwPolicyResourceId
       backendAddressPools: [
         {
           name: 'appServiceBackendPool'
@@ -493,33 +495,6 @@ module testDeployment '../../../main.bicep' = [
           }
         }
       ]
-      webApplicationFirewallConfiguration: {
-        enabled: true
-        fileUploadLimitInMb: 100
-        firewallMode: 'Detection'
-        maxRequestBodySizeInKb: 128
-        requestBodyCheck: true
-        ruleSetType: 'OWASP'
-        ruleSetVersion: '3.0'
-        disabledRuleGroups: [
-          {
-            ruleGroupName: 'Known-CVEs'
-          }
-          {
-            ruleGroupName: 'REQUEST-943-APPLICATION-ATTACK-SESSION-FIXATION'
-          }
-          {
-            ruleGroupName: 'REQUEST-941-APPLICATION-ATTACK-XSS'
-          }
-        ]
-        exclusions: [
-          {
-            matchVariable: 'RequestHeaderNames'
-            selectorMatchOperator: 'StartsWith'
-            selector: 'hola'
-          }
-        ]
-      }
       tags: {
         'hidden-title': 'This is visible in the resource name'
         Environment: 'Non-Prod'

@@ -7,13 +7,14 @@ This module deploys a Key Vault Key.
 - [Resource Types](#Resource-Types)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
+- [Cross-referenced modules](#Cross-referenced-modules)
 
 ## Resource Types
 
 | Resource Type | API Version |
 | :-- | :-- |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.KeyVault/vaults/keys` | [2022-07-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.KeyVault/2022-07-01/vaults/keys) |
+| `Microsoft.KeyVault/vaults/keys` | [2024-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.KeyVault/2024-11-01/vaults/keys) |
 
 ## Parameters
 
@@ -264,6 +265,102 @@ Key rotation policy properties object.
 - Required: No
 - Type: object
 
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`attributes`](#parameter-rotationpolicyattributes) | object | The attributes of key rotation policy. |
+| [`lifetimeActions`](#parameter-rotationpolicylifetimeactions) | array | The key rotation policy lifetime actions. |
+
+### Parameter: `rotationPolicy.attributes`
+
+The attributes of key rotation policy.
+
+- Required: No
+- Type: object
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`expiryTime`](#parameter-rotationpolicyattributesexpirytime) | string | The expiration time for the new key version. It should be in ISO8601 format. Eg: "P90D", "P1Y". |
+
+### Parameter: `rotationPolicy.attributes.expiryTime`
+
+The expiration time for the new key version. It should be in ISO8601 format. Eg: "P90D", "P1Y".
+
+- Required: No
+- Type: string
+
+### Parameter: `rotationPolicy.lifetimeActions`
+
+The key rotation policy lifetime actions.
+
+- Required: No
+- Type: array
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`action`](#parameter-rotationpolicylifetimeactionsaction) | object | The type of the action. |
+| [`trigger`](#parameter-rotationpolicylifetimeactionstrigger) | object | The time duration for rotating the key. |
+
+### Parameter: `rotationPolicy.lifetimeActions.action`
+
+The type of the action.
+
+- Required: No
+- Type: object
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`type`](#parameter-rotationpolicylifetimeactionsactiontype) | string | The type of the action. |
+
+### Parameter: `rotationPolicy.lifetimeActions.action.type`
+
+The type of the action.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'notify'
+    'rotate'
+  ]
+  ```
+
+### Parameter: `rotationPolicy.lifetimeActions.trigger`
+
+The time duration for rotating the key.
+
+- Required: No
+- Type: object
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`timeAfterCreate`](#parameter-rotationpolicylifetimeactionstriggertimeaftercreate) | string | The time duration after key creation to rotate the key. It only applies to rotate. It will be in ISO 8601 duration format. Eg: "P90D", "P1Y". |
+| [`timeBeforeExpiry`](#parameter-rotationpolicylifetimeactionstriggertimebeforeexpiry) | string | The time duration before key expiring to rotate or notify. It will be in ISO 8601 duration format. Eg: "P90D", "P1Y". |
+
+### Parameter: `rotationPolicy.lifetimeActions.trigger.timeAfterCreate`
+
+The time duration after key creation to rotate the key. It only applies to rotate. It will be in ISO 8601 duration format. Eg: "P90D", "P1Y".
+
+- Required: No
+- Type: string
+
+### Parameter: `rotationPolicy.lifetimeActions.trigger.timeBeforeExpiry`
+
+The time duration before key expiring to rotate or notify. It will be in ISO 8601 duration format. Eg: "P90D", "P1Y".
+
+- Required: No
+- Type: string
+
 ### Parameter: `tags`
 
 Resource tags.
@@ -275,6 +372,16 @@ Resource tags.
 
 | Output | Type | Description |
 | :-- | :-- | :-- |
+| `keyUri` | string | The uri of the key. |
+| `keyUriWithVersion` | string | The uri with version of the key. |
 | `name` | string | The name of the key. |
 | `resourceGroupName` | string | The name of the resource group the key was created in. |
 | `resourceId` | string | The resource ID of the key. |
+
+## Cross-referenced modules
+
+This section gives you an overview of all local-referenced module files (i.e., other modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
+
+| Reference | Type |
+| :-- | :-- |
+| `br/public:avm/utl/types/avm-common-types:0.5.1` | Remote reference |

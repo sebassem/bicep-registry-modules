@@ -44,7 +44,7 @@ module nestedDependencies 'dependencies.bicep' = {
 
 // Diagnostics
 // ===========
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
+module diagnosticDependencies '../../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
   scope: resourceGroup
   name: '${uniqueString(deployment().name, resourceLocation)}-diagnosticDependencies'
   params: {
@@ -173,6 +173,57 @@ module testDeployment '../../../main.bicep' = [
           name: 'shir01'
         }
       ]
+      bigDataPools: [
+        {
+          name: 'dep${namePrefix}bdp01'
+          nodeSizeFamily: 'MemoryOptimized'
+          nodeSize: 'Large'
+          autoScale: {
+            minNodeCount: 3
+            maxNodeCount: 10
+          }
+          dynamicExecutorAllocation: {
+            minExecutors: 1
+            maxExecutors: 9
+          }
+          autoPauseDelayInMinutes: 5
+          sessionLevelPackagesEnabled: true
+          cacheSize: 50
+          autotuneEnabled: true
+          sparkEventsFolder: '/events'
+          defaultSparkLogFolder: '/logs'
+          sparkConfigProperties: {
+            configurationType: 'File'
+            filename: 'spark-defaults.conf'
+            content: loadTextContent('./src/spark-defaults.conf')
+          }
+          roleAssignments: [
+            {
+              roleDefinitionIdOrName: 'Reader'
+              principalId: nestedDependencies.outputs.managedIdentityPrincipalId
+              principalType: 'ServicePrincipal'
+            }
+          ]
+          diagnosticSettings: [
+            {
+              name: 'customSetting'
+              metricCategories: [
+                {
+                  category: 'AllMetrics'
+                }
+              ]
+              eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
+              eventHubAuthorizationRuleResourceId: diagnosticDependencies.outputs.eventHubAuthorizationRuleId
+              storageAccountResourceId: diagnosticDependencies.outputs.storageAccountResourceId
+              workspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
+            }
+          ]
+          lock: {
+            kind: 'CanNotDelete'
+            name: 'myCustomLockName'
+          }
+        }
+      ]
       diagnosticSettings: [
         {
           name: 'customSetting'
@@ -191,9 +242,5 @@ module testDeployment '../../../main.bicep' = [
         }
       ]
     }
-    dependsOn: [
-      nestedDependencies
-      diagnosticDependencies
-    ]
   }
 ]

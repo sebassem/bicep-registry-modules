@@ -1,6 +1,5 @@
 metadata name = 'Event Hub Namespace Event Hubs'
 metadata description = 'This module deploys an Event Hub Namespace Event Hub.'
-metadata owner = 'Azure/module-maintainers'
 
 @description('Conditional. The name of the parent event hub namespace. Required if the template is used in a standalone deployment.')
 param namespaceName string
@@ -22,7 +21,7 @@ param authorizationRules array = [
 
 @description('Optional. Number of days to retain the events for this Event Hub, value should be 1 to 7 days. Will be automatically set to infinite retention if cleanup policy is set to "Compact".')
 @minValue(1)
-@maxValue(7)
+@maxValue(90)
 param messageRetentionInDays int = 1
 
 @description('Optional. Number of partitions created for the Event Hub, allowed values are from 1 to 32 partitions.')
@@ -51,11 +50,13 @@ param consumergroups array = [
   }
 ]
 
+import { lockType } from 'br/public:avm/utl/types/avm-common-types:0.5.1'
 @description('Optional. The lock settings of the service.')
-param lock lockType
+param lock lockType?
 
+import { roleAssignmentType } from 'br/public:avm/utl/types/avm-common-types:0.5.1'
 @description('Optional. Array of role assignments to create.')
-param roleAssignments roleAssignmentType
+param roleAssignments roleAssignmentType[]?
 
 @description('Optional. Name for capture destination.')
 param captureDescriptionDestinationName string = 'EventHubArchive.AzureBlockBlob'
@@ -92,6 +93,9 @@ param captureDescriptionSizeLimitInBytes int = 314572800
 @description('Optional. A value that indicates whether to Skip Empty Archives.')
 param captureDescriptionSkipEmptyArchives bool = false
 
+@description('Optional. A value that indicates whether to enable retention description properties. If it is set to true the messageRetentionInDays property is ignored.')
+param retentionDescriptionEnabled bool = false
+
 @allowed([
   'Compact'
   'Delete'
@@ -100,28 +104,30 @@ param captureDescriptionSkipEmptyArchives bool = false
 param retentionDescriptionCleanupPolicy string = 'Delete'
 
 @minValue(1)
-@maxValue(168)
-@description('Optional. Retention time in hours. Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compact the returned value of this property is Long.MaxValue.')
+@maxValue(2160)
+@description('Optional. Retention time in hours. Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete and it overrides the messageRetentionInDays. If cleanupPolicy is Compact the returned value of this property is Long.MaxValue.')
 param retentionDescriptionRetentionTimeInHours int = 1
 
 @minValue(1)
-@maxValue(168)
+@maxValue(2160)
 @description('Optional. Retention cleanup policy. Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compact. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub.')
 param retentionDescriptionTombstoneRetentionTimeInHours int = 1
 
 var eventHubProperties = {
-  messageRetentionInDays: messageRetentionInDays
+  messageRetentionInDays: retentionDescriptionEnabled ? null : messageRetentionInDays
   partitionCount: partitionCount
   status: status
-  retentionDescription: {
-    cleanupPolicy: retentionDescriptionCleanupPolicy
-    retentionTimeInHours: retentionDescriptionCleanupPolicy == 'Delete'
-      ? retentionDescriptionRetentionTimeInHours
-      : null
-    tombstoneRetentionTimeInHours: retentionDescriptionCleanupPolicy == 'Compact'
-      ? retentionDescriptionTombstoneRetentionTimeInHours
-      : null
-  }
+  retentionDescription: retentionDescriptionEnabled
+    ? {
+        cleanupPolicy: retentionDescriptionCleanupPolicy
+        retentionTimeInHours: retentionDescriptionCleanupPolicy == 'Delete'
+          ? retentionDescriptionRetentionTimeInHours
+          : null
+        tombstoneRetentionTimeInHours: retentionDescriptionCleanupPolicy == 'Compact'
+          ? retentionDescriptionTombstoneRetentionTimeInHours
+          : null
+      }
+    : null
 }
 
 var eventHubPropertiesCapture = {
@@ -183,7 +189,7 @@ resource namespace 'Microsoft.EventHub/namespaces@2024-01-01' existing = {
   name: namespaceName
 }
 
-resource eventHub 'Microsoft.EventHub/namespaces/eventhubs@2022-10-01-preview' = {
+resource eventHub 'Microsoft.EventHub/namespaces/eventhubs@2024-01-01' = {
   name: name
   parent: namespace
   properties: captureDescriptionEnabled ? union(eventHubProperties, eventHubPropertiesCapture) : eventHubProperties
@@ -207,7 +213,7 @@ module eventHub_consumergroups 'consumergroup/main.bicep' = [
       namespaceName: namespaceName
       eventHubName: eventHub.name
       name: consumerGroup.name
-      userMetadata: contains(consumerGroup, 'userMetadata') ? consumerGroup.userMetadata : ''
+      userMetadata: consumerGroup.?userMetadata
     }
   }
 ]
@@ -219,7 +225,7 @@ module eventHub_authorizationRules 'authorization-rule/main.bicep' = [
       namespaceName: namespaceName
       eventHubName: eventHub.name
       name: authorizationRule.name
-      rights: contains(authorizationRule, 'rights') ? authorizationRule.rights : []
+      rights: authorizationRule.?rights
     }
   }
 ]
@@ -248,41 +254,3 @@ output resourceId string = eventHub.id
 
 @description('The resource group the event hub was deployed into.')
 output resourceGroupName string = resourceGroup().name
-
-// =============== //
-//   Definitions   //
-// =============== //
-
-type lockType = {
-  @description('Optional. Specify the name of lock.')
-  name: string?
-
-  @description('Optional. Specify the type of lock.')
-  kind: ('CanNotDelete' | 'ReadOnly' | 'None')?
-}?
-
-type roleAssignmentType = {
-  @description('Optional. The name (as GUID) of the role assignment. If not provided, a GUID will be generated.')
-  name: string?
-
-  @description('Required. The role to assign. You can provide either the display name of the role definition, the role definition GUID, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'.')
-  roleDefinitionIdOrName: string
-
-  @description('Required. The principal ID of the principal (user/group/identity) to assign the role to.')
-  principalId: string
-
-  @description('Optional. The principal type of the assigned principal ID.')
-  principalType: ('ServicePrincipal' | 'Group' | 'User' | 'ForeignGroup' | 'Device')?
-
-  @description('Optional. The description of the role assignment.')
-  description: string?
-
-  @description('Optional. The conditions on the role assignment. This limits the resources it can be assigned to. e.g.: @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:ContainerName] StringEqualsIgnoreCase "foo_storage_container".')
-  condition: string?
-
-  @description('Optional. Version of the condition.')
-  conditionVersion: '2.0'?
-
-  @description('Optional. The Resource Id of the delegated managed identity resource.')
-  delegatedManagedIdentityResourceId: string?
-}[]?

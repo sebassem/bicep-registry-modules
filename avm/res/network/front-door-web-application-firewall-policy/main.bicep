@@ -1,6 +1,5 @@
 metadata name = 'Front Door Web Application Firewall (WAF) Policies'
 metadata description = 'This module deploys a Front Door Web Application Firewall (WAF) Policy.'
-metadata owner = 'Azure/module-maintainers'
 
 @description('Required. Name of the Front Door WAF policy.')
 @minLength(1)
@@ -24,7 +23,7 @@ param tags object?
 param enableTelemetry bool = true
 
 @description('Optional. Describes the managedRules structure.')
-param managedRules object = {
+param managedRules managedRulesType = {
   managedRuleSets: [
     {
       ruleSetType: 'Microsoft_DefaultRuleSet'
@@ -43,7 +42,7 @@ param managedRules object = {
 }
 
 @description('Optional. The custom rules inside the policy.')
-param customRules object = {
+param customRules customRulesType = {
   rules: [
     {
       name: 'ApplyGeoFilter'
@@ -69,11 +68,13 @@ param policySettings object = {
   mode: 'Prevention'
 }
 
-@description('Optional. The lock settings of the service.')
-param lock lockType
+import { lockType } from 'br/public:avm/utl/types/avm-common-types:0.5.1'
+@sys.description('Optional. The lock settings of the service.')
+param lock lockType?
 
-@description('Optional. Array of role assignments to create.')
-param roleAssignments roleAssignmentType
+import { roleAssignmentType } from 'br/public:avm/utl/types/avm-common-types:0.5.1'
+@sys.description('Optional. Array of role assignments to create.')
+param roleAssignments roleAssignmentType[]?
 
 var builtInRoleNames = {
   Contributor: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
@@ -119,7 +120,7 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableT
   }
 }
 
-resource frontDoorWAFPolicy 'Microsoft.Network/FrontDoorWebApplicationFirewallPolicies@2022-05-01' = {
+resource frontDoorWAFPolicy 'Microsoft.Network/FrontDoorWebApplicationFirewallPolicies@2024-02-01' = {
   name: name
   location: location
   sku: {
@@ -180,36 +181,63 @@ output location string = frontDoorWAFPolicy.location
 //   Definitions   //
 // =============== //
 
-type lockType = {
-  @description('Optional. Specify the name of lock.')
-  name: string?
+@export()
+@description('The type for the managed rules.')
+type managedRulesType = {
+  @description('Optional. List of rule sets.')
+  managedRuleSets: managedRuleSetType[]?
+}
 
-  @description('Optional. Specify the type of lock.')
-  kind: ('CanNotDelete' | 'ReadOnly' | 'None')?
-}?
+@export()
+@description('The type for the managed rule set.')
+type managedRuleSetType = {
+  @description('Required. Defines the rule set type to use.')
+  ruleSetType: string
 
-type roleAssignmentType = {
-  @description('Optional. The name (as GUID) of the role assignment. If not provided, a GUID will be generated.')
-  name: string?
+  @description('Required. Defines the version of the rule set to use.')
+  ruleSetVersion: string
 
-  @description('Required. The role to assign. You can provide either the display name of the role definition, the role definition GUID, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'.')
-  roleDefinitionIdOrName: string
+  @description('Optional. Defines the rule group overrides to apply to the rule set.')
+  ruleGroupOverrides: array?
 
-  @description('Required. The principal ID of the principal (user/group/identity) to assign the role to.')
-  principalId: string
+  @description('Optional. Describes the exclusions that are applied to all rules in the set.')
+  exclusions: array?
 
-  @description('Optional. The principal type of the assigned principal ID.')
-  principalType: ('ServicePrincipal' | 'Group' | 'User' | 'ForeignGroup' | 'Device')?
+  @description('Optional. Defines the rule set action.')
+  ruleSetAction: 'Block' | 'Log' | 'Redirect' | null
+}
 
-  @description('Optional. The description of the role assignment.')
-  description: string?
+@export()
+@description('The type for the custom rules.')
+type customRulesType = {
+  @description('Optional. List of rules.')
+  rules: customRulesRuleType[]?
+}
 
-  @description('Optional. The conditions on the role assignment. This limits the resources it can be assigned to. e.g.: @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:ContainerName] StringEqualsIgnoreCase "foo_storage_container".')
-  condition: string?
+@export()
+@description('The type for the custom rules rule.')
+type customRulesRuleType = {
+  @description('Required. Describes what action to be applied when rule matches.')
+  action: 'Allow' | 'Block' | 'Log' | 'Redirect'
 
-  @description('Optional. Version of the condition.')
-  conditionVersion: '2.0'?
+  @description('Required. Describes if the custom rule is in enabled or disabled state.')
+  enabledState: 'Enabled' | 'Disabled'
 
-  @description('Optional. The Resource Id of the delegated managed identity resource.')
-  delegatedManagedIdentityResourceId: string?
-}[]?
+  @description('Required. List of match conditions. See https://learn.microsoft.com/en-us/azure/templates/microsoft.network/frontdoorwebapplicationfirewallpolicies#matchcondition for details.')
+  matchConditions: array
+
+  @description('Required. Describes the name of the rule.')
+  name: string
+
+  @description('Required. Describes priority of the rule. Rules with a lower value will be evaluated before rules with a higher value.')
+  priority: int
+
+  @description('Optional. Time window for resetting the rate limit count. Default is 1 minute.')
+  rateLimitDurationInMinutes: int?
+
+  @description('Optional. Number of allowed requests per client within the time window.')
+  rateLimitThreshold: int?
+
+  @description('Required. Describes type of rule.')
+  ruleType: 'MatchRule' | 'RateLimitRule'
+}

@@ -37,13 +37,14 @@ module nestedDependencies 'dependencies.bicep' = {
   params: {
     virtualNetworkName: 'dep-${namePrefix}-vnet-${serviceShort}'
     managedIdentityName: 'dep-${namePrefix}-msi-${serviceShort}'
+    storageAccountName: 'dep${namePrefix}sa${serviceShort}001'
     location: resourceLocation
   }
 }
 
 // Diagnostics
 // ===========
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
+module diagnosticDependencies '../../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
   scope: resourceGroup
   name: '${uniqueString(deployment().name, resourceLocation)}-diagnosticDependencies'
   params: {
@@ -67,6 +68,9 @@ module testDeployment '../../../main.bicep' = [
     params: {
       name: '${namePrefix}${serviceShort}001'
       location: resourceLocation
+      managedIdentities: {
+        systemAssigned: true
+      }         
       diagnosticSettings: [
         {
           name: 'customSetting'
@@ -140,6 +144,7 @@ module testDeployment '../../../main.bicep' = [
           principalType: 'ServicePrincipal'
         }
       ]
+      minimumTlsVersionAllowed: '1.2'
       tags: {
         'hidden-title': 'This is visible in the resource name'
         Environment: 'Non-Prod'
@@ -148,6 +153,23 @@ module testDeployment '../../../main.bicep' = [
       topics: [
         '${namePrefix}-topic-${serviceShort}001'
       ]
+      eventSubscriptions: [
+        {
+          name: '${namePrefix}-sub-${serviceShort}001'
+          destination: {
+            endpointType: 'StorageQueue'
+            properties: {
+              resourceId: nestedDependencies.outputs.storageAccountResourceId 
+              queueName: nestedDependencies.outputs.storageQueueName
+            }
+          }
+          filter: {
+            includedEventTypes: [
+              'Microsoft.Resources.ResourceWriteSuccess'
+            ]
+          }
+        }
+      ]       
     }
     dependsOn: [
       nestedDependencies

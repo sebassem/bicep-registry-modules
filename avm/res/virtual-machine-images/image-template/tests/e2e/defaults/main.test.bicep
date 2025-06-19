@@ -57,14 +57,12 @@ module testDeployment '../../../main.bicep' = {
       type: 'PlatformImage'
       version: 'latest'
     }
-
     distributions: [
       {
         imageName: '${namePrefix}-mi-${serviceShort}-001'
         type: 'ManagedImage'
       }
     ]
-
     managedIdentities: {
       userAssignedResourceIds: [
         nestedDependencies.outputs.managedIdentityResourceId

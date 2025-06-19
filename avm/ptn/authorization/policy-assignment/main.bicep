@@ -1,6 +1,5 @@
 metadata name = 'Policy Assignments (All scopes)'
 metadata description = 'This module deploys a Policy Assignment at a Management Group, Subscription or Resource Group scope.'
-metadata owner = 'Azure/module-maintainers'
 
 targetScope = 'managementGroup'
 
@@ -50,6 +49,15 @@ param enforcementMode string = 'Default'
 @sys.description('Optional. The Target Scope for the Policy. The name of the management group for the policy assignment. If not provided, will use the current scope for deployment.')
 param managementGroupId string = managementGroup().name
 
+@sys.description('Optional. An array of additional management group IDs to assign RBAC to for the policy assignment if it has an identity.')
+param additionalManagementGroupsIDsToAssignRbacTo array = []
+
+@sys.description('Optional. An array of additional Subscription IDs to assign RBAC to for the policy assignment if it has an identity, only supported for Management Group Policy Assignments.')
+param additionalSubscriptionIDsToAssignRbacTo array = []
+
+@sys.description('Optional. An array of additional Resource Group Resource IDs to assign RBAC to for the policy assignment if it has an identity, only supported for Management Group Policy Assignments.')
+param additionalResourceGroupResourceIDsToAssignRbacTo array = []
+
 @sys.description('Optional. The Target Scope for the Policy. The subscription ID of the subscription for the policy assignment.')
 param subscriptionId string = ''
 
@@ -67,6 +75,9 @@ param overrides array = []
 
 @sys.description('Optional. The resource selector list to filter policies by resource properties. Facilitates safe deployment practices (SDP) by enabling gradual roll out policy assignments based on factors like resource location, resource type, or whether a resource has a location.')
 param resourceSelectors array = []
+
+@sys.description('Optional. The policy definition version to use for the policy assignment. If not specified, the latest version of the policy definition will be used. For more information on policy assignment definition versions see https://learn.microsoft.com/azure/governance/policy/concepts/assignment-structure#policy-definition-id-and-version-preview.')
+param definitionVersion string?
 
 @sys.description('Optional. Enable/Disable usage telemetry for module.')
 param enableTelemetry bool = true
@@ -110,12 +121,17 @@ module policyAssignment_mg 'modules/management-group.bicep' = if (empty(subscrip
     nonComplianceMessages: !empty(nonComplianceMessages) ? nonComplianceMessages : []
     enforcementMode: enforcementMode
     notScopes: !empty(notScopes) ? notScopes : []
-    managementGroupId: managementGroupId
     location: location
     overrides: !empty(overrides) ? overrides : []
     resourceSelectors: !empty(resourceSelectors) ? resourceSelectors : []
+    definitionVersion: definitionVersion
+    additionalManagementGroupsIDsToAssignRbacTo: additionalManagementGroupsIDsToAssignRbacTo
+    additionalSubscriptionIDsToAssignRbacTo: additionalSubscriptionIDsToAssignRbacTo
+    additionalResourceGroupResourceIDsToAssignRbacTo: additionalResourceGroupResourceIDsToAssignRbacTo
   }
 }
+
+// Create additional role assignments at different management group scopes if needed
 
 module policyAssignment_sub 'modules/subscription.bicep' = if (!empty(subscriptionId) && empty(resourceGroupName)) {
   name: '${uniqueString(deployment().name, location)}-PolicyAssignment-Sub-Module'
@@ -137,6 +153,7 @@ module policyAssignment_sub 'modules/subscription.bicep' = if (!empty(subscripti
     location: location
     overrides: !empty(overrides) ? overrides : []
     resourceSelectors: !empty(resourceSelectors) ? resourceSelectors : []
+    definitionVersion: definitionVersion
   }
 }
 
@@ -160,6 +177,7 @@ module policyAssignment_rg 'modules/resource-group.bicep' = if (!empty(resourceG
     location: location
     overrides: !empty(overrides) ? overrides : []
     resourceSelectors: !empty(resourceSelectors) ? resourceSelectors : []
+    definitionVersion: definitionVersion
   }
 }
 

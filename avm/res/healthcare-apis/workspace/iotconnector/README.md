@@ -7,6 +7,7 @@ This module deploys a Healthcare API Workspace IoT Connector.
 - [Resource Types](#Resource-Types)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
+- [Cross-referenced modules](#Cross-referenced-modules)
 - [Notes](#Notes)
 
 ## Resource Types
@@ -14,8 +15,8 @@ This module deploys a Healthcare API Workspace IoT Connector.
 | Resource Type | API Version |
 | :-- | :-- |
 | `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
-| `Microsoft.HealthcareApis/workspaces/iotconnectors` | [2022-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.HealthcareApis/workspaces) |
-| `Microsoft.HealthcareApis/workspaces/iotconnectors/fhirdestinations` | [2022-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.HealthcareApis/workspaces) |
+| `Microsoft.HealthcareApis/workspaces/iotconnectors` | [2022-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.HealthcareApis/2022-06-01/workspaces/iotconnectors) |
+| `Microsoft.HealthcareApis/workspaces/iotconnectors/fhirdestinations` | [2022-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.HealthcareApis/2022-06-01/workspaces/iotconnectors/fhirdestinations) |
 | `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
 
 ## Parameters
@@ -24,7 +25,6 @@ This module deploys a Healthcare API Workspace IoT Connector.
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`deviceMapping`](#parameter-devicemapping) | object | The mapping JSON that determines how incoming device data is normalized. |
 | [`eventHubName`](#parameter-eventhubname) | string | Event Hub name to connect to. |
 | [`eventHubNamespaceName`](#parameter-eventhubnamespacename) | string | Namespace of the Event Hub to connect to. |
 | [`name`](#parameter-name) | string | The name of the MedTech service. |
@@ -40,26 +40,13 @@ This module deploys a Healthcare API Workspace IoT Connector.
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`consumerGroup`](#parameter-consumergroup) | string | Consumer group of the event hub to connected to. |
+| [`deviceMapping`](#parameter-devicemapping) | object | The mapping JSON that determines how incoming device data is normalized. |
 | [`diagnosticSettings`](#parameter-diagnosticsettings) | array | The diagnostic settings of the service. |
 | [`fhirdestination`](#parameter-fhirdestination) | object | FHIR Destination. |
 | [`location`](#parameter-location) | string | Location for all resources. |
 | [`lock`](#parameter-lock) | object | The lock settings of the service. |
 | [`managedIdentities`](#parameter-managedidentities) | object | The managed identity definition for this resource. |
 | [`tags`](#parameter-tags) | object | Tags of the resource. |
-
-### Parameter: `deviceMapping`
-
-The mapping JSON that determines how incoming device data is normalized.
-
-- Required: No
-- Type: object
-- Default:
-  ```Bicep
-  {
-      template: []
-      templateType: 'CollectionContent'
-  }
-  ```
 
 ### Parameter: `eventHubName`
 
@@ -97,6 +84,20 @@ Consumer group of the event hub to connected to.
 - Type: string
 - Default: `[parameters('name')]`
 
+### Parameter: `deviceMapping`
+
+The mapping JSON that determines how incoming device data is normalized.
+
+- Required: No
+- Type: object
+- Default:
+  ```Bicep
+  {
+      template: []
+      templateType: 'CollectionContent'
+  }
+  ```
+
 ### Parameter: `diagnosticSettings`
 
 The diagnostic settings of the service.
@@ -114,7 +115,7 @@ The diagnostic settings of the service.
 | [`logCategoriesAndGroups`](#parameter-diagnosticsettingslogcategoriesandgroups) | array | The name of logs that will be streamed. "allLogs" includes all possible logs for the resource. Set to `[]` to disable log collection. |
 | [`marketplacePartnerResourceId`](#parameter-diagnosticsettingsmarketplacepartnerresourceid) | string | The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic Logs. |
 | [`metricCategories`](#parameter-diagnosticsettingsmetriccategories) | array | The name of metrics that will be streamed. "allMetrics" includes all possible metrics for the resource. Set to `[]` to disable metric collection. |
-| [`name`](#parameter-diagnosticsettingsname) | string | The name of diagnostic setting. |
+| [`name`](#parameter-diagnosticsettingsname) | string | The name of the diagnostic setting. |
 | [`storageAccountResourceId`](#parameter-diagnosticsettingsstorageaccountresourceid) | string | Resource ID of the diagnostic storage account. For security reasons, it is recommended to set diagnostic settings to send data to either storage account, log analytics workspace or event hub. |
 | [`workspaceResourceId`](#parameter-diagnosticsettingsworkspaceresourceid) | string | Resource ID of the diagnostic log analytics workspace. For security reasons, it is recommended to set diagnostic settings to send data to either storage account, log analytics workspace or event hub. |
 
@@ -224,7 +225,7 @@ Enable or disable the category explicitly. Default is `true`.
 
 ### Parameter: `diagnosticSettings.name`
 
-The name of diagnostic setting.
+The name of the diagnostic setting.
 
 - Required: No
 - Type: string
@@ -307,7 +308,7 @@ The managed identity definition for this resource.
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`systemAssigned`](#parameter-managedidentitiessystemassigned) | bool | Enables system assigned managed identity on the resource. |
-| [`userAssignedResourceIds`](#parameter-managedidentitiesuserassignedresourceids) | array | The resource ID(s) to assign to the resource. |
+| [`userAssignedResourceIds`](#parameter-managedidentitiesuserassignedresourceids) | array | The resource ID(s) to assign to the resource. Required if a user assigned identity is used for encryption. |
 
 ### Parameter: `managedIdentities.systemAssigned`
 
@@ -318,7 +319,7 @@ Enables system assigned managed identity on the resource.
 
 ### Parameter: `managedIdentities.userAssignedResourceIds`
 
-The resource ID(s) to assign to the resource.
+The resource ID(s) to assign to the resource. Required if a user assigned identity is used for encryption.
 
 - Required: No
 - Type: array
@@ -340,6 +341,14 @@ Tags of the resource.
 | `resourceId` | string | The resource ID of the medtech service. |
 | `systemAssignedMIPrincipalId` | string | The principal ID of the system assigned identity. |
 | `workspaceName` | string | The name of the medtech workspace. |
+
+## Cross-referenced modules
+
+This section gives you an overview of all local-referenced module files (i.e., other modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
+
+| Reference | Type |
+| :-- | :-- |
+| `br/public:avm/utl/types/avm-common-types:0.5.1` | Remote reference |
 
 ## Notes
 

@@ -43,7 +43,7 @@ module nestedDependencies 'dependencies.bicep' = {
 
 // Diagnostics
 // ===========
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
+module diagnosticDependencies '../../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
   scope: resourceGroup
   name: '${uniqueString(deployment().name, resourceLocation)}-diagnosticDependencies'
   params: {
@@ -103,6 +103,7 @@ module testDeployment '../../../main.bicep' = [
       eventhubs: [
         {
           name: '${namePrefix}-az-evh-x-001'
+          messageRetentionInDays: 3
           roleAssignments: [
             {
               roleDefinitionIdOrName: 'Reader'
@@ -145,7 +146,6 @@ module testDeployment '../../../main.bicep' = [
               userMetadata: 'customMetadata'
             }
           ]
-          messageRetentionInDays: 1
           partitionCount: 2
           roleAssignments: [
             {
@@ -155,11 +155,13 @@ module testDeployment '../../../main.bicep' = [
             }
           ]
           status: 'Active'
+          retentionDescriptionEnabled: true
           retentionDescriptionCleanupPolicy: 'Delete'
           retentionDescriptionRetentionTimeInHours: 3
         }
         {
           name: '${namePrefix}-az-evh-x-003'
+          retentionDescriptionEnabled: true
           retentionDescriptionCleanupPolicy: 'Compact'
           retentionDescriptionTombstoneRetentionTimeInHours: 24
         }

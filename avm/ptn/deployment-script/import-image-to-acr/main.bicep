@@ -1,6 +1,5 @@
 metadata name = 'import-image-to-acr'
 metadata description = 'This modules deployes an image to an Azure Container Registry.'
-metadata owner = 'Azure/module-maintainers'
 
 @description('Required. The name of the deployment script resource.')
 param name string
@@ -12,6 +11,8 @@ param location string = resourceGroup().location
 param enableTelemetry bool = true
 
 @description('Required. The name of the Azure Container Registry.')
+@minLength(5)
+@maxLength(50)
 param acrName string
 
 @description('Optional. How the deployment script should be forced to execute. Default is to force the script to deploy the image to run every time.')
@@ -20,8 +21,9 @@ param runOnce bool = false
 @description('Optional. If set, the `Contributor` role will be granted to the managed identity (passed by the `managedIdentities` parameter or create with the name specified in parameter `managedIdentityName`), which is needed to import images into the Azure Container Registry. Defaults to `true`.')
 param assignRbacRole bool = true
 
+import { managedIdentityOnlyUserAssignedType } from 'br/public:avm/utl/types/avm-common-types:0.2.1'
 @description('Conditional. The managed identity definition for this resource. Required if `assignRbacRole` is `true` and `managedIdentityName` is `null`.')
-param managedIdentities managedIdentitiesType?
+param managedIdentities managedIdentityOnlyUserAssignedType?
 
 @description('Conditional. Name of the Managed Identity resource to create. Required if `assignRbacRole` is `true` and `managedIdentities` is `null`. Defaults to `id-ContainerRegistryImport`.')
 param managedIdentityName string?
@@ -41,6 +43,7 @@ param sourceRegistryUsername string = ''
 
 @description('Optional. The password for the source registry. Required if the source registry is private, or to logon to the public docker registry.')
 @secure()
+@metadata({ example: 'keyVault.getSecret("keyVaultSecretName")' })
 param sourceRegistryPassword string = ''
 
 @description('Optional. The new image name in the ACR. You can use this to import a publically available image with a custom name for later updating from e.g., your build pipeline.')
@@ -87,7 +90,7 @@ param tags object?
 // Variables      //
 // ============== //
 
-var useExistingManagedIdentity = length(managedIdentities.?userAssignedResourcesIds ?? []) > 0
+var useExistingManagedIdentity = length(managedIdentities.?userAssignedResourceIds ?? []) > 0
 
 // ============== //
 // Resources      //
@@ -117,14 +120,14 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
 }
 
 // needed to "convert" resourceIds to principalId
-resource existingManagedIdentities 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = [
-  for resourceId in (managedIdentities.?userAssignedResourcesIds ?? []): if (assignRbacRole) {
+resource existingManagedIdentities 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' existing = [
+  for resourceId in (managedIdentities.?userAssignedResourceIds ?? []): if (assignRbacRole) {
     name: last(split(resourceId, '/'))
     scope: resourceGroup(split(resourceId, '/')[2], split(resourceId, '/')[4]) // get the resource group from the managed identity, as it could be in another resource group
   }
 ]
 
-resource newManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (!useExistingManagedIdentity && assignRbacRole) {
+resource newManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = if (!useExistingManagedIdentity && assignRbacRole) {
   name: managedIdentityName ?? 'id-ContainerRegistryImport'
   location: location
   tags: tags
@@ -132,7 +135,7 @@ resource newManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@20
 
 // assign the Contributor role to the managed identity (new or existing) to import images into the ACR
 resource acrRoleAssignmentExistingManagedIdentities 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
-  for i in range(0, length(assignRbacRole ? (managedIdentities.?userAssignedResourcesIds ?? []) : [])): if (useExistingManagedIdentity && assignRbacRole) {
+  for i in range(0, length(assignRbacRole ? (managedIdentities.?userAssignedResourceIds ?? []) : [])): if (useExistingManagedIdentity && assignRbacRole) {
     name: guid('roleAssignment-acr-${existingManagedIdentities[i].name}')
     scope: acr
     properties: {
@@ -158,19 +161,20 @@ resource acrRoleAssignmentNewManagedIdentity 'Microsoft.Authorization/roleAssign
   }
 }
 
-module imageImport 'br/public:avm/res/resources/deployment-script:0.4.0' = {
+module imageImport 'br/public:avm/res/resources/deployment-script:0.5.1' = {
   name: name ?? 'ACR-Import-${last(split(replace(image,':','-'),'/'))}'
   scope: resourceGroup()
   params: {
     name: name
     location: location
     tags: tags
+    enableTelemetry: enableTelemetry
     managedIdentities: useExistingManagedIdentity
       ? managedIdentities
-      : { userAssignedResourcesIds: [newManagedIdentity.id] }
+      : { userAssignedResourceIds: [newManagedIdentity.id] }
     kind: 'AzureCLI'
     runOnce: runOnce
-    azCliVersion: '2.63.0' // available tags are listed here: https://mcr.microsoft.com/v2/azure-cli/tags/list
+    azCliVersion: '2.69.0' // available tags are listed here: https://mcr.microsoft.com/v2/azure-cli/tags/list
     timeout: 'PT30M' // set timeout to 30m
     retentionInterval: 'PT1H' // cleanup after 1h
     environmentVariables: [
@@ -247,9 +251,4 @@ type importedImageType = {
 
   @description('Required. The image name in the Azure Container Registry.')
   acrHostedImage: string
-}
-
-type managedIdentitiesType = {
-  @description('Optional. The resource ID(s) to assign to the resource.')
-  userAssignedResourcesIds: string[]
 }

@@ -28,14 +28,14 @@ module dependencies 'dependencies.bicep' = {
   name: 'dependencies'
   scope: resourceGroup
   params: {
-    acrName: 'dep${namePrefix}acr${serviceShort}'
+    acrName: 'dep${namePrefix}acr${serviceShort}${take(uniqueString(subscription().subscriptionId, resourceGroupName), 10)}'
     managedIdentityName: 'dep-${namePrefix}-mi-${serviceShort}'
   }
 }
 
 // General resources
 // =================
-resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {
   name: resourceGroupName
   location: resourceLocation
 }
@@ -55,7 +55,7 @@ module testDeployment '../../../main.bicep' = [
       acrName: dependencies.outputs.acrName
       image: 'mcr.microsoft.com/k8se/quickstart-jobs:latest'
       overwriteExistingImage: true
-      managedIdentities: { userAssignedResourcesIds: [dependencies.outputs.managedIdentityResourceId] }
+      managedIdentities: { userAssignedResourceIds: [dependencies.outputs.managedIdentityResourceId] }
     }
   }
 ]

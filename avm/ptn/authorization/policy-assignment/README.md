@@ -14,7 +14,7 @@ This module deploys a Policy Assignment at a Management Group, Subscription or R
 
 | Resource Type | API Version |
 | :-- | :-- |
-| `Microsoft.Authorization/policyAssignments` | [2022-06-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-06-01/policyAssignments) |
+| `Microsoft.Authorization/policyAssignments` | [2025-01-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2025-01-01/policyAssignments) |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
 
 ## Usage examples
@@ -129,6 +129,16 @@ module policyAssignment 'br/public:avm/ptn/authorization/policy-assignment:<vers
     name: 'apamgmax001'
     policyDefinitionId: '/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611'
     // Non-required parameters
+    additionalManagementGroupsIDsToAssignRbacTo: [
+      '<name>'
+    ]
+    additionalResourceGroupResourceIDsToAssignRbacTo: [
+      '<resourceId>'
+    ]
+    additionalSubscriptionIDsToAssignRbacTo: [
+      '<subscriptionId>'
+    ]
+    definitionVersion: '1.*.*-preview'
     description: '[Description] Policy Assignment at the management group scope'
     displayName: '[Display Name] Policy Assignment at the management group scope'
     enforcementMode: 'DoNotEnforce'
@@ -146,7 +156,7 @@ module policyAssignment 'br/public:avm/ptn/authorization/policy-assignment:<vers
       }
     ]
     notScopes: [
-      '/subscriptions/<value>/resourceGroups/validation-rg'
+      '<resourceId>'
     ]
     overrides: [
       {
@@ -217,6 +227,24 @@ module policyAssignment 'br/public:avm/ptn/authorization/policy-assignment:<vers
       "value": "/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611"
     },
     // Non-required parameters
+    "additionalManagementGroupsIDsToAssignRbacTo": {
+      "value": [
+        "<name>"
+      ]
+    },
+    "additionalResourceGroupResourceIDsToAssignRbacTo": {
+      "value": [
+        "<resourceId>"
+      ]
+    },
+    "additionalSubscriptionIDsToAssignRbacTo": {
+      "value": [
+        "<subscriptionId>"
+      ]
+    },
+    "definitionVersion": {
+      "value": "1.*.*-preview"
+    },
     "description": {
       "value": "[Description] Policy Assignment at the management group scope"
     },
@@ -251,7 +279,7 @@ module policyAssignment 'br/public:avm/ptn/authorization/policy-assignment:<vers
     },
     "notScopes": {
       "value": [
-        "/subscriptions/<value>/resourceGroups/validation-rg"
+        "<resourceId>"
       ]
     },
     "overrides": {
@@ -325,6 +353,16 @@ using 'br/public:avm/ptn/authorization/policy-assignment:<version>'
 param name = 'apamgmax001'
 param policyDefinitionId = '/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611'
 // Non-required parameters
+param additionalManagementGroupsIDsToAssignRbacTo = [
+  '<name>'
+]
+param additionalResourceGroupResourceIDsToAssignRbacTo = [
+  '<resourceId>'
+]
+param additionalSubscriptionIDsToAssignRbacTo = [
+  '<subscriptionId>'
+]
+param definitionVersion = '1.*.*-preview'
 param description = '[Description] Policy Assignment at the management group scope'
 param displayName = '[Display Name] Policy Assignment at the management group scope'
 param enforcementMode = 'DoNotEnforce'
@@ -342,7 +380,7 @@ param nonComplianceMessages = [
   }
 ]
 param notScopes = [
-  '/subscriptions/<value>/resourceGroups/validation-rg'
+  '<resourceId>'
 ]
 param overrides = [
   {
@@ -501,6 +539,7 @@ module policyAssignment 'br/public:avm/ptn/authorization/policy-assignment:<vers
     name: 'apargmax001'
     policyDefinitionId: '/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611'
     // Non-required parameters
+    definitionVersion: '1.*.*-preview'
     description: '[Description] Policy Assignment at the resource group scope'
     displayName: '[Display Name] Policy Assignment at the resource group scope'
     enforcementMode: 'DoNotEnforce'
@@ -591,6 +630,9 @@ module policyAssignment 'br/public:avm/ptn/authorization/policy-assignment:<vers
       "value": "/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611"
     },
     // Non-required parameters
+    "definitionVersion": {
+      "value": "1.*.*-preview"
+    },
     "description": {
       "value": "[Description] Policy Assignment at the resource group scope"
     },
@@ -705,6 +747,7 @@ using 'br/public:avm/ptn/authorization/policy-assignment:<version>'
 param name = 'apargmax001'
 param policyDefinitionId = '/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611'
 // Non-required parameters
+param definitionVersion = '1.*.*-preview'
 param description = '[Description] Policy Assignment at the resource group scope'
 param displayName = '[Display Name] Policy Assignment at the resource group scope'
 param enforcementMode = 'DoNotEnforce'
@@ -884,6 +927,7 @@ module policyAssignment 'br/public:avm/ptn/authorization/policy-assignment:<vers
     name: 'apasubmax001'
     policyDefinitionId: '/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611'
     // Non-required parameters
+    definitionVersion: '1.*.*-preview'
     description: '[Description] Policy Assignment at the subscription scope'
     displayName: '[Display Name] Policy Assignment at the subscription scope'
     enforcementMode: 'DoNotEnforce'
@@ -973,6 +1017,9 @@ module policyAssignment 'br/public:avm/ptn/authorization/policy-assignment:<vers
       "value": "/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611"
     },
     // Non-required parameters
+    "definitionVersion": {
+      "value": "1.*.*-preview"
+    },
     "description": {
       "value": "[Description] Policy Assignment at the subscription scope"
     },
@@ -1084,6 +1131,7 @@ using 'br/public:avm/ptn/authorization/policy-assignment:<version>'
 param name = 'apasubmax001'
 param policyDefinitionId = '/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611'
 // Non-required parameters
+param definitionVersion = '1.*.*-preview'
 param description = '[Description] Policy Assignment at the subscription scope'
 param displayName = '[Display Name] Policy Assignment at the subscription scope'
 param enforcementMode = 'DoNotEnforce'
@@ -1167,6 +1215,10 @@ param userAssignedIdentityId = '<userAssignedIdentityId>'
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
+| [`additionalManagementGroupsIDsToAssignRbacTo`](#parameter-additionalmanagementgroupsidstoassignrbacto) | array | An array of additional management group IDs to assign RBAC to for the policy assignment if it has an identity. |
+| [`additionalResourceGroupResourceIDsToAssignRbacTo`](#parameter-additionalresourcegroupresourceidstoassignrbacto) | array | An array of additional Resource Group Resource IDs to assign RBAC to for the policy assignment if it has an identity, only supported for Management Group Policy Assignments. |
+| [`additionalSubscriptionIDsToAssignRbacTo`](#parameter-additionalsubscriptionidstoassignrbacto) | array | An array of additional Subscription IDs to assign RBAC to for the policy assignment if it has an identity, only supported for Management Group Policy Assignments. |
+| [`definitionVersion`](#parameter-definitionversion) | string | The policy definition version to use for the policy assignment. If not specified, the latest version of the policy definition will be used. For more information on policy assignment definition versions see https://learn.microsoft.com/azure/governance/policy/concepts/assignment-structure#policy-definition-id-and-version-preview. |
 | [`description`](#parameter-description) | string | This message will be part of response in case of policy violation. |
 | [`displayName`](#parameter-displayname) | string | The display name of the policy assignment. Maximum length is 128 characters. |
 | [`enableTelemetry`](#parameter-enabletelemetry) | bool | Enable/Disable usage telemetry for module. |
@@ -1197,6 +1249,37 @@ Specifies the name of the policy assignment. Maximum length is 24 characters for
 Specifies the ID of the policy definition or policy set definition being assigned.
 
 - Required: Yes
+- Type: string
+
+### Parameter: `additionalManagementGroupsIDsToAssignRbacTo`
+
+An array of additional management group IDs to assign RBAC to for the policy assignment if it has an identity.
+
+- Required: No
+- Type: array
+- Default: `[]`
+
+### Parameter: `additionalResourceGroupResourceIDsToAssignRbacTo`
+
+An array of additional Resource Group Resource IDs to assign RBAC to for the policy assignment if it has an identity, only supported for Management Group Policy Assignments.
+
+- Required: No
+- Type: array
+- Default: `[]`
+
+### Parameter: `additionalSubscriptionIDsToAssignRbacTo`
+
+An array of additional Subscription IDs to assign RBAC to for the policy assignment if it has an identity, only supported for Management Group Policy Assignments.
+
+- Required: No
+- Type: array
+- Default: `[]`
+
+### Parameter: `definitionVersion`
+
+The policy definition version to use for the policy assignment. If not specified, the latest version of the policy definition will be used. For more information on policy assignment definition versions see https://learn.microsoft.com/azure/governance/policy/concepts/assignment-structure#policy-definition-id-and-version-preview.
+
+- Required: No
 - Type: string
 
 ### Parameter: `description`

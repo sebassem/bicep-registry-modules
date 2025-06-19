@@ -8,6 +8,7 @@ This template deploys an dns forwarding ruleset.
 - [Usage examples](#Usage-examples)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
+- [Cross-referenced modules](#Cross-referenced-modules)
 - [Data Collection](#Data-Collection)
 
 ## Resource Types
@@ -134,7 +135,7 @@ module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<v
         targetDnsServers: [
           {
             ipAddress: '192.168.0.1'
-            port: '53'
+            port: 53
           }
         ]
       }
@@ -209,7 +210,7 @@ module dnsForwardingRuleset 'br/public:avm/res/network/dns-forwarding-ruleset:<v
           "targetDnsServers": [
             {
               "ipAddress": "192.168.0.1",
-              "port": "53"
+              "port": 53
             }
           ]
         }
@@ -288,7 +289,7 @@ param forwardingRules = [
     targetDnsServers: [
       {
         ipAddress: '192.168.0.1'
-        port: '53'
+        port: 53
       }
     ]
   }
@@ -530,7 +531,7 @@ The target DNS servers to forward to.
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`ipAddress`](#parameter-forwardingrulestargetdnsserversipaddress) | string | The IP address of the target DNS server. |
-| [`port`](#parameter-forwardingrulestargetdnsserversport) | string | The port of the target DNS server. |
+| [`port`](#parameter-forwardingrulestargetdnsserversport) | int | The port of the target DNS server. |
 
 ### Parameter: `forwardingRules.targetDnsServers.ipAddress`
 
@@ -544,7 +545,7 @@ The IP address of the target DNS server.
 The port of the target DNS server.
 
 - Required: Yes
-- Type: string
+- Type: int
 
 ### Parameter: `forwardingRules.forwardingRuleState`
 
@@ -765,6 +766,14 @@ The name of the virtual network link.
 | `name` | string | The name of the DNS Forwarding Ruleset. |
 | `resourceGroupName` | string | The resource group the DNS Forwarding Ruleset was deployed into. |
 | `resourceId` | string | The resource ID of the DNS Forwarding Ruleset. |
+
+## Cross-referenced modules
+
+This section gives you an overview of all local-referenced module files (i.e., other modules that are referenced in this module) and all remote-referenced files (i.e., Bicep modules that are referenced from a Bicep Registry or Template Specs).
+
+| Reference | Type |
+| :-- | :-- |
+| `br/public:avm/utl/types/avm-common-types:0.5.1` | Remote reference |
 
 ## Data Collection
 

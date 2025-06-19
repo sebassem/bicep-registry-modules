@@ -10,6 +10,9 @@ param managedIdentityName string
 @description('Required. The name of the Load Balancer to create.')
 param loadBalancerName string
 
+@description('Required. The name of the Public IP address to create.')
+param publicIPAddressName string
+
 @description('Required. The name of the Recovery Services Vault to create.')
 param recoveryServicesVaultName string
 
@@ -28,7 +31,7 @@ param proximityPlacementGroupName string
 @description('Optional. The location to deploy resources to.')
 param location string = resourceGroup().location
 
-@description('Required. The object ID of the Backup Management Service Enterprise Application. Required for Customer-Managed-Keys.')
+@description('Required. The object ID of the Backup Management Service Enterprise Application.')
 param backupManagementServiceApplicationObjectId string
 
 @description('Required. The name of the data collection rule.')
@@ -36,6 +39,9 @@ param dcrName string
 
 @description('Required. Resource ID of the log analytics worspace to stream logs from Azure monitoring agent.')
 param logAnalyticsWorkspaceResourceId string
+
+@description('Required. The name of the disk to create.')
+param preCreatedDiskName string
 
 var storageAccountCSEFileName = 'scriptExtensionMasterInstaller.ps1'
 var addressPrefix = '10.0.0.0/16'
@@ -105,6 +111,17 @@ resource loadBalancer 'Microsoft.Network/loadBalancers@2023-04-01' = {
         name: 'servers'
       }
     ]
+  }
+}
+
+resource pip 'Microsoft.Network/publicIPAddresses@2024-01-01' = {
+  name: publicIPAddressName
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
   }
 }
 
@@ -282,7 +299,7 @@ resource storageUpload 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     azPowerShellVersion: '9.0'
     retentionInterval: 'P1D'
     arguments: '-StorageAccountName "${storageAccount.name}" -ResourceGroupName "${resourceGroup().name}" -ContainerName "${storageAccount::blobService::container.name}" -FileName "${storageAccountCSEFileName}"'
-    scriptContent: loadTextContent('../../../../../../utilities/e2e-template-assets/scripts/Set-BlobContent.ps1')
+    scriptContent: loadTextContent('../../../../../../../utilities/e2e-template-assets/scripts/Set-BlobContent.ps1')
   }
   dependsOn: [
     msiRGContrRoleAssignment
@@ -380,6 +397,25 @@ resource dcr 'Microsoft.Insights/dataCollectionRules@2023-03-11' = {
     ]
   }
 }
+
+resource dataDisk 'Microsoft.Compute/disks@2024-03-02' = {
+  location: location
+  name: preCreatedDiskName
+  sku: {
+    name: 'Premium_LRS'
+  }
+  properties: {
+    diskSizeGB: 1024
+    creationData: {
+      createOption: 'Empty'
+    }
+    encryption: {
+      type: 'EncryptionAtRestWithPlatformKey'
+    }
+  }
+  zones: ['2'] // Should be set to the same zone as the VM
+}
+
 @description('The resource ID of the created Virtual Network Subnet.')
 output subnetResourceId string = virtualNetwork.properties.subnets[0].id
 
@@ -404,6 +440,9 @@ output recoveryServicesVaultResourceGroupName string = resourceGroup().name
 @description('The name of the Backup Policy created in the Backup Recovery Vault.')
 output recoveryServicesVaultBackupPolicyName string = recoveryServicesVault::backupPolicy.name
 
+@description('The resource ID of the created PIP.')
+output publicIPAddressResourceId string = pip.id
+
 @description('The resource ID of the created Key Vault.')
 output keyVaultResourceId string = keyVault.id
 
@@ -427,3 +466,9 @@ output proximityPlacementGroupResourceId string = proximityPlacementGroup.id
 
 @description('The resource ID of the created data collection rule.')
 output dataCollectionRuleResourceId string = dcr.id
+
+@description('The resource ID of the created data disk.')
+output preCreatedDataDiskResourceId string = dataDisk.id
+
+@description('The name of the created data disk.')
+output preCreatedDataDiskName string = dataDisk.name

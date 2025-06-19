@@ -1,6 +1,5 @@
 metadata name = 'CI CD Agents and Runners'
 metadata description = 'This module deploys self-hosted agents and runners for Azure DevOps and GitHub on Azure Container Instances and/or Azure Container Apps.'
-metadata owner = 'Azure/module-maintainers'
 
 // ================ //
 // Parameters       //
@@ -13,7 +12,7 @@ param location string = resourceGroup().location
 param namingPrefix string
 
 @description('Required. The compute target for the private runners.')
-param computeTypes computeTypesType
+param computeTypes computeTypesType[]
 
 @description('Required. The self-hosted runner configuration. This can be either GitHub or Azure DevOps.')
 param selfHostedConfig selfHostedRunnerType
@@ -26,6 +25,9 @@ param privateNetworking bool = true
 
 @description('Optional. Enable/Disable usage telemetry for module.')
 param enableTelemetry bool = true
+
+@description('Optional. Name of the infrastructure resource group for the container apps environment.')
+param infrastructureResourceGroupName string?
 
 // ================ //
 // Variables        //
@@ -50,7 +52,7 @@ var imagePaths = [
   }
 ]
 
-var githubURL = 'https://github.com/azure/bicep-registry-modules#main:avm/ptn/dev-ops/cicd-agents-and-runners/scripts'
+var githubURL = 'https://github.com/azure/avm-container-images-cicd-agents-and-runners#main'
 
 var acaGitHubRules = (selfHostedConfig.selfHostedType == 'github')
   ? [
@@ -59,7 +61,7 @@ var acaGitHubRules = (selfHostedConfig.selfHostedType == 'github')
         type: 'github-runner'
         metadata: {
           owner: selfHostedConfig.githubOrganization
-          repos: selfHostedConfig.githubRepository
+          repos: selfHostedConfig.?runnerScope != 'repo' ? null : selfHostedConfig.?githubRepository
           targetWorkflowQueueLength: selfHostedConfig.?targetWorkflowQueueLength ?? '1'
           runnerScope: selfHostedConfig.?runnerScope ?? 'repo'
         }
@@ -83,36 +85,42 @@ var acaGitHubSecrets = (selfHostedConfig.selfHostedType == 'github')
   : []
 
 var acaGitHubEnvVariables = (selfHostedConfig.selfHostedType == 'github')
-  ? [
-      {
-        name: 'RUNNER_NAME_PREFIX'
-        value: selfHostedConfig.?runnerNamePrefix ?? 'gh-runner'
-      }
-      {
-        name: 'REPO_URL'
-        value: gitHubRunnerURL
-      }
-      {
-        name: 'RUNNER_SCOPE'
-        value: selfHostedConfig.?runnerScope ?? 'repo'
-      }
-      {
-        name: 'EPHEMERAL'
-        value: selfHostedConfig.?ephemeral ?? 'true'
-      }
-      {
-        name: 'ORG_NAME'
-        value: selfHostedConfig.?gitHubOrganization
-      }
-      {
-        name: 'RUNNER_GROUP'
-        value: selfHostedConfig.?runnerGroup ?? ''
-      }
-      {
-        name: 'ACCESS_TOKEN'
-        secretRef: 'personal-access-token'
-      }
-    ]
+  ? union(
+      selfHostedConfig.?runnerScope == 'repo'
+        ? [
+            {
+              name: 'REPO_URL'
+              value: gitHubRunnerURL
+            }
+          ]
+        : [],
+      [
+        {
+          name: 'RUNNER_NAME_PREFIX'
+          value: selfHostedConfig.?runnerNamePrefix ?? 'gh-runner'
+        }
+        {
+          name: 'RUNNER_SCOPE'
+          value: selfHostedConfig.?runnerScope ?? 'repo'
+        }
+        {
+          name: 'EPHEMERAL'
+          value: selfHostedConfig.?ephemeral ?? 'true'
+        }
+        {
+          name: 'ORG_NAME'
+          value: selfHostedConfig.?gitHubOrganization
+        }
+        {
+          name: 'RUNNER_GROUP'
+          value: selfHostedConfig.?runnerGroup ?? ''
+        }
+        {
+          name: 'ACCESS_TOKEN'
+          secretRef: 'personal-access-token'
+        }
+      ]
+    )
   : []
 
 var acaAzureDevOpsEnvVariables = (selfHostedConfig.selfHostedType == 'azuredevops')
@@ -199,22 +207,24 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableT
   }
 }
 
-module logAnalyticsWokrspace 'br/public:avm/res/operational-insights/workspace:0.5.0' = {
-  name: 'logAnalyticsWokrspace'
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.11.1' = {
+  name: 'logAnalyticsWorkspace-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'law-${namingPrefix}-${uniqueString(resourceGroup().id)}-law'
+    location: location
+    enableTelemetry: enableTelemetry
   }
 }
 
-module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.3.0' = {
-  name: 'userAssignedIdentity'
+module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = {
+  name: 'userAssignedIdentity-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'msi-${namingPrefix}-${uniqueString(resourceGroup().id)}'
-    location: location
+    enableTelemetry: enableTelemetry
   }
 }
 
-module acrPrivateDNSZone 'br/public:avm/res/network/private-dns-zone:0.5.0' = if (privateNetworking && empty(networkingConfiguration.?containerRegistryPrivateDnsZoneResourceId ?? '')) {
+module acrPrivateDNSZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = if (privateNetworking && empty(networkingConfiguration.?containerRegistryPrivateDnsZoneResourceId ?? '')) {
   name: 'acrdnszone${namingPrefix}${uniqueString(resourceGroup().id)}'
   params: {
     name: 'privatelink.azurecr.io'
@@ -225,15 +235,17 @@ module acrPrivateDNSZone 'br/public:avm/res/network/private-dns-zone:0.5.0' = if
           : networkingConfiguration.virtualNetworkResourceId
       }
     ]
+    enableTelemetry: enableTelemetry
   }
 }
 
-module acr 'br/public:avm/res/container-registry/registry:0.4.0' = {
+module acr 'br/public:avm/res/container-registry/registry:0.9.1' = {
   name: 'acr${namingPrefix}${uniqueString(resourceGroup().id)}'
   params: {
     name: 'acr${namingPrefix}${uniqueString(resourceGroup().id)}'
     acrSku: privateNetworking ? 'Premium' : 'Standard'
     acrAdminUserEnabled: false
+    enableTelemetry: enableTelemetry
     // Assigning AcrPull and AcrPush roles to the user assigned identity
     roleAssignments: [
       {
@@ -276,11 +288,12 @@ module acr 'br/public:avm/res/container-registry/registry:0.4.0' = {
       : null
   }
 }
-module newVnet 'br/public:avm/res/network/virtual-network:0.2.0' = if (networkingConfiguration.networkType == 'createNew') {
+module newVnet 'br/public:avm/res/network/virtual-network:0.6.1' = if (networkingConfiguration.networkType == 'createNew') {
   name: 'vnet-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'vnet-${namingPrefix}-${uniqueString(resourceGroup().id)}'
     location: location
+    enableTelemetry: enableTelemetry
     addressPrefixes: [
       networkingConfiguration.addressSpace
     ]
@@ -304,14 +317,7 @@ module newVnet 'br/public:avm/res/network/virtual-network:0.2.0' = if (networkin
               natGatewayResourceId: empty(networkingConfiguration.?natGatewayResourceId ?? '') && privateNetworking
                 ? natGateway.outputs.resourceId
                 : networkingConfiguration.?natGatewayResourceId ?? ''
-              delegations: [
-                {
-                  name: 'Microsoft.ContainerInstance/containerGroups'
-                  properties: {
-                    serviceName: 'Microsoft.ContainerInstance/containerGroups'
-                  }
-                }
-              ]
+              delegation: 'Microsoft.ContainerInstance/containerGroups'
             }
           ]
         : [],
@@ -323,14 +329,7 @@ module newVnet 'br/public:avm/res/network/virtual-network:0.2.0' = if (networkin
               natGatewayResourceId: empty(networkingConfiguration.?natGatewayResourceId ?? '') && privateNetworking
                 ? natGateway.outputs.resourceId
                 : networkingConfiguration.?natGatewayResourceId ?? ''
-              delegations: [
-                {
-                  name: 'Microsoft.App.environments'
-                  properties: {
-                    serviceName: 'Microsoft.App/environments'
-                  }
-                }
-              ]
+              delegation: 'Microsoft.App/environments'
             }
           ]
         : [],
@@ -346,15 +345,17 @@ module newVnet 'br/public:avm/res/network/virtual-network:0.2.0' = if (networkin
     )
   }
 }
-module appEnvironment 'br/public:avm/res/app/managed-environment:0.6.2' = if (contains(
+module appEnvironment 'br/public:avm/res/app/managed-environment:0.10.2' = if (contains(
   computeTypes,
   'azure-container-app'
 )) {
   name: 'appEnv-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'appEnv${namingPrefix}${uniqueString(resourceGroup().id)}'
-    logAnalyticsWorkspaceResourceId: logAnalyticsWokrspace.outputs.resourceId
+    logAnalyticsWorkspaceResourceId: logAnalyticsWorkspace.outputs.resourceId
     location: location
+    enableTelemetry: enableTelemetry
+    infrastructureResourceGroupName: infrastructureResourceGroupName
     infrastructureSubnetId: networkingConfiguration.networkType == 'createNew'
       ? filter(
           newVnet.outputs.subnetResourceIds,
@@ -374,22 +375,24 @@ module appEnvironment 'br/public:avm/res/app/managed-environment:0.6.2' = if (co
   }
 }
 
-module natGatewayPublicIp 'br/public:avm/res/network/public-ip-address:0.5.1' = if (empty(networkingConfiguration.?natGatewayResourceId ?? '') && empty(networkingConfiguration.?natGatewayPublicIpAddressResourceId ?? '') && networkingConfiguration.networkType == 'createNew' && privateNetworking) {
+module natGatewayPublicIp 'br/public:avm/res/network/public-ip-address:0.8.0' = if (empty(networkingConfiguration.?natGatewayResourceId ?? '') && empty(networkingConfiguration.?natGatewayPublicIpAddressResourceId ?? '') && networkingConfiguration.networkType == 'createNew' && privateNetworking) {
   name: 'natGatewayPublicIp-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'natGatewayPublicIp-${uniqueString(resourceGroup().id)}'
     skuName: 'Standard'
+    enableTelemetry: enableTelemetry
     publicIPAddressVersion: 'IPv4'
     publicIPAllocationMethod: 'Static'
   }
 }
 
-module natGateway 'br/public:avm/res/network/nat-gateway:1.1.0' = if (privateNetworking && empty(networkingConfiguration.?natGatewayResourceId ?? '') && networkingConfiguration.networkType == 'createNew') {
+module natGateway 'br/public:avm/res/network/nat-gateway:1.2.2' = if (privateNetworking && empty(networkingConfiguration.?natGatewayResourceId ?? '') && networkingConfiguration.networkType == 'createNew') {
   name: 'natGateway-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'natGateway-${namingPrefix}-${uniqueString(resourceGroup().id)}'
     zone: 0
     location: location
+    enableTelemetry: enableTelemetry
     publicIpResourceIds: [
       networkingConfiguration.?natGatewayPublicIpAddressResourceId ?? natGatewayPublicIp.outputs.resourceId
     ]
@@ -411,9 +414,9 @@ resource buildImages 'Microsoft.ContainerRegistry/registries/tasks@2019-06-01-pr
         dockerFilePath: 'dockerfile'
         type: 'Docker'
         contextPath: contains(computeTypes, 'azure-container-app')
-          ? '${githubURL}/${filter(imagePaths, imagePath => imagePath.platform == '${selfHostedConfig.selfHostedType}-container-app')[0].imagePath}'
+          ? '${githubURL}:${filter(imagePaths, imagePath => imagePath.platform == '${selfHostedConfig.selfHostedType}-container-app')[0].imagePath}'
           : contains(computeTypes, 'azure-container-instance')
-              ? '${githubURL}/${filter(imagePaths, imagePath => imagePath.platform == '${selfHostedConfig.selfHostedType}-container-instance')[0].imagePath}'
+              ? '${githubURL}:${filter(imagePaths, imagePath => imagePath.platform == '${selfHostedConfig.selfHostedType}-container-instance')[0].imagePath}'
               : null
         imageNames: [
           '${acr.outputs.loginServer}/${selfHostedConfig.selfHostedType}-${image}:latest'
@@ -432,7 +435,7 @@ resource buildImages 'Microsoft.ContainerRegistry/registries/tasks@2019-06-01-pr
   }
 ]
 
-module buildImagesRoleAssignment 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = [
+module buildImagesRoleAssignment 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = [
   for (image, i) in computeTypes: {
     name: 'buildImagesRoleAssignment-${uniqueString(resourceGroup().id)}-${i}'
     params: {
@@ -440,6 +443,7 @@ module buildImagesRoleAssignment 'br/public:avm/ptn/authorization/resource-role-
       resourceId: acr.outputs.resourceId
       roleDefinitionId: '8311e382-0749-4cb8-b61a-304f252e45ec'
       principalType: 'ServicePrincipal'
+      enableTelemetry: enableTelemetry
     }
   }
 ]
@@ -476,6 +480,7 @@ module aciJob 'br/public:avm/res/container-instance/container-group:0.2.0' = [
           userAssignedIdentity.outputs.resourceId
         ]
       }
+      enableTelemetry: enableTelemetry
       imageRegistryCredentials: [
         {
           identity: userAssignedIdentity.outputs.resourceId
@@ -488,7 +493,7 @@ module aciJob 'br/public:avm/res/container-instance/container-group:0.2.0' = [
             subnetId => contains(subnetId, networkingConfiguration.?containerInstanceSubnetName ?? 'aci-subnet')
           )[0]
         : privateNetworking && networkingConfiguration.networkType == 'useExisting'
-            ? '${networkingConfiguration.virtualNetworkResourceId}/subnets/${networkingConfiguration.computeNetworking.containerInstanceSubnetName}'
+            ? '${networkingConfiguration.virtualNetworkResourceId}/subnets/${networkingConfiguration.computeNetworking.?containerInstanceSubnetName}'
             : null
       ipAddressType: privateNetworking ? 'Private' : 'Public'
       sku: 'Standard'
@@ -563,7 +568,7 @@ module aciJob 'br/public:avm/res/container-instance/container-group:0.2.0' = [
   }
 ]
 
-module acaJob 'br/public:avm/res/app/job:0.4.0' = if (contains(computeTypes, 'azure-container-app')) {
+module acaJob 'br/public:avm/res/app/job:0.6.0' = if (contains(computeTypes, 'azure-container-app')) {
   name: '${namingPrefix}acaJob'
   dependsOn: [
     taskRun
@@ -577,6 +582,7 @@ module acaJob 'br/public:avm/res/app/job:0.4.0' = if (contains(computeTypes, 'az
         userAssignedIdentity.outputs.resourceId
       ]
     }
+    enableTelemetry: enableTelemetry
     roleAssignments: [
       {
         principalId: userAssignedIdentity.outputs.principalId
@@ -621,7 +627,7 @@ module acaJob 'br/public:avm/res/app/job:0.4.0' = if (contains(computeTypes, 'az
   }
 }
 
-module acaPlaceholderJob 'br/public:avm/res/app/job:0.4.0' = if (contains(computeTypes, 'azure-container-app') && selfHostedConfig.selfHostedType == 'azuredevops') {
+module acaPlaceholderJob 'br/public:avm/res/app/job:0.6.0' = if (contains(computeTypes, 'azure-container-app') && selfHostedConfig.selfHostedType == 'azuredevops') {
   name: 'acaDevOpsPlaceholderJob'
   dependsOn: [
     taskRun
@@ -629,6 +635,7 @@ module acaPlaceholderJob 'br/public:avm/res/app/job:0.4.0' = if (contains(comput
   params: {
     name: '${namingPrefix}-${uniqueString(resourceGroup().id)}-placeholder'
     location: location
+    enableTelemetry: enableTelemetry
     managedIdentities: {
       userAssignedResourceIds: [
         userAssignedIdentity.outputs.resourceId
@@ -705,6 +712,7 @@ module deploymentScriptPrivateDNSZone 'br/public:avm/res/network/private-dns-zon
           : newVnet.outputs.resourceId
       }
     ]
+    enableTelemetry: enableTelemetry
   }
 }
 
@@ -727,6 +735,7 @@ module deploymentScriptStg 'br/public:avm/res/storage/storage-account:0.13.0' = 
         principalType: 'ServicePrincipal'
       }
     ]
+    enableTelemetry: enableTelemetry
     privateEndpoints: [
       {
         service: 'file'
@@ -766,6 +775,7 @@ module runPlaceHolderAgent 'br/public:avm/res/resources/deployment-script:0.3.1'
         userAssignedIdentity.outputs.resourceId
       ]
     }
+    enableTelemetry: enableTelemetry
     storageAccountResourceId: privateNetworking ? deploymentScriptStg.outputs.resourceId : null
     subnetResourceIds: privateNetworking && networkingConfiguration.networkType == 'createNew'
       ? [
@@ -776,7 +786,7 @@ module runPlaceHolderAgent 'br/public:avm/res/resources/deployment-script:0.3.1'
         ]
       : privateNetworking && networkingConfiguration.networkType == 'useExisting'
           ? [
-              '${networkingConfiguration.virtualNetworkResourceId}/subnets/${networkingConfiguration.computeNetworking.containerInstanceSubnetName}'
+              '${networkingConfiguration.virtualNetworkResourceId}/subnets/${networkingConfiguration.computeNetworking.?containerInstanceSubnetName}'
             ]
           : null
     arguments: '-resourceGroup ${resourceGroup().name} -jobName ${acaPlaceholderJob.outputs.name} -subscriptionId ${subscription().subscriptionId}'
@@ -798,6 +808,7 @@ output location string = location
 // Definitions      //
 // ================ //
 
+@export()
 type newNetworkType = {
   @description('Required. The network type. This can be either createNew or useExisting.')
   networkType: 'createNew'
@@ -811,7 +822,7 @@ type newNetworkType = {
   @description('Optional. The existing NAT Gateway resource Id. This should be provided if an existing NAT gateway is available to be used. If this parameter is not provided, a new NAT gateway will be created.')
   natGatewayResourceId: string?
 
-  @description('Optional. The existing public IP address to assosciate with the NAT gateway. This should be provided if an existing public Ip address is available to be used. If this parameter is not provided, a new Public Ip address will be created.')
+  @description('Optional. The existing public IP address to associate with the NAT gateway. This should be provided if an existing public Ip address is available to be used. If this parameter is not provided, a new Public Ip address will be created.')
   natGatewayPublicIpAddressResourceId: string?
 
   @description('Optional. The container instance subnet name in the created virtual network. If not provided, a default name will be used.')
@@ -848,6 +859,7 @@ type newNetworkType = {
   deploymentScriptPrivateDnsZoneResourceId: string?
 }
 
+@export()
 type existingNetworkType = {
   @description('Required. The network type. This can be either createNew or useExisting.')
   networkType: 'useExisting'
@@ -862,15 +874,16 @@ type existingNetworkType = {
   containerRegistryPrivateDnsZoneResourceId: string?
 
   @description('Optional. The existing NAT Gateway resource Id. This should be provided if an existing NAT gateway is available to be used. If this parameter is not provided, a new NAT gateway will be created.')
-  natGatewayResourceId: string
+  natGatewayResourceId: string?
 
-  @description('Optional. The existing public IP address to assosciate with the NAT gateway. This should be provided if an existing public Ip address is available to be used. If this parameter is not provided, a new Public Ip address will be created.')
-  natGatewayPublicIpAddressResourceId: string
+  @description('Optional. The existing public IP address to associate with the NAT gateway. This should be provided if an existing public Ip address is available to be used. If this parameter is not provided, a new Public Ip address will be created.')
+  natGatewayPublicIpAddressResourceId: string?
 
   @description('Required. The compute type networking type.')
   computeNetworking: computeNetworkingType
 }
 
+@export()
 type containerAppNetworkConfigType = {
   @description('Required. The Azure Container App networking type.')
   computeNetworkType: 'azureContainerApp'
@@ -884,7 +897,7 @@ type containerAppNetworkConfigType = {
   @description('Optional. The deployment script private DNS zone Id. If not provided, a new private DNS zone will be created.')
   deploymentScriptPrivateDnsZoneResourceId: string?
 
-  @description('Required. The container instance subnet name in the created virtual network. If not provided, a default name will be used. This subnet is required for private networking Azure DevOps scenarios to deploy the deployment script which starts the placeholder agent privately.')
+  @description('Optional. The container instance subnet name in the created virtual network. If not provided, a default name will be used. This subnet is required for private networking Azure DevOps scenarios to deploy the deployment script which starts the placeholder agent privately.')
   containerInstanceSubnetName: string?
 }
 
@@ -896,12 +909,15 @@ type containerInstanceNetworkConfigType = {
   containerInstanceSubnetName: string
 }
 
+@export()
 @discriminator('networkType')
 type networkType = newNetworkType | existingNetworkType
 
+@export()
 @discriminator('computeNetworkType')
 type computeNetworkingType = containerAppNetworkConfigType | containerInstanceNetworkConfigType
 
+@export()
 type azureContainerInstanceTargetType = {
   @description('Optional. The Azure Container Instance Sku name.')
   sku: 'Standard' | 'Dedicated'?
@@ -917,26 +933,28 @@ type azureContainerInstanceTargetType = {
 
   @description('Optional. The Azure Container Instance container port.')
   port: int?
-}?
+}
 
+@export()
 type azureContainerAppTargetType = {
   @description('Optional. The Azure Container App Job CPU and memory resources.')
   resources: acaResourcesType?
 }
 
+@export()
 type gitHubRunnersType = {
   @description('Required. The self-hosted runner type.')
   selfHostedType: 'github'
 
-  @description('Required. The GitHub personal access token with permissions to create and manage self-hosted runners.  See https://learn.microsoft.com/azure/container-apps/tutorial-ci-cd-runners-jobs?tabs=bash&pivots=container-apps-jobs-self-hosted-ci-cd-github-actions#get-a-github-personal-access-token for PAT permissions.')
+  @description('Required. The GitHub personal access token with permissions to create and manage self-hosted runners.  See https://learn.microsoft.com/azure/container-apps/tutorial-ci-cd-runners-jobs?tabs=bash&pivots=container-apps-jobs-self-hosted-ci-cd-github-actions#get-a-github-personal-access-token for PAT permissions. The permissions will change based on the scope of the runner.')
   @secure()
   personalAccessToken: string
 
   @description('Required. The GitHub organization name.')
   githubOrganization: string
 
-  @description('Required. The GitHub repository name.')
-  githubRepository: string
+  @description('Optional. The GitHub repository name.')
+  githubRepository: string?
 
   @description('Optional. The GitHub runner name.')
   runnerName: string?
@@ -947,7 +965,7 @@ type gitHubRunnersType = {
   @description('Optional. The GitHub runner name prefix.')
   runnerNamePrefix: string?
 
-  @description('Optional. The GitHub runner scope.')
+  @description('Optional. The GitHub runner scope. Depending on the scope, you would need to set the right permissions for your Personal Access Token.')
   runnerScope: 'repo' | 'org' | 'ent'?
 
   @description('Optional. Deploy ephemeral runners.')
@@ -963,6 +981,7 @@ type gitHubRunnersType = {
   azureContainerAppTarget: azureContainerAppTargetType?
 }
 
+@export()
 type devOpsAgentsType = {
   @description('Required. The self-hosted runner type.')
   selfHostedType: 'azuredevops'
@@ -996,6 +1015,7 @@ type devOpsAgentsType = {
   azureContainerAppTarget: azureContainerAppTargetType?
 }
 
+@export()
 type acaResourcesType =
   | { cpu: '0.25', memory: '0.5Gi' }
   | { cpu: '0.5', memory: '1Gi' }
@@ -1014,8 +1034,10 @@ type acaResourcesType =
   | { cpu: '3.75', memory: '7.5Gi' }
   | { cpu: '4', memory: '8Gi' }
 
+@export()
 @discriminator('selfHostedType')
 type selfHostedRunnerType = gitHubRunnersType | devOpsAgentsType
 
+@export()
 @description('Required. The target compute environments for the private runners.')
-type computeTypesType = ('azure-container-app' | 'azure-container-instance')[]
+type computeTypesType = ('azure-container-app' | 'azure-container-instance')

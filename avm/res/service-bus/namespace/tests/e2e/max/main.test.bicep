@@ -43,7 +43,7 @@ module nestedDependencies 'dependencies.bicep' = {
 
 // Diagnostics
 // ===========
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
+module diagnosticDependencies '../../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
   scope: resourceGroup
   name: '${uniqueString(deployment().name, resourceLocation)}-diagnosticDependencies'
   params: {
@@ -226,7 +226,52 @@ module testDeployment '../../../main.bicep' = [
           ]
           subscriptions: [
             {
-              name: 'subscription001'
+              name: 'subscriptionwithoutrules001' // this will still result in the creation of the default SqlFilter '1=1' rule
+            }
+            {
+              name: 'subscriptionwithsqlfilterrule001'
+              rules: [
+                {
+                  name: '${namePrefix}-test-sql-filter'
+                  filterType: 'SqlFilter'
+                  sqlFilter: {
+                    sqlExpression: 'Test=1'
+                  }
+                  action: {
+                    sqlExpression: 'SET Foo = 1;'
+                    requiresPreprocessing: true
+                    compatibilityLevel: 20
+                  }
+                }
+              ]
+            }
+            {
+              name: 'subscriptionwithcorrelationfilterrule001'
+              rules: [
+                {
+                  name: '${namePrefix}-test-correlation-filter'
+                  filterType: 'CorrelationFilter'
+                  correlationFilter: {
+                    contentType: 'application/json'
+                    label: 'Test'
+                    messageId: 'Test'
+                    to: 'Test'
+                    replyTo: 'Test'
+                    replyToSessionId: 'Test'
+                    sessionId: 'Test'
+                    correlationId: 'Test'
+                    properties: {
+                      fooHeader: 'Foo'
+                      barHeader: 'Bar'
+                    }
+                  }
+                  action: {
+                    sqlExpression: 'SET Foo = 1;'
+                    requiresPreprocessing: true
+                    compatibilityLevel: 20
+                  }
+                }
+              ]
             }
           ]
         }
@@ -299,7 +344,7 @@ module testDeployment '../../../main.bicep' = [
       ]
       managedIdentities: {
         systemAssigned: true
-        userAssignedResourcesIds: [
+        userAssignedResourceIds: [
           nestedDependencies.outputs.managedIdentityResourceId
         ]
       }
@@ -307,9 +352,5 @@ module testDeployment '../../../main.bicep' = [
       publicNetworkAccess: 'Enabled'
       minimumTlsVersion: '1.2'
     }
-    dependsOn: [
-      nestedDependencies
-      diagnosticDependencies
-    ]
   }
 ]

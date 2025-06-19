@@ -18,7 +18,7 @@ This modules deployes an image to an Azure Container Registry.
 | :-- | :-- |
 | `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.ManagedIdentity/userAssignedIdentities` | [2023-01-31](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ManagedIdentity/2023-01-31/userAssignedIdentities) |
+| `Microsoft.ManagedIdentity/userAssignedIdentities` | [2024-11-30](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ManagedIdentity/2024-11-30/userAssignedIdentities) |
 | `Microsoft.Resources/deploymentScripts` | [2023-08-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Resources/2023-08-01/deploymentScripts) |
 
 ## Usage examples
@@ -136,6 +136,8 @@ module importImageToAcr 'br/public:avm/ptn/deployment-script/import-image-to-acr
     managedIdentities: '<managedIdentities>'
     newImageName: 'application/your-image-name:tag'
     overwriteExistingImage: true
+    sourceRegistryPassword: '<sourceRegistryPassword>'
+    sourceRegistryUsername: 'username'
     storageAccountResourceId: '<storageAccountResourceId>'
     subnetResourceIds: '<subnetResourceIds>'
     tags: {
@@ -187,6 +189,12 @@ module importImageToAcr 'br/public:avm/ptn/deployment-script/import-image-to-acr
     "overwriteExistingImage": {
       "value": true
     },
+    "sourceRegistryPassword": {
+      "value": "<sourceRegistryPassword>"
+    },
+    "sourceRegistryUsername": {
+      "value": "username"
+    },
     "storageAccountResourceId": {
       "value": "<storageAccountResourceId>"
     },
@@ -224,6 +232,8 @@ param location = '<location>'
 param managedIdentities = '<managedIdentities>'
 param newImageName = 'application/your-image-name:tag'
 param overwriteExistingImage = true
+param sourceRegistryPassword = '<sourceRegistryPassword>'
+param sourceRegistryUsername = 'username'
 param storageAccountResourceId = '<storageAccountResourceId>'
 param subnetResourceIds = '<subnetResourceIds>'
 param tags = {
@@ -393,13 +403,13 @@ The managed identity definition for this resource. Required if `assignRbacRole` 
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`userAssignedResourcesIds`](#parameter-managedidentitiesuserassignedresourcesids) | array | The resource ID(s) to assign to the resource. |
+| [`userAssignedResourceIds`](#parameter-managedidentitiesuserassignedresourceids) | array | The resource ID(s) to assign to the resource. Required if a user assigned identity is used for encryption. |
 
-### Parameter: `managedIdentities.userAssignedResourcesIds`
+### Parameter: `managedIdentities.userAssignedResourceIds`
 
-The resource ID(s) to assign to the resource.
+The resource ID(s) to assign to the resource. Required if a user assigned identity is used for encryption.
 
-- Required: Yes
+- Required: No
 - Type: array
 
 ### Parameter: `managedIdentityName`
@@ -497,6 +507,7 @@ The password for the source registry. Required if the source registry is private
 - Required: No
 - Type: securestring
 - Default: `''`
+- Example: `keyVault.getSecret("keyVaultSecretName")`
 
 ### Parameter: `sourceRegistryUsername`
 
@@ -549,7 +560,8 @@ This section gives you an overview of all local-referenced module files (i.e., o
 
 | Reference | Type |
 | :-- | :-- |
-| `br/public:avm/res/resources/deployment-script:0.4.0` | Remote reference |
+| `br/public:avm/res/resources/deployment-script:0.5.1` | Remote reference |
+| `br/public:avm/utl/types/avm-common-types:0.2.1` | Remote reference |
 
 ## Notes
 

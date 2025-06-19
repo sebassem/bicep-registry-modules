@@ -17,9 +17,11 @@ param serviceShort string = 'dddawaf'
 @description('Optional. A token to inject into the name of each resource. This value can be automatically injected by the CI.')
 param namePrefix string = '#_namePrefix_#'
 
-// Pipeline is selecting random regions which dont support all cosmos features and have constraints when creating new cosmos
+// The default pipeline is selecting random regions which don't have capacity for Azure Cosmos DB or support all Azure Cosmos DB features when creating new accounts.
 #disable-next-line no-hardcoded-location
-var enforcedLocation = 'eastasia'
+var enforcedLocation = 'australiaeast'
+#disable-next-line no-hardcoded-location
+var enforcedSecondLocation = 'uksouth'
 
 // ============ //
 // Dependencies //
@@ -45,7 +47,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 // ============ //
 // Diagnostics
 // ============ //
-module diagnosticDependencies '../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
+module diagnosticDependencies '../../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
   scope: resourceGroup
   name: '${uniqueString(deployment().name, enforcedLocation)}-diagnosticDependencies'
   params: {
@@ -66,11 +68,31 @@ module testDeployment '../../../main.bicep' = {
   name: '${uniqueString(deployment().name, enforcedLocation)}-test-${serviceShort}'
   params: {
     name: '${namePrefix}${serviceShort}001'
-    location: enforcedLocation
+    tags: {
+      environment: 'dev'
+      role: 'validation'
+      type: 'waf-aligned'
+    }
+    failoverLocations: [
+      {
+        failoverPriority: 0
+        isZoneRedundant: true
+        locationName: enforcedLocation
+      }
+      {
+        failoverPriority: 1
+        isZoneRedundant: true
+        locationName: enforcedSecondLocation
+      }
+    ]
+    zoneRedundant: true
+    disableLocalAuthentication: true
     disableKeyBasedMetadataWriteAccess: true
-    lock: {
-      kind: 'CanNotDelete'
-      name: 'myCustomLockName'
+    automaticFailover: true
+    minimumTlsVersion: 'Tls12'
+    networkRestrictions: {
+      networkAclBypass: 'None'
+      publicNetworkAccess: 'Disabled'
     }
     diagnosticSettings: [
       {
@@ -91,31 +113,12 @@ module testDeployment '../../../main.bicep' = {
         }
         service: 'Sql'
         subnetResourceId: nestedDependencies.outputs.subnetResourceId
-        tags: {
-          'hidden-title': 'This is visible in the resource name'
-          Environment: 'Non-Prod'
-          Role: 'DeploymentValidation'
-        }
       }
     ]
     sqlDatabases: [
       {
-        containers: [
-          {
-            name: 'container-001'
-            kind: 'Hash'
-            paths: [
-              '/myPartitionKey1'
-            ]
-          }
-        ]
-        name: '${namePrefix}-sql-${serviceShort}-001'
+        name: 'no-containers-specified'
       }
     ]
-    tags: {
-      'hidden-title': 'This is visible in the resource name'
-      Environment: 'Non-Prod'
-      Role: 'DeploymentValidation'
-    }
   }
 }
