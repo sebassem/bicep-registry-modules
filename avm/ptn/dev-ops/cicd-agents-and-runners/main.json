@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.40.2.10011",
-      "templateHash": "9022339514209272521"
+      "version": "0.37.4.10188",
+      "templateHash": "2273969900389099556"
     },
     "name": "CI CD Agents and Runners",
     "description": "This module deploys self-hosted agents and runners for Azure DevOps and GitHub on Azure Container Instances and/or Azure Container Apps."
