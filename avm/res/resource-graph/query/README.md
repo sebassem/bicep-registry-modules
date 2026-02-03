@@ -25,7 +25,7 @@ For examples, please refer to the [Usage Examples](#usage-examples) section.
 | :-- | :-- | :-- |
 | `Microsoft.Authorization/locks` | 2020-05-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.authorization_locks.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks)</li></ul> |
 | `Microsoft.Authorization/roleAssignments` | 2022-04-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.authorization_roleassignments.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments)</li></ul> |
-| `Microsoft.ResourceGraph/queries` | 2018-09-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.resourcegraph_queries.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ResourceGraph/2018-09-01-preview/queries)</li></ul> |
+| `Microsoft.ResourceGraph/queries` | 2024-04-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.resourcegraph_queries.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.ResourceGraph/2024-04-01/queries)</li></ul> |
 
 ## Usage examples
 
@@ -116,7 +116,7 @@ You can find the full example and the setup of its dependencies in the deploymen
 module query 'br/public:avm/res/resource-graph/query:<version>' = {
   params: {
     // Required parameters
-    name: 'rdsmax001'
+    name: 'rgqmax001'
     query: '<query>'
     // Non-required parameters
     location: '<location>'
@@ -166,7 +166,7 @@ module query 'br/public:avm/res/resource-graph/query:<version>' = {
   "parameters": {
     // Required parameters
     "name": {
-      "value": "rdsmax001"
+      "value": "rgqmax001"
     },
     "query": {
       "value": "<query>"
@@ -226,7 +226,7 @@ module query 'br/public:avm/res/resource-graph/query:<version>' = {
 using 'br/public:avm/res/resource-graph/query:<version>'
 
 // Required parameters
-param name = 'rdsmax001'
+param name = 'rgqmax001'
 param query = '<query>'
 // Non-required parameters
 param location = '<location>'

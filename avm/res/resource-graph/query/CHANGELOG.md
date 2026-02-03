@@ -2,6 +2,17 @@
 
 The latest version of the changelog can be found [here](https://github.com/Azure/bicep-registry-modules/blob/main/avm/res/resource-graph/query/CHANGELOG.md).
 
+## 0.3.3
+
+### Changes
+
+- Updated API version
+- Updated service short default value
+
+### Breaking Changes
+
+- None
+
 ## 0.3.2
 
 ### Changes

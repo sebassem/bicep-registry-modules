@@ -94,7 +94,7 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableT
   }
 }
 
-resource rgQuery 'Microsoft.ResourceGraph/queries@2018-09-01-preview' = {
+resource rgQuery 'Microsoft.ResourceGraph/queries@2024-04-01' = {
   name: name
   location: location
   tags: tags

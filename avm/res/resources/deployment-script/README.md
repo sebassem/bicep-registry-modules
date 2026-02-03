@@ -283,12 +283,12 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
   params: {
     // Required parameters
     kind: 'AzureCLI'
-    name: 'rdsmax001'
+    name: 'depsmax001'
     // Non-required parameters
     arguments: '-argument1 \\\'test\\\''
     azCliVersion: '2.52.0'
     cleanupPreference: 'Always'
-    containerGroupName: 'dep-cg-rdsmax'
+    containerGroupName: 'dep-cg-depsmax'
     environmentVariables: [
       {
         name: 'var1'
@@ -358,7 +358,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
       "value": "AzureCLI"
     },
     "name": {
-      "value": "rdsmax001"
+      "value": "depsmax001"
     },
     // Non-required parameters
     "arguments": {
@@ -371,7 +371,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
       "value": "Always"
     },
     "containerGroupName": {
-      "value": "dep-cg-rdsmax"
+      "value": "dep-cg-depsmax"
     },
     "environmentVariables": {
       "value": [
@@ -459,12 +459,12 @@ using 'br/public:avm/res/resources/deployment-script:<version>'
 
 // Required parameters
 param kind = 'AzureCLI'
-param name = 'rdsmax001'
+param name = 'depsmax001'
 // Non-required parameters
 param arguments = '-argument1 \\\'test\\\''
 param azCliVersion = '2.52.0'
 param cleanupPreference = 'Always'
-param containerGroupName = 'dep-cg-rdsmax'
+param containerGroupName = 'dep-cg-depsmax'
 param environmentVariables = [
   {
     name: 'var1'
