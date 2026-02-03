@@ -59,7 +59,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
   params: {
     // Required parameters
     kind: 'AzureCLI'
-    name: 'rdscli001'
+    name: 'depscli001'
     // Non-required parameters
     azCliVersion: '2.52.0'
     environmentVariables: [
@@ -98,7 +98,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
       "value": "AzureCLI"
     },
     "name": {
-      "value": "rdscli001"
+      "value": "depscli001"
     },
     // Non-required parameters
     "azCliVersion": {
@@ -147,7 +147,7 @@ using 'br/public:avm/res/resources/deployment-script:<version>'
 
 // Required parameters
 param kind = 'AzureCLI'
-param name = 'rdscli001'
+param name = 'depscli001'
 // Non-required parameters
 param azCliVersion = '2.52.0'
 param environmentVariables = [
@@ -186,7 +186,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
   params: {
     // Required parameters
     kind: 'AzurePowerShell'
-    name: 'rdsmin001'
+    name: 'depsmin001'
     // Non-required parameters
     azPowerShellVersion: '12.3'
     location: '<location>'
@@ -217,7 +217,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
       "value": "AzurePowerShell"
     },
     "name": {
-      "value": "rdsmin001"
+      "value": "depsmin001"
     },
     // Non-required parameters
     "azPowerShellVersion": {
@@ -252,7 +252,7 @@ using 'br/public:avm/res/resources/deployment-script:<version>'
 
 // Required parameters
 param kind = 'AzurePowerShell'
-param name = 'rdsmin001'
+param name = 'depsmin001'
 // Non-required parameters
 param azPowerShellVersion = '12.3'
 param location = '<location>'
@@ -534,7 +534,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
   params: {
     // Required parameters
     kind: 'AzureCLI'
-    name: 'rdspe001'
+    name: 'depspe001'
     // Non-required parameters
     azCliVersion: '2.52.0'
     cleanupPreference: 'Always'
@@ -573,7 +573,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
       "value": "AzureCLI"
     },
     "name": {
-      "value": "rdspe001"
+      "value": "depspe001"
     },
     // Non-required parameters
     "azCliVersion": {
@@ -628,7 +628,7 @@ using 'br/public:avm/res/resources/deployment-script:<version>'
 
 // Required parameters
 param kind = 'AzureCLI'
-param name = 'rdspe001'
+param name = 'depspe001'
 // Non-required parameters
 param azCliVersion = '2.52.0'
 param cleanupPreference = 'Always'
@@ -667,7 +667,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
   params: {
     // Required parameters
     kind: 'AzureCLI'
-    name: 'rdsnet001'
+    name: 'depsnet001'
     // Non-required parameters
     azCliVersion: '2.52.0'
     cleanupPreference: 'Always'
@@ -706,7 +706,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
       "value": "AzureCLI"
     },
     "name": {
-      "value": "rdsnet001"
+      "value": "depsnet001"
     },
     // Non-required parameters
     "azCliVersion": {
@@ -761,7 +761,7 @@ using 'br/public:avm/res/resources/deployment-script:<version>'
 
 // Required parameters
 param kind = 'AzureCLI'
-param name = 'rdsnet001'
+param name = 'depsnet001'
 // Non-required parameters
 param azCliVersion = '2.52.0'
 param cleanupPreference = 'Always'
@@ -800,7 +800,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
   params: {
     // Required parameters
     kind: 'AzurePowerShell'
-    name: 'rdsps001'
+    name: 'depsps001'
     // Non-required parameters
     arguments: '-var1 \\\'AVM Deployment Script test!\\\''
     azPowerShellVersion: '12.3'
@@ -834,7 +834,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
       "value": "AzurePowerShell"
     },
     "name": {
-      "value": "rdsps001"
+      "value": "depsps001"
     },
     // Non-required parameters
     "arguments": {
@@ -878,7 +878,7 @@ using 'br/public:avm/res/resources/deployment-script:<version>'
 
 // Required parameters
 param kind = 'AzurePowerShell'
-param name = 'rdsps001'
+param name = 'depsps001'
 // Non-required parameters
 param arguments = '-var1 \\\'AVM Deployment Script test!\\\''
 param azPowerShellVersion = '12.3'
@@ -912,7 +912,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
   params: {
     // Required parameters
     kind: 'AzureCLI'
-    name: 'rdswaf001'
+    name: 'depswaf001'
     // Non-required parameters
     azCliVersion: '2.52.0'
     cleanupPreference: 'Always'
@@ -956,7 +956,7 @@ module deploymentScript 'br/public:avm/res/resources/deployment-script:<version>
       "value": "AzureCLI"
     },
     "name": {
-      "value": "rdswaf001"
+      "value": "depswaf001"
     },
     // Non-required parameters
     "azCliVersion": {
@@ -1018,7 +1018,7 @@ using 'br/public:avm/res/resources/deployment-script:<version>'
 
 // Required parameters
 param kind = 'AzureCLI'
-param name = 'rdswaf001'
+param name = 'depswaf001'
 // Non-required parameters
 param azCliVersion = '2.52.0'
 param cleanupPreference = 'Always'

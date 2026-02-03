@@ -213,7 +213,7 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2025-04-01' = if (enableT
   }
 }
 
-module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.12.0' = {
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.15.0' = {
   name: 'logAnalyticsWorkspace-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'law-${namingPrefix}-${uniqueString(resourceGroup().id)}'
@@ -228,7 +228,7 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
   }
 }
 
-module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = {
+module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.5.0' = {
   name: 'userAssignedIdentity-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'msi-${namingPrefix}-${uniqueString(resourceGroup().id)}'
@@ -251,7 +251,7 @@ module acrPrivateDNSZone 'br/public:avm/res/network/private-dns-zone:0.8.0' = if
   }
 }
 
-module acr 'br/public:avm/res/container-registry/registry:0.9.3' = {
+module acr 'br/public:avm/res/container-registry/registry:0.10.0' = {
   name: 'acr${namingPrefix}${uniqueString(resourceGroup().id)}'
   params: {
     name: 'acr${namingPrefix}${uniqueString(resourceGroup().id)}'
@@ -304,7 +304,7 @@ module acr 'br/public:avm/res/container-registry/registry:0.9.3' = {
       : null
   }
 }
-module newVnet 'br/public:avm/res/network/virtual-network:0.7.0' = if (networkingConfiguration.networkType == 'createNew') {
+module newVnet 'br/public:avm/res/network/virtual-network:0.7.2' = if (networkingConfiguration.networkType == 'createNew') {
   name: 'vnet-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'vnet-${namingPrefix}-${uniqueString(resourceGroup().id)}'
@@ -402,7 +402,7 @@ module appEnvironment 'br/public:avm/res/app/managed-environment:0.11.3' = if (c
   }
 }
 
-module natGatewayPublicIp 'br/public:avm/res/network/public-ip-address:0.9.0' = if (empty(networkingConfiguration.?natGatewayResourceId ?? '') && empty(networkingConfiguration.?natGatewayPublicIpAddressResourceId ?? '') && networkingConfiguration.networkType == 'createNew' && privateNetworking) {
+module natGatewayPublicIp 'br/public:avm/res/network/public-ip-address:0.12.0' = if (empty(networkingConfiguration.?natGatewayResourceId ?? '') && empty(networkingConfiguration.?natGatewayPublicIpAddressResourceId ?? '') && networkingConfiguration.networkType == 'createNew' && privateNetworking) {
   name: 'natGatewayPublicIp-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'natGatewayPublicIp-${uniqueString(resourceGroup().id)}'
@@ -413,7 +413,7 @@ module natGatewayPublicIp 'br/public:avm/res/network/public-ip-address:0.9.0' = 
   }
 }
 
-module natGateway 'br/public:avm/res/network/nat-gateway:1.4.0' = if (privateNetworking && empty(networkingConfiguration.?natGatewayResourceId ?? '') && networkingConfiguration.networkType == 'createNew') {
+module natGateway 'br/public:avm/res/network/nat-gateway:2.0.1' = if (privateNetworking && empty(networkingConfiguration.?natGatewayResourceId ?? '') && networkingConfiguration.networkType == 'createNew') {
   name: 'natGateway-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'natGateway-${namingPrefix}-${uniqueString(resourceGroup().id)}'
@@ -494,7 +494,7 @@ resource taskRun 'Microsoft.ContainerRegistry/registries/taskRuns@2025-03-01-pre
   }
 ]
 
-module aciJob 'br/public:avm/res/container-instance/container-group:0.6.0' = [
+module aciJob 'br/public:avm/res/container-instance/container-group:0.7.0' = [
   for i in range(0, int(selfHostedConfig.?azureContainerInstanceTarget.?numberOfInstances ?? 1)): if (contains(
     computeTypes,
     'azure-container-instance'
@@ -750,7 +750,7 @@ module deploymentScriptPrivateDNSZone 'br/public:avm/res/network/private-dns-zon
   }
 }
 
-module deploymentScriptStg 'br/public:avm/res/storage/storage-account:0.26.2' = if (contains(
+module deploymentScriptStg 'br/public:avm/res/storage/storage-account:0.31.0' = if (contains(
   computeTypes,
   'azure-container-app'
 ) && selfHostedConfig.selfHostedType == 'azuredevops' && privateNetworking) {
@@ -796,7 +796,7 @@ module deploymentScriptStg 'br/public:avm/res/storage/storage-account:0.26.2' = 
   }
 }
 
-module deploymentScriptAcrStg 'br/public:avm/res/storage/storage-account:0.26.2' = if (privateNetworking) {
+module deploymentScriptAcrStg 'br/public:avm/res/storage/storage-account:0.31.0' = if (privateNetworking) {
   name: 'deploymentScriptAcrStg-${uniqueString(resourceGroup().id)}'
   params: {
     name: 'stgacr${uniqueString(resourceGroup().id, acr.outputs.name,location)}'

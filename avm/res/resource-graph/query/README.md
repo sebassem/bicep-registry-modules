@@ -54,7 +54,7 @@ You can find the full example and the setup of its dependencies in the deploymen
 module query 'br/public:avm/res/resource-graph/query:<version>' = {
   params: {
     // Required parameters
-    name: 'rdsmin001'
+    name: 'rgqmin001'
     query: 'Resources | limit 10'
   }
 }
@@ -74,7 +74,7 @@ module query 'br/public:avm/res/resource-graph/query:<version>' = {
   "parameters": {
     // Required parameters
     "name": {
-      "value": "rdsmin001"
+      "value": "rgqmin001"
     },
     "query": {
       "value": "Resources | limit 10"
@@ -94,7 +94,7 @@ module query 'br/public:avm/res/resource-graph/query:<version>' = {
 using 'br/public:avm/res/resource-graph/query:<version>'
 
 // Required parameters
-param name = 'rdsmin001'
+param name = 'rgqmin001'
 param query = 'Resources | limit 10'
 ```
 
@@ -278,7 +278,7 @@ You can find the full example and the setup of its dependencies in the deploymen
 module query 'br/public:avm/res/resource-graph/query:<version>' = {
   params: {
     // Required parameters
-    name: 'rdswaf001'
+    name: 'rgqwaf001'
     query: 'resourcecontainers| where type == \'microsoft.resources/subscriptions\' | take 5'
     // Non-required parameters
     queryDescription: 'An example query to list first 5 subscriptions.'
@@ -305,7 +305,7 @@ module query 'br/public:avm/res/resource-graph/query:<version>' = {
   "parameters": {
     // Required parameters
     "name": {
-      "value": "rdswaf001"
+      "value": "rgqwaf001"
     },
     "query": {
       "value": "resourcecontainers| where type == \"microsoft.resources/subscriptions\" | take 5"
@@ -336,7 +336,7 @@ module query 'br/public:avm/res/resource-graph/query:<version>' = {
 using 'br/public:avm/res/resource-graph/query:<version>'
 
 // Required parameters
-param name = 'rdswaf001'
+param name = 'rgqwaf001'
 param query = 'resourcecontainers| where type == \'microsoft.resources/subscriptions\' | take 5'
 // Non-required parameters
 param queryDescription = 'An example query to list first 5 subscriptions.'
