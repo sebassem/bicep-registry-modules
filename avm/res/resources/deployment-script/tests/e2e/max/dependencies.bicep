@@ -7,12 +7,12 @@ param managedIdentityName string
 @description('Required. The name of the Storage Account to create.')
 param storageAccountName string
 
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
   name: managedIdentityName
   location: location
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: storageAccountName
   location: location
   sku: {
@@ -21,6 +21,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
   kind: 'StorageV2'
   properties: {
     supportsHttpsTrafficOnly: true
+    allowSharedKeyAccess: true
   }
 }
 @description('The principal ID of the created Managed Identity.')

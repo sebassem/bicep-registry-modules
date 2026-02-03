@@ -21,7 +21,7 @@ resource storageFileDataPrivilegedContributor 'Microsoft.Authorization/roleDefin
   scope: tenant()
 }
 
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
   name: managedIdentityName
   location: location
 }
@@ -36,7 +36,7 @@ resource storageFileSharePermissions 'Microsoft.Authorization/roleAssignments@20
   }
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-04-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: storageAccountName
   location: location
   sku: {
